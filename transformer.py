@@ -1,192 +1,384 @@
-import math
+# Work in progress
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.nn.modules.transformer import TransformerEncoder, TransformerEncoderLayer
+import copy
+from torch.nn import functional as F
+from torch.nn import Module
+# from .activation import MultiheadAttention
+from torch.nn import ModuleList
+from torch.nn.init import xavier_uniform_
+from torch.nn import Dropout
+from torch.nn import Linear
+from torch.nn import LayerNorm
+from .moe_multiheaded_attention import MoE
 
-class TransformerModel(nn.Module):
+class Transformer(Module):
+    r"""A transformer model. User is able to modify the attributes as needed. The architecture
+    is based on the paper "Attention Is All You Need". Ashish Vaswani, Noam Shazeer,
+    Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Lukasz Kaiser, and
+    Illia Polosukhin. 2017. Attention is all you need. In Advances in Neural Information
+    Processing Systems, pages 6000-6010. Users can build the BERT(https://arxiv.org/abs/1810.04805)
+    model with corresponding parameters.
 
-    def __init__(self, ntoken, ninp, nhead, nhid, nlayers, dropout=0.5):
-        super(TransformerModel, self).__init__()
+    Args:
+        d_model: the number of expected features in the encoder/decoder inputs (default=512).
+        nhead: the number of heads in the multiheadattention models (default=8).
+        num_encoder_layers: the number of sub-encoder-layers in the encoder (default=6).
+        num_decoder_layers: the number of sub-decoder-layers in the decoder (default=6).
+        dim_feedforward: the dimension of the feedforward network model (default=2048).
+        dropout: the dropout value (default=0.1).
+        activation: the activation function of encoder/decoder intermediate layer, relu or gelu (default=relu).
+        custom_encoder: custom encoder (default=None).
+        custom_decoder: custom decoder (default=None).
 
-        self.model_type = 'Transformer'
-        self.src_mask = None
-        self.pos_encoder = PositionalEncoding(ninp, dropout)
-        encoder_layers = TransformerEncoderLayer(ninp, nhead, nhid, dropout)
-        self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
-        self.encoder = nn.Embedding(ntoken, ninp)
-        self.ninp = ninp
-        self.decoder = nn.Linear(ninp, ntoken)
+    Examples::
+        # >>> transformer_model = nn.Transformer(nhead=16, num_encoder_layers=12)
+        # >>> src = torch.rand((10, 32, 512))
+        # >>> tgt = torch.rand((20, 32, 512))
+        # >>> out = transformer_model(src, tgt)
 
-        self.init_weights()
+    Note: A full example to apply nn.Transformer module for the word language model is available in
+    https://github.com/pytorch/examples/tree/master/word_language_model
+    """
 
-    def _generate_square_subsequent_mask(self, sz):
+    def __init__(self, d_model=512, nhead=8, num_encoder_layers=6,
+                 num_decoder_layers=6, dim_feedforward=2048, dropout=0.1,
+                 activation="relu", custom_encoder=None, custom_decoder=None):
+        super(Transformer, self).__init__()
+
+        if custom_encoder is not None:
+            self.encoder = custom_encoder
+        else:
+            encoder_layer = TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout, activation)
+            encoder_norm = LayerNorm(d_model)
+            self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
+
+        if custom_decoder is not None:
+            self.decoder = custom_decoder
+        else:
+            decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward, dropout, activation)
+            decoder_norm = LayerNorm(d_model)
+            self.decoder = TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm)
+
+        self._reset_parameters()
+
+        self.d_model = d_model
+        self.nhead = nhead
+
+    def forward(self, src, tgt, src_mask=None, tgt_mask=None,
+                memory_mask=None, src_key_padding_mask=None,
+                tgt_key_padding_mask=None, memory_key_padding_mask=None):
+        r"""Take in and process masked source/target sequences.
+
+        Args:
+            src: the sequence to the encoder (required).
+            tgt: the sequence to the decoder (required).
+            src_mask: the additive mask for the src sequence (optional).
+            tgt_mask: the additive mask for the tgt sequence (optional).
+            memory_mask: the additive mask for the encoder output (optional).
+            src_key_padding_mask: the ByteTensor mask for src keys per batch (optional).
+            tgt_key_padding_mask: the ByteTensor mask for tgt keys per batch (optional).
+            memory_key_padding_mask: the ByteTensor mask for memory keys per batch (optional).
+
+        Shape:
+            - src: :math:`(S, N, E)`.
+            - tgt: :math:`(T, N, E)`.
+            - src_mask: :math:`(S, S)`.
+            - tgt_mask: :math:`(T, T)`.
+            - memory_mask: :math:`(T, S)`.
+            - src_key_padding_mask: :math:`(N, S)`.
+            - tgt_key_padding_mask: :math:`(N, T)`.
+            - memory_key_padding_mask: :math:`(N, S)`.
+
+            Note: [src/tgt/memory]_mask should be filled with
+            float('-inf') for the masked positions and float(0.0) else. These masks
+            ensure that predictions for position i depend only on the unmasked positions
+            j and are applied identically for each sequence in a batch.
+            [src/tgt/memory]_key_padding_mask should be a ByteTensor where True values are positions
+            that should be masked with float('-inf') and False values will be unchanged.
+            This mask ensures that no information will be taken from position i if
+            it is masked, and has a separate mask for each sequence in a batch.
+
+            - output: :math:`(T, N, E)`.
+
+            Note: Due to the multi-head attention architecture in the transformer model,
+            the output sequence length of a transformer is same as the input sequence
+            (i.e. target) length of the decode.
+
+            where S is the source sequence length, T is the target sequence length, N is the
+            batch size, E is the feature number
+
+        Examples:
+            # >>> output = transformer_model(src, tgt, src_mask=src_mask, tgt_mask=tgt_mask)
+        """
+
+        if src.size(1) != tgt.size(1):
+            raise RuntimeError("the batch number of src and tgt must be equal")
+
+        if src.size(2) != self.d_model or tgt.size(2) != self.d_model:
+            raise RuntimeError("the feature number of src and tgt must be equal to d_model")
+
+        memory = self.encoder(src, mask=src_mask, src_key_padding_mask=src_key_padding_mask)
+        output = self.decoder(tgt, memory, tgt_mask=tgt_mask, memory_mask=memory_mask,
+                              tgt_key_padding_mask=tgt_key_padding_mask,
+                              memory_key_padding_mask=memory_key_padding_mask)
+        return output
+
+    def generate_square_subsequent_mask(self, sz):
+        r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
+            Unmasked positions are filled with float(0.0).
+        """
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
 
-    def init_weights(self):
-        initrange = 0.1
-        self.encoder.weight.data.uniform_(-initrange, initrange)
-        self.decoder.bias.data.zero_()
-        self.decoder.weight.data.uniform_(-initrange, initrange)
+    def _reset_parameters(self):
+        r"""Initiate parameters in the transformer model."""
 
-    def forward(self, src):
-        if self.src_mask is None or self.src_mask.size(0) != len(src):
-            device = src.device
-            mask = self._generate_square_subsequent_mask(len(src)).to(device)
-            self.src_mask = mask
+        for p in self.parameters():
+            if p.dim() > 1:
+                xavier_uniform_(p)
 
-        src = self.encoder(src) * math.sqrt(self.ninp)
-        src = self.pos_encoder(src)
-        output = self.transformer_encoder(src, self.src_mask)
-        output = self.decoder(output)
+
+class TransformerEncoder(Module):
+    r"""TransformerEncoder is a stack of N encoder layers
+
+    Args:
+        encoder_layer: an instance of the TransformerEncoderLayer() class (required).
+        num_layers: the number of sub-encoder-layers in the encoder (required).
+        norm: the layer normalization component (optional).
+
+    Examples::
+        >>> encoder_layer = nn.TransformerEncoderLayer(d_model=512, nhead=8)
+        >>> transformer_encoder = nn.TransformerEncoder(encoder_layer, num_layers=6)
+        >>> src = torch.rand(10, 32, 512)
+        >>> out = transformer_encoder(src)
+    """
+
+    def __init__(self, encoder_layer, num_layers, norm=None):
+        super(TransformerEncoder, self).__init__()
+        self.layers = _get_clones(encoder_layer, num_layers)
+        self.num_layers = num_layers
+        self.norm = norm
+
+    def forward(self, src, mask=None, src_key_padding_mask=None):
+        r"""Pass the input through the encoder layers in turn.
+
+        Args:
+            src: the sequnce to the encoder (required).
+            mask: the mask for the src sequence (optional).
+            src_key_padding_mask: the mask for the src keys per batch (optional).
+
+        Shape:
+            see the docs in Transformer class.
+        """
+        output = src
+
+        for i in range(self.num_layers):
+            output = self.layers[i](output, src_mask=mask,
+                                    src_key_padding_mask=src_key_padding_mask)
+
+        if self.norm:
+            output = self.norm(output)
+
         return output
 
 
+class TransformerDecoder(Module):
+    r"""TransformerDecoder is a stack of N decoder layers
 
-class PositionalEncoding(nn.Module):
+    Args:
+        decoder_layer: an instance of the TransformerDecoderLayer() class (required).
+        num_layers: the number of sub-decoder-layers in the decoder (required).
+        norm: the layer normalization component (optional).
 
-    def __init__(self, d_model, dropout=0.1, max_len=5000):
-        super(PositionalEncoding, self).__init__()
-        self.dropout = nn.Dropout(p=dropout)
+    Examples::
+        # >>> decoder_layer = nn.TransformerDecoderLayer(d_model=512, nhead=8)
+        # >>> transformer_decoder = nn.TransformerDecoder(decoder_layer, num_layers=6)
+        # >>> memory = torch.rand(10, 32, 512)
+        # >>> tgt = torch.rand(20, 32, 512)
+        # >>> out = transformer_decoder(tgt, memory)
+    """
 
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0).transpose(0, 1)
-        self.register_buffer('pe', pe)
+    def __init__(self, decoder_layer, num_layers, norm=None):
+        super(TransformerDecoder, self).__init__()
+        self.layers = _get_clones(decoder_layer, num_layers)
+        self.num_layers = num_layers
+        self.norm = norm
 
-    def forward(self, x):
-        x = x + self.pe[:x.size(0), :]
-        return self.dropout(x)
+    def forward(self, tgt, memory, tgt_mask=None,
+                memory_mask=None, tgt_key_padding_mask=None,
+                memory_key_padding_mask=None):
+        r"""Pass the inputs (and mask) through the decoder layer in turn.
 
+        Args:
+            tgt: the sequence to the decoder (required).
+            memory: the sequnce from the last layer of the encoder (required).
+            tgt_mask: the mask for the tgt sequence (optional).
+            memory_mask: the mask for the memory sequence (optional).
+            tgt_key_padding_mask: the mask for the tgt keys per batch (optional).
+            memory_key_padding_mask: the mask for the memory keys per batch (optional).
 
+        Shape:
+            see the docs in Transformer class.
+        """
+        output = tgt
 
-import torchtext
-from torchtext.data.utils import get_tokenizer
-TEXT = torchtext.data.Field(tokenize=get_tokenizer("basic_english"),
-                            init_token='<sos>',
-                            eos_token='<eos>',
-                            lower=True)
-train_txt, val_txt, test_txt = torchtext.datasets.WikiText2.splits(TEXT)
-TEXT.build_vocab(train_txt)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        for i in range(self.num_layers):
+            output = self.layers[i](output, memory, tgt_mask=tgt_mask,
+                                    memory_mask=memory_mask,
+                                    tgt_key_padding_mask=tgt_key_padding_mask,
+                                    memory_key_padding_mask=memory_key_padding_mask)
 
-def batchify(data, bsz):
-    data = TEXT.numericalize([data.examples[0].text])
-    # Divide the dataset into bsz parts.
-    nbatch = data.size(0) // bsz
-    # Trim off any extra elements that wouldn't cleanly fit (remainders).
-    data = data.narrow(0, 0, nbatch * bsz)
-    # Evenly divide the data across the bsz batches.
-    data = data.view(bsz, -1).t().contiguous()
-    return data.to(device)
+        if self.norm:
+            output = self.norm(output)
 
-batch_size = 20
-eval_batch_size = 10
-train_data = batchify(train_txt, batch_size)
-val_data = batchify(val_txt, eval_batch_size)
-test_data = batchify(test_txt, eval_batch_size)
+        return output
 
+class TransformerEncoderLayer(Module):
+    r"""TransformerEncoderLayer is made up of self-attn and feedforward network.
+    This standard encoder layer is based on the paper "Attention Is All You Need".
+    Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez,
+    Lukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need. In Advances in
+    Neural Information Processing Systems, pages 6000-6010. Users may modify or implement
+    in a different way during application.
 
-bptt = 35
-def get_batch(source, i):
-    seq_len = min(bptt, len(source) - 1 - i)
-    data = source[i:i+seq_len]
-    target = source[i+1:i+1+seq_len].view(-1)
-    return data, target
+    Args:
+        d_model: the number of expected features in the input (required).
+        nhead: the number of heads in the multiheadattention models (required).
+        dim_feedforward: the dimension of the feedforward network model (default=2048).
+        dropout: the dropout value (default=0.1).
+        activation: the activation function of intermediate layer, relu or gelu (default=relu).
 
-ntokens = len(TEXT.vocab.stoi) # the size of vocabulary
-emsize = 200 # embedding dimension
-nhid = 200 # the dimension of the feedforward network model in nn.TransformerEncoder
-nlayers = 2 # the number of nn.TransformerEncoderLayer in nn.TransformerEncoder
-nhead = 2 # the number of heads in the multiheadattention models
-dropout = 0.2 # the dropout value
-model = TransformerModel(ntokens, emsize, nhead, nhid, nlayers, dropout).to(device)
+    Examples::
+        # >>> encoder_layer = nn.TransformerEncoderLayer(d_model=512, nhead=8)
+        # >>> src = torch.rand(10, 32, 512)
+        # >>> out = encoder_layer(src)
+    """
 
+    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu"):
+        super(TransformerEncoderLayer, self).__init__()
+        # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        self.self_attn = MoE(d_model, nhead, dropout=dropout)
+        # Implementation of Feedforward model
+        self.linear1 = Linear(d_model, dim_feedforward)
+        self.dropout = Dropout(dropout)
+        self.linear2 = Linear(dim_feedforward, d_model)
 
-criterion = nn.CrossEntropyLoss()
-lr = 5.0 # learning rate
-optimizer = torch.optim.SGD(model.parameters(), lr=lr)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
+        self.norm1 = LayerNorm(d_model)
+        self.norm2 = LayerNorm(d_model)
+        self.dropout1 = Dropout(dropout)
+        self.dropout2 = Dropout(dropout)
 
-import time
-def train():
-    model.train() # Turn on the train mode
-    total_loss = 0.
-    start_time = time.time()
-    ntokens = len(TEXT.vocab.stoi)
-    for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
-        data, targets = get_batch(train_data, i)
-        optimizer.zero_grad()
-        output = model(data)
-        loss = criterion(output.view(-1, ntokens), targets)
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
-        optimizer.step()
+        self.activation = _get_activation_fn(activation)
 
-        total_loss += loss.item()
-        log_interval = 200
-        if batch % log_interval == 0 and batch > 0:
-            cur_loss = total_loss / log_interval
-            elapsed = time.time() - start_time
-            print('| epoch {:3d} | {:5d}/{:5d} batches | '
-                  'lr {:02.2f} | ms/batch {:5.2f} | '
-                  'loss {:5.2f} | ppl {:8.2f}'.format(
-                    epoch, batch, len(train_data) // bptt, scheduler.get_lr()[0],
-                    elapsed * 1000 / log_interval,
-                    cur_loss, math.exp(cur_loss)))
-            total_loss = 0
-            start_time = time.time()
+    def forward(self, src, src_mask=None, src_key_padding_mask=None):
+        r"""Pass the input through the encoder layer.
 
-def evaluate(eval_model, data_source):
-    eval_model.eval() # Turn on the evaluation mode
-    total_loss = 0.
-    ntokens = len(TEXT.vocab.stoi)
-    with torch.no_grad():
-        for i in range(0, data_source.size(0) - 1, bptt):
-            data, targets = get_batch(data_source, i)
-            output = eval_model(data)
-            output_flat = output.view(-1, ntokens)
-            total_loss += len(data) * criterion(output_flat, targets).item()
-    return total_loss / (len(data_source) - 1)
+        Args:
+            src: the sequnce to the encoder layer (required).
+            src_mask: the mask for the src sequence (optional).
+            src_key_padding_mask: the mask for the src keys per batch (optional).
 
-######################################################################
-# Loop over epochs. Save the model if the validation loss is the best
-# we've seen so far. Adjust the learning rate after each epoch.
+        Shape:
+            see the docs in Transformer class.
+        """
+        src2, aux_loss = self.self_attn(src, src, src, attn_mask=src_mask,
+                              key_padding_mask=src_key_padding_mask)[0]
 
-best_val_loss = float("inf")
-epochs = 3 # The number of epochs
-best_model = None
+        # here each self_atn can be a separate expert so instead of deciding how many heads --> decide how many
+        # multiheads to implement
 
-for epoch in range(1, epochs + 1):
-    epoch_start_time = time.time()
-    train()
-    val_loss = evaluate(model, val_data)
-    print('-' * 89)
-    print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
-          'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
-                                     val_loss, math.exp(val_loss)))
-    print('-' * 89)
-
-    if val_loss < best_val_loss:
-        best_val_loss = val_loss
-        best_model = model
-
-    scheduler.step()
+        src = src + self.dropout1(src2)
+        src = self.norm1(src)
+        if hasattr(self, "activation"):
+            src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))
+        else:  # for backward compatibility
+            src2 = self.linear2(self.dropout(F.relu(self.linear1(src))))
+        src = src + self.dropout2(src2)
+        src = self.norm2(src)
+        return src, aux_loss
 
 
-######################################################################
-# Evaluate the model with the test dataset
-# -------------------------------------
-#
-# Apply the best model to check the result with the test dataset.
+class TransformerDecoderLayer(Module):
+    r"""TransformerDecoderLayer is made up of self-attn, multi-head-attn and feedforward network.
+    This standard decoder layer is based on the paper "Attention Is All You Need".
+    Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez,
+    Lukasz Kaiser, and Illia Polosukhin. 2017. Attention is all you need. In Advances in
+    Neural Information Processing Systems, pages 6000-6010. Users may modify or implement
+    in a different way during application.
 
-test_loss = evaluate(best_model, test_data)
-print('=' * 89)
-print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
-    test_loss, math.exp(test_loss)))
-print('=' * 89)
+    Args:
+        d_model: the number of expected features in the input (required).
+        nhead: the number of heads in the multiheadattention models (required).
+        dim_feedforward: the dimension of the feedforward network model (default=2048).
+        dropout: the dropout value (default=0.1).
+        activation: the activation function of intermediate layer, relu or gelu (default=relu).
+
+    Examples::
+        >>> decoder_layer = nn.TransformerDecoderLayer(d_model=512, nhead=8)
+        >>> memory = torch.rand(10, 32, 512)
+        >>> tgt = torch.rand(20, 32, 512)
+        >>> out = decoder_layer(tgt, memory)
+    """
+
+    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu"):
+        super(TransformerDecoderLayer, self).__init__()
+        self.self_attn = MoE(d_model, nhead, dropout=dropout)
+        self.multihead_attn = MoE(d_model, nhead, dropout=dropout)
+        # Implementation of Feedforward model
+        self.linear1 = Linear(d_model, dim_feedforward)
+        self.dropout = Dropout(dropout)
+        self.linear2 = Linear(dim_feedforward, d_model)
+
+        self.norm1 = LayerNorm(d_model)
+        self.norm2 = LayerNorm(d_model)
+        self.norm3 = LayerNorm(d_model)
+        self.dropout1 = Dropout(dropout)
+        self.dropout2 = Dropout(dropout)
+        self.dropout3 = Dropout(dropout)
+
+        self.activation = _get_activation_fn(activation)
+
+    def forward(self, tgt, memory, tgt_mask=None, memory_mask=None,
+                tgt_key_padding_mask=None, memory_key_padding_mask=None):
+        r"""Pass the inputs (and mask) through the decoder layer.
+
+        Args:
+            tgt: the sequence to the decoder layer (required).
+            memory: the sequnce from the last layer of the encoder (required).
+            tgt_mask: the mask for the tgt sequence (optional).
+            memory_mask: the mask for the memory sequence (optional).
+            tgt_key_padding_mask: the mask for the tgt keys per batch (optional).
+            memory_key_padding_mask: the mask for the memory keys per batch (optional).
+
+        Shape:
+            see the docs in Transformer class.
+        """
+        tgt2, aux_loss1 = self.self_attn(tgt, tgt, tgt, attn_mask=tgt_mask,
+                              key_padding_mask=tgt_key_padding_mask)[0]
+        tgt = tgt + self.dropout1(tgt2)
+        tgt = self.norm1(tgt)
+        tgt2, aux_loss2 = self.multihead_attn(tgt, memory, memory, attn_mask=memory_mask,
+                                   key_padding_mask=memory_key_padding_mask)[0]
+        tgt = tgt + self.dropout2(tgt2)
+        tgt = self.norm2(tgt)
+        if hasattr(self, "activation"):
+            tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
+        else:  # for backward compatibility
+            tgt2 = self.linear2(self.dropout(F.relu(self.linear1(tgt))))
+        tgt = tgt + self.dropout3(tgt2)
+        tgt = self.norm3(tgt)
+        return tgt, aux_loss1 + aux_loss2
+
+
+def _get_clones(module, N):
+    return ModuleList([copy.deepcopy(module) for i in range(N)])
+
+
+def _get_activation_fn(activation):
+    if activation == "relu":
+        return F.relu
+    elif activation == "gelu":
+        return F.gelu
+    else:
+        raise RuntimeError("activation should be relu/gelu, not %s." % activation)
