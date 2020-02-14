@@ -7,6 +7,7 @@ from torch.optim import Adam
 def train(x,y, model, loss_fn, optim):
     # model returns the prediction and the loss that encourages all experts to have equal importance and load
     y_hat, aux_loss = model(x.float())
+    print(aux_loss.shape)
     # calculate prediction loss
     loss = loss_fn(y_hat, y)
     # combine losses

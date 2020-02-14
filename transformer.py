@@ -9,7 +9,7 @@ from torch.nn.init import xavier_uniform_
 from torch.nn import Dropout
 from torch.nn import Linear
 from torch.nn import LayerNorm
-from .moe_multiheaded_attention import MoE
+from moe_multiheaded_attention import MoE
 
 class Transformer(Module):
     r"""A transformer model. User is able to modify the attributes as needed. The architecture
@@ -117,11 +117,11 @@ class Transformer(Module):
         if src.size(2) != self.d_model or tgt.size(2) != self.d_model:
             raise RuntimeError("the feature number of src and tgt must be equal to d_model")
 
-        memory = self.encoder(src, mask=src_mask, src_key_padding_mask=src_key_padding_mask)
-        output = self.decoder(tgt, memory, tgt_mask=tgt_mask, memory_mask=memory_mask,
+        memory, aux_loss1 = self.encoder(src, mask=src_mask, src_key_padding_mask=src_key_padding_mask)
+        output, aux_loss2 = self.decoder(tgt, memory, tgt_mask=tgt_mask, memory_mask=memory_mask,
                               tgt_key_padding_mask=tgt_key_padding_mask,
                               memory_key_padding_mask=memory_key_padding_mask)
-        return output
+        return output, aux_loss1 + aux_loss2
 
     def generate_square_subsequent_mask(self, sz):
         r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
@@ -172,15 +172,17 @@ class TransformerEncoder(Module):
             see the docs in Transformer class.
         """
         output = src
+        aux_loss = torch.tensor(0)
 
         for i in range(self.num_layers):
-            output = self.layers[i](output, src_mask=mask,
+            output, new_loss = self.layers[i](output, src_mask=mask,
                                     src_key_padding_mask=src_key_padding_mask)
+            aux_loss += new_loss
 
         if self.norm:
             output = self.norm(output)
 
-        return output
+        return output, aux_loss
 
 
 class TransformerDecoder(Module):
@@ -222,17 +224,19 @@ class TransformerDecoder(Module):
             see the docs in Transformer class.
         """
         output = tgt
+        aux_loss = torch.tensor(0)
 
         for i in range(self.num_layers):
-            output = self.layers[i](output, memory, tgt_mask=tgt_mask,
+            output, new_loss = self.layers[i](output, memory, tgt_mask=tgt_mask,
                                     memory_mask=memory_mask,
                                     tgt_key_padding_mask=tgt_key_padding_mask,
                                     memory_key_padding_mask=memory_key_padding_mask)
+            aux_loss += new_loss
 
         if self.norm:
             output = self.norm(output)
 
-        return output
+        return output, aux_loss
 
 class TransformerEncoderLayer(Module):
     r"""TransformerEncoderLayer is made up of self-attn and feedforward network.
@@ -258,7 +262,7 @@ class TransformerEncoderLayer(Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu"):
         super(TransformerEncoderLayer, self).__init__()
         # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
-        self.self_attn = MoE(d_model, nhead, dropout=dropout)
+        self.self_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
         # Implementation of Feedforward model
         self.linear1 = Linear(d_model, dim_feedforward)
         self.dropout = Dropout(dropout)
@@ -323,8 +327,8 @@ class TransformerDecoderLayer(Module):
 
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu"):
         super(TransformerDecoderLayer, self).__init__()
-        self.self_attn = MoE(d_model, nhead, dropout=dropout)
-        self.multihead_attn = MoE(d_model, nhead, dropout=dropout)
+        self.self_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
+        self.multihead_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
         # Implementation of Feedforward model
         self.linear1 = Linear(d_model, dim_feedforward)
         self.dropout = Dropout(dropout)

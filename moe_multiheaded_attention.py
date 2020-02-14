@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.distributions.normal import Normal
 # from mlp import MLP
-from .multiheaded_attention import MultiheadAttention
+from multiheaded_attention import MultiheadAttention
 import numpy as np
 class SparseDispatcher(object):
     """Helper for implementing a mixture of experts.
@@ -129,7 +129,7 @@ class MoE(nn.Module):
     k: an integer - how many experts to use for each batch element
     """
 
-    def __init__(self, embed_dim, num_heads, dropout, num_experts, hidden_size, noisy_gating=True, k=4):
+    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=4):
         super(MoE, self).__init__()
         self.noisy_gating = noisy_gating
         self.num_experts = num_experts
@@ -138,7 +138,6 @@ class MoE(nn.Module):
         self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.dropout = dropout
-        self.hidden_size = hidden_size
         self.k = k
         # instantiate experts
         self.experts = nn.ModuleList(MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads, dropout=dropout) for i in range(self.num_experts))
@@ -225,6 +224,11 @@ class MoE(nn.Module):
             gates: a Tensor with shape [batch_size, num_experts]
             load: a Tensor with shape [num_experts]
         """
+        # TODO: change the shape of the query, figure out the best way to reshape the query
+        # TODO: make sure the shape inconsistencies are handeled since original moe paper assumes a shape of
+        # [batch_size, input_size]
+        x = x.view(32, -1)
+
         clean_logits = x @ self.w_gate
         if self.noisy_gating:
             raw_noise_stddev = x @ self.w_noise
