@@ -23,7 +23,11 @@ class SparseDispatcher(object):
     See common_layers.reshape_like().
     Example use:
     gates: a float32 `Tensor` with shape `[batch_size, num_experts]`
-    inputs: a float32 `Tensor` with shape `[batch_size, input_size]`
+
+
+    !!!inputs: a float32 `Tensor` with shape `[batch_size, input_size]`!!!
+
+
     experts: a list of length `num_experts` containing sub-networks.
     dispatcher = SparseDispatcher(num_experts, gates)
     expert_inputs = dispatcher.dispatch(inputs)
@@ -62,13 +66,22 @@ class SparseDispatcher(object):
           a list of `num_experts` `Tensor`s with shapes
             `[expert_batch_size_i, <extra_input_dims>]`.
         """
-        query_exp = query[self._batch_index].squeeze(1)
-        key_exp = key[self._batch_index].squeeze(1)
-        value_exp = value[self._batch_index].squeeze(1)
+        # query_exp = query[self._batch_index].squeeze(1)
+        # key_exp = key[self._batch_index].squeeze(1)
+        # value_exp = value[self._batch_index].squeeze(1)
 
-        queries_exp = torch.split(query_exp, self._part_sizes, dim=0)
-        keys_exp = torch.split(key_exp, self._part_sizes, dim=0)
-        values_exp = torch.split(value_exp, self._part_sizes, dim=0)
+        query_exp = query[:, self._batch_index, :]
+        key_exp = key[:, self._batch_index, :]
+        value_exp = value[:, self._batch_index, :]
+
+
+        # Dimension changed to 1 since the batch is along the first dimension and not the first one like in the original
+        # paper
+        queries_exp = torch.split(query_exp, self._part_sizes, dim=1)
+        keys_exp = torch.split(key_exp, self._part_sizes, dim=1)
+        values_exp = torch.split(value_exp, self._part_sizes, dim=1)
+
+
 
         expert_outputs = []
 
@@ -91,6 +104,9 @@ class SparseDispatcher(object):
         Returns:
           a `Tensor` with shape `[batch_size, <extra_output_dims>]`.
         """
+
+
+        # TODO: why exponentiate and then go back to the log space?
         # apply exp to expert outputs, so we are not longer in log space
         stitched = torch.cat(expert_out, 0).exp()
 
@@ -129,7 +145,8 @@ class MoE(nn.Module):
     k: an integer - how many experts to use for each batch element
     """
 
-    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=4):
+    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=2):
+        # TODO: k is 2
         super(MoE, self).__init__()
         self.noisy_gating = noisy_gating
         self.num_experts = num_experts
@@ -227,9 +244,25 @@ class MoE(nn.Module):
         # TODO: change the shape of the query, figure out the best way to reshape the query
         # TODO: make sure the shape inconsistencies are handeled since original moe paper assumes a shape of
         # [batch_size, input_size]
-        x = x.view(32, -1)
+
+        # x is the query
+
+        '''
+        Shape of x is [10, 32, 512] where 
+        '''
+
+        # TODO: could convert the sequence into bag of words instead ?
+        # TODO: can also pass each word through the w_gate and them sum the resulted logits?? --> the current appraoch
+
+
+
+
+        x = x[0]
+
 
         clean_logits = x @ self.w_gate
+
+
         if self.noisy_gating:
             raw_noise_stddev = x @ self.w_noise
             noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)

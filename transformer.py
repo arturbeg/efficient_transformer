@@ -3,7 +3,7 @@ import torch
 import copy
 from torch.nn import functional as F
 from torch.nn import Module
-# from .activation import MultiheadAttention
+from multiheaded_attention import MultiheadAttention
 from torch.nn import ModuleList
 from torch.nn.init import xavier_uniform_
 from torch.nn import Dropout
@@ -262,6 +262,8 @@ class TransformerEncoderLayer(Module):
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu"):
         super(TransformerEncoderLayer, self).__init__()
         # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        # TODO: embedding dimention for the MoE layer = sequence length * d_model
+        # TODO: think of better approaches of designing the custom gating function
         self.self_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
         # Implementation of Feedforward model
         self.linear1 = Linear(d_model, dim_feedforward)
@@ -329,6 +331,8 @@ class TransformerDecoderLayer(Module):
         super(TransformerDecoderLayer, self).__init__()
         self.self_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
         self.multihead_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
+        # self.self_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
+        # self.multihead_attn = MultiheadAttention(d_model, nhead, dropout=dropout)
         # Implementation of Feedforward model
         self.linear1 = Linear(d_model, dim_feedforward)
         self.dropout = Dropout(dropout)
