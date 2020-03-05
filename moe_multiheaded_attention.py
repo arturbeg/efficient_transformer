@@ -106,20 +106,37 @@ class SparseDispatcher(object):
         """
 
 
+
+
+        # expert_out_
+        expert_out_attn_output = [expert_out[i][0] for i in range(len(expert_out))]
+        expert_out_attn_output_weights = [expert_out[i][1] for i in range(len(expert_out))]
+
         # TODO: why exponentiate and then go back to the log space?
         # apply exp to expert outputs, so we are not longer in log space
-        stitched = torch.cat(expert_out, 0).exp()
+        stitched_out = torch.cat(expert_out_attn_output, 1).exp() #attn_output: :math:`(L, N, E)`
+        stitched_weights = torch.cat(expert_out_attn_output_weights, 0).exp() #  attn_output_weights: :math:`(N, L, S)` where N is the batch size,
 
-        if multiply_by_gates:
-            stitched = stitched.mul(self._nonzero_gates)
-        zeros = torch.zeros(self._gates.size(0), expert_out[-1].size(1), requires_grad=True)
+
+        # TODO: fix multiplication by gates (fix later)
+        # if multiply_by_gates:
+        #     stitched_out = stitched_out.mul(self._nonzero_gates)
+        #     stitched_weights = stitched_weights.mul(self._nonzero_gates)
+
+        zeros_out = torch.zeros(expert_out_attn_output[-1].size(0), self._gates.size(0), expert_out_attn_output[-1].size(2), requires_grad=True)
+        zeros_weights = torch.zeros(self._gates.size(0), expert_out_attn_output_weights[-1].size(1), expert_out_attn_output_weights[-1].size(2), requires_grad=True)
+
         # combine samples that have been processed by the same k experts
-        combined = zeros.index_add(0, self._batch_index, stitched.float())
-        # add eps to all zero values in order to avoid nans when going back to log space
-        combined[combined == 0] = np.finfo(float).eps
-        # back to log space
-        return combined.log()
+        combined_out = zeros_out.index_add(1, self._batch_index, stitched_out.float())
+        combined_weights = zeros_weights.index_add(0, self._batch_index, stitched_weights.float())
 
+
+        # add eps to all zero values in order to avoid nans when going back to log space
+        combined_out[combined_out == 0] = np.finfo(float).eps
+        combined_weights[combined_weights == 0] = np.finfo(float).eps
+
+        # back to log space
+        return combined_out.log(), combined_weights.log()
 
     def expert_to_gates(self):
         """Gate values corresponding to the examples in the per-expert `Tensor`s.
@@ -313,5 +330,5 @@ class MoE(nn.Module):
         dispatcher = SparseDispatcher(self.num_experts, gates)
         expert_outputs = dispatcher.dispatch(self.experts, query, key, value, key_padding_mask, need_weights, attn_mask)
         gates = dispatcher.expert_to_gates()
-        y = dispatcher.combine(expert_outputs)
-        return y, loss
+        attn_output, attn_output_weights = dispatcher.combine(expert_outputs)
+        return attn_output, loss, attn_output_weights

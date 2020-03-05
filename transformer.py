@@ -177,6 +177,8 @@ class TransformerEncoder(Module):
         for i in range(self.num_layers):
             output, new_loss = self.layers[i](output, src_mask=mask,
                                     src_key_padding_mask=src_key_padding_mask)
+            # TODO: refactor
+            new_loss = new_loss.type_as(aux_loss)
             aux_loss += new_loss
 
         if self.norm:
@@ -231,6 +233,7 @@ class TransformerDecoder(Module):
                                     memory_mask=memory_mask,
                                     tgt_key_padding_mask=tgt_key_padding_mask,
                                     memory_key_padding_mask=memory_key_padding_mask)
+            new_loss = new_loss.type_as(aux_loss)
             aux_loss += new_loss
 
         if self.norm:
@@ -289,7 +292,7 @@ class TransformerEncoderLayer(Module):
             see the docs in Transformer class.
         """
         src2, aux_loss = self.self_attn(src, src, src, attn_mask=src_mask,
-                              key_padding_mask=src_key_padding_mask)[0]
+                              key_padding_mask=src_key_padding_mask)[0:2]
 
         # here each self_atn can be a separate expert so instead of deciding how many heads --> decide how many
         # multiheads to implement
@@ -363,11 +366,11 @@ class TransformerDecoderLayer(Module):
             see the docs in Transformer class.
         """
         tgt2, aux_loss1 = self.self_attn(tgt, tgt, tgt, attn_mask=tgt_mask,
-                              key_padding_mask=tgt_key_padding_mask)[0]
+                              key_padding_mask=tgt_key_padding_mask)[0:2]
         tgt = tgt + self.dropout1(tgt2)
         tgt = self.norm1(tgt)
         tgt2, aux_loss2 = self.multihead_attn(tgt, memory, memory, attn_mask=memory_mask,
-                                   key_padding_mask=memory_key_padding_mask)[0]
+                                   key_padding_mask=memory_key_padding_mask)[0:2]
         tgt = tgt + self.dropout2(tgt2)
         tgt = self.norm2(tgt)
         if hasattr(self, "activation"):
