@@ -31,8 +31,7 @@ class SparseDispatcher(object):
         value_exp = value[:, self._batch_index, :]
 
 
-        # Dimension changed to 1 since the batch is along the first dimension and not the first one like in the original
-        # paper
+        # Dimension changed to 1 since the batch is along the first dimension and not the first one like in the original paper
         queries_exp = torch.split(query_exp, self._part_sizes, dim=1)
         keys_exp = torch.split(key_exp, self._part_sizes, dim=1)
         values_exp = torch.split(value_exp, self._part_sizes, dim=1)
@@ -40,9 +39,22 @@ class SparseDispatcher(object):
 
 
         expert_outputs = []
+        # TODO: handle cases where one of the experts gets assigned to observations, could populate with zeros?
 
         for i in range(len(experts)):
-            expert_outputs.append(experts[i](queries_exp[i], keys_exp[i], values_exp[i], key_padding_mask, need_weights, attn_mask))
+
+            # TODO: refactor, make sure actually requires_grad
+            if queries_exp[i].size(1) == 0:
+                print("One of the experts has no observations")
+                # no observations were passed onto this expert
+                attn_zeros_out = torch.zeros(queries_exp[i].size(0), 0, queries_exp[i].size(2), requires_grad=True)
+
+                attn_zeros_weights = torch.zeros(0, queries_exp[i].size(0),
+                                            queries_exp[i].size(0), requires_grad=True)
+                expert_outputs.append((attn_zeros_out, attn_zeros_weights))
+
+            else:
+                expert_outputs.append(experts[i](queries_exp[i], keys_exp[i], values_exp[i], key_padding_mask, need_weights, attn_mask))
 
         return expert_outputs
 
