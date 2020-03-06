@@ -172,7 +172,7 @@ class TransformerEncoder(Module):
             see the docs in Transformer class.
         """
         output = src
-        aux_loss = torch.tensor(0)
+        aux_loss = torch.tensor(0.0, dtype=torch.float)
 
         for i in range(self.num_layers):
             output, new_loss = self.layers[i](output, src_mask=mask,
@@ -226,7 +226,7 @@ class TransformerDecoder(Module):
             see the docs in Transformer class.
         """
         output = tgt
-        aux_loss = torch.tensor(0)
+        aux_loss = torch.tensor(0.0, dtype=torch.float)
 
         for i in range(self.num_layers):
             output, new_loss = self.layers[i](output, memory, tgt_mask=tgt_mask,
