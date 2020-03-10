@@ -1,3 +1,4 @@
+# https://github.com/tunz/transformer-pytorch/blob/master/train.py
 # Full transformer example
 # from transformer import Transformer
 # import torch
@@ -10,12 +11,19 @@
 # print(out.shape)
 
 from transformer_lm import TransformerLM
-import torch
-
-transformer_lm_model = TransformerLM(nhead=4)
-
-src = torch.rand((10, 32, 512))
-out, loss = transformer_lm_model(src)
-print(out.shape)
-print(loss)
+# import torch
+#
+# # transformer_lm_model = TransformerLM(nhead=4)
+# #
+# # src = torch.rand((10, 32, 512))
+# # out, loss = transformer_lm_model(src)
+# # print(out.shape)
+# # print(loss)
+#
+# def main():
+#     device = torch.device('cpu' if opt.no_cuda else 'cuda')
+#
+#
+#
+# main()
 
