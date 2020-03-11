@@ -36,6 +36,11 @@ class TransformerLM(Module):
         self.embedding = Embedding(ntoken, d_model)
         self.pos_encoder = PositionalEncoding(d_model=d_model, dropout=dropout)
         self.linear = Linear(d_model, ntoken)
+        self.src_mask = None
+
+        self._reset_parameters() # init weights...
+
+
 
 
     # TODO: handle trg all in one Transformer model
@@ -43,22 +48,27 @@ class TransformerLM(Module):
                 memory_mask=None, src_key_padding_mask=None,
                 tgt_key_padding_mask=None, memory_key_padding_mask=None):
 
+        if self.src_mask is None or self.src_mask.size(0) != len(src):
+            device = src.device
+            mask = self._generate_square_subsequent_mask(len(src)).to(device)
+            self.src_mask = mask
+
+
+
 
         src = self.embedding(src) * math.sqrt(self.d_model)
         src = self.pos_encoder(src)
-
-        # TODO: generate the source mask
 
         if src.size(2) != self.d_model:
             raise RuntimeError("the feature number of src and tgt must be equal to d_model")
 
         # No encoder in the TransformerLM
-        output, aux_loss2 = self.decoder(src, tgt_mask=tgt_mask, memory_mask=memory_mask,
+        output, aux_loss2 = self.decoder(src, tgt_mask=self.src_mask, memory_mask=memory_mask,
                               tgt_key_padding_mask=tgt_key_padding_mask,
                               memory_key_padding_mask=memory_key_padding_mask)
 
         output = self.linear(output)
-        output = F.log_softmax(output, dim=-1) # TODO: -1 dimension refers to the d_model (embedding dimension)
+        output = F.log_softmax(output, dim=-1)  # TODO: -1 dimension refers to the d_model (embedding dimension)
 
         return output, aux_loss2
 
@@ -66,6 +76,12 @@ class TransformerLM(Module):
         r"""Generate a square mask for the sequence. The masked positions are filled with float('-inf').
             Unmasked positions are filled with float(0.0).
         """
+        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
+        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+        return mask
+
+    # alternative mask implementation
+    def _generate_square_subsequent_mask(self, sz):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
