@@ -1,7 +1,7 @@
 import math
 import torch
 import torch.nn as nn
-from transformer import Transformer
+from mixtures.transformer import Transformer
 
 
 import torchtext

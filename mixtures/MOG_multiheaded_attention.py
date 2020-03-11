@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.distributions.normal import Normal
 # from mlp import MLP
-from multiheaded_attention import MultiheadAttention
+from mixtures.multiheaded_attention import MultiheadAttention
 import numpy as np
 # TODO: rewrite the docstrings
 # TODO: make more general purporse

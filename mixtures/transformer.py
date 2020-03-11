@@ -3,13 +3,13 @@ import torch
 import copy
 from torch.nn import functional as F
 from torch.nn import Module
-from multiheaded_attention import MultiheadAttention
+from mixtures.multiheaded_attention import MultiheadAttention
 from torch.nn import ModuleList
 from torch.nn.init import xavier_uniform_
 from torch.nn import Dropout
 from torch.nn import Linear
 from torch.nn import LayerNorm
-from moe_multiheaded_attention import MoE
+from mixtures.moe_multiheaded_attention import MoE
 
 class Transformer(Module):
     r"""A transformer model. User is able to modify the attributes as needed. The architecture

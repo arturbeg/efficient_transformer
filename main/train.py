@@ -6,9 +6,9 @@ import torch
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-from dataset import problem
-from utils.optimizer import LRScheduler
-from utils import utils
+from main.dataset import problem
+from main.utils.optimizer import LRScheduler
+from main.utils import utils
 
 
 def summarize_train(writer, global_step, last_time, model, opt,
@@ -62,14 +62,18 @@ def train(train_data, model, opt, global_step, optimizer, t_vocab_size,
         if opt.has_inputs:
             inputs = batch.src
 
+        # TODO: change src trg in TransformerLM for consistent terminology
         targets = batch.trg
-        pred = model(inputs, targets)
+        pred, aux_loss = model(inputs, targets)
 
         pred = pred.view(-1, pred.size(-1))
         ans = targets.view(-1)
 
         loss = utils.get_loss(pred, ans, t_vocab_size,
                               label_smoothing, opt.trg_pad_idx)
+
+        loss += aux_loss
+
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -101,12 +105,15 @@ def validation(validation_data, model, global_step, t_vocab_size, val_writer,
         targets = batch.trg
 
         with torch.no_grad():
-            pred = model(inputs, targets)
+            pred, aux_loss = model(inputs, targets)
 
             pred = pred.view(-1, pred.size(-1))
             ans = targets.view(-1)
             loss = utils.get_loss(pred, ans, t_vocab_size, 0,
                                   opt.trg_pad_idx)
+
+            loss += aux_loss
+
         total_loss += loss.item() * len(batch)
         total_cnt += len(batch)
 
@@ -135,7 +142,11 @@ def main():
     parser.add_argument('--no_cuda', action='store_true')
     parser.add_argument('--parallel', action='store_true')
     parser.add_argument('--summary_grad', action='store_true')
-    opt = parser.parse_args()
+
+    opt = parser.parse_args(["--problem", "lm1b", "--output_dir", "./output", "--data_dir", "./lm1b_data", "--model", "moe_transformer_lm"])
+    # opt = parser.parse_args() # test time
+
+
 
     # device = torch.device('cpu' if opt.no_cuda else 'cuda')
     device = torch.device('cpu')
@@ -153,27 +164,36 @@ def main():
     print("# of vocabs (target):", t_vocab_size)
 
     if opt.model == 'transformer':
-        from model.transformer import Transformer
+        from main.model.transformer import Transformer
         model_fn = Transformer
-    elif opt.model == 'fast_transformer':
-        from model.fast_transformer import FastTransformer
-        model_fn = FastTransformer
+    elif opt.model == 'moe_transformer_lm':
+        from mixtures.transformer_lm import TransformerLM
+        model_fn = TransformerLM
+    else:
+        raise Exception("Please define a valid problem")
+    # elif opt.model == 'fast_transformer':
+    #     from main.model.fast_transformer import FastTransformer
+    #     model_fn = FastTransformer
 
     if os.path.exists(opt.output_dir + '/last/models/last_model.pt'):
         print("Load a checkpoint...")
         last_model_path = opt.output_dir + '/last/models'
         model, global_step = utils.load_checkpoint(last_model_path, device,
                                                    is_eval=False)
+    # else:
+    #     model = model_fn(i_vocab_size, t_vocab_size,
+    #                      n_layers=opt.n_layers,
+    #                      hidden_size=opt.hidden_size,
+    #                      filter_size=opt.filter_size,
+    #                      dropout_rate=opt.dropout,
+    #                      share_target_embedding=opt.share_target_embedding,
+    #                      has_inputs=opt.has_inputs,
+    #                      src_pad_idx=opt.src_pad_idx,
+    #                      trg_pad_idx=opt.trg_pad_idx)
+    #     model = model.to(device=device)
+    #     global_step = 0
     else:
-        model = model_fn(i_vocab_size, t_vocab_size,
-                         n_layers=opt.n_layers,
-                         hidden_size=opt.hidden_size,
-                         filter_size=opt.filter_size,
-                         dropout_rate=opt.dropout,
-                         share_target_embedding=opt.share_target_embedding,
-                         has_inputs=opt.has_inputs,
-                         src_pad_idx=opt.src_pad_idx,
-                         trg_pad_idx=opt.trg_pad_idx)
+        model = model_fn(ntoken=t_vocab_size, nhead=4) # TODO: make other parameters adjustable
         model = model.to(device=device)
         global_step = 0
 

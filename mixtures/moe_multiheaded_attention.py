@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.distributions.normal import Normal
-from multiheaded_attention import MultiheadAttention
+from mixtures.multiheaded_attention import MultiheadAttention
 import numpy as np
 class SparseDispatcher(object):
     def __init__(self, num_experts, gates):
@@ -159,6 +159,11 @@ class MoE(nn.Module):
         TODO: make sure the shape inconsistencies are handeled since original moe paper assumes a shape of
         '''
 
+
+        # TODO: (remove) temporary fill nans with zeroes
+        x[x!=x] = float(0.0)
+
+
         # TODO: turn into a separate method?
         clean_logits = torch.tensor((), dtype=torch.float)
         clean_logits = clean_logits.new_zeros((x.size(1), self.num_experts)) # x.size(1) refers to the batch size
@@ -188,6 +193,8 @@ class MoE(nn.Module):
         top_k_indices = top_indices[:, :self.k]
         top_k_gates = self.softmax(top_k_logits)
 
+        top_k_gates += float(1e-9) # TODO: make smaller ? (making sure all gates have non zero weights
+
         zeros = torch.zeros_like(logits, requires_grad=True)
         gates = zeros.scatter(1, top_k_indices, top_k_gates)
 
@@ -195,6 +202,11 @@ class MoE(nn.Module):
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
         else:
             load = self._gates_to_load(gates)
+
+        ''' 
+        After going through softmax some of the logit values turn into zeros; fixed by adding a small epsilon to all top_k_gates
+        values
+        '''
         return gates, load
 
 

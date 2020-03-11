@@ -8,10 +8,15 @@ from torch.nn.init import xavier_uniform_
 from torch.nn import Dropout
 from torch.nn import Linear
 from torch.nn import LayerNorm
-from moe_multiheaded_attention import MoE
+from mixtures.moe_multiheaded_attention import MoE
+from torch.nn import Embedding
+import torch.nn.functional as F
+import math
+
+
 
 class TransformerLM(Module):
-    def __init__(self, d_model=512, nhead=8,
+    def __init__(self, ntoken, d_model=512, nhead=8,
                  num_decoder_layers=6, dim_feedforward=2048, dropout=0.1,
                  activation="relu", custom_decoder=None):
         super(TransformerLM, self).__init__()
@@ -28,9 +33,21 @@ class TransformerLM(Module):
         self.d_model = d_model
         self.nhead = nhead
 
-    def forward(self, src, src_mask=None, tgt_mask=None,
+        self.embedding = Embedding(ntoken, d_model)
+        self.pos_encoder = PositionalEncoding(d_model=d_model, dropout=dropout)
+        self.linear = Linear(d_model, ntoken)
+
+
+    # TODO: handle trg all in one Transformer model
+    def forward(self, trg, src, src_mask=None, tgt_mask=None,
                 memory_mask=None, src_key_padding_mask=None,
                 tgt_key_padding_mask=None, memory_key_padding_mask=None):
+
+
+        src = self.embedding(src) * math.sqrt(self.d_model)
+        src = self.pos_encoder(src)
+
+        # TODO: generate the source mask
 
         if src.size(2) != self.d_model:
             raise RuntimeError("the feature number of src and tgt must be equal to d_model")
@@ -39,6 +56,10 @@ class TransformerLM(Module):
         output, aux_loss2 = self.decoder(src, tgt_mask=tgt_mask, memory_mask=memory_mask,
                               tgt_key_padding_mask=tgt_key_padding_mask,
                               memory_key_padding_mask=memory_key_padding_mask)
+
+        output = self.linear(output)
+        output = F.log_softmax(output, dim=-1) # TODO: -1 dimension refers to the d_model (embedding dimension)
+
         return output, aux_loss2
 
     def generate_square_subsequent_mask(self, sz):
@@ -56,6 +77,34 @@ class TransformerLM(Module):
             if p.dim() > 1:
                 xavier_uniform_(p)
 
+
+# Temporarily leave PositionalEncoding module here. Will be moved somewhere else.
+class PositionalEncoding(Module):
+    def __init__(self, d_model, dropout=0.1, max_len=5000):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0).transpose(0, 1)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        r"""Inputs of forward function
+        Args:
+            x: the sequence fed to the positional encoder model (required).
+        Shape:
+            x: [sequence length, batch size, embed dim]
+            output: [sequence length, batch size, embed dim]
+        Examples:
+            >>> output = pos_encoder(x)
+        """
+
+        x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)
 
 class TransformerDecoder(Module):
     def __init__(self, decoder_layer, num_layers, norm=None):
