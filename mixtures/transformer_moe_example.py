@@ -1,3 +1,10 @@
+import sys
+import os
+
+sys.path.extend(['/Users/arturbegyan/Desktop/OATML/mog_transformer'])
+# sys.path.extend(['/Users/arturbegyan/Desktop/OATML/mog_transformer/mixtures'])
+# sys.path.extend(['/Users/arturbegyan/Desktop/OATML/mog_transformer/main'])
+
 import torch
 import torch.nn as nn
 import torch.onnx
@@ -5,16 +12,28 @@ import math
 from mixtures.transformer_lm import TransformerLM
 from mixtures import data
 import time
+import argparse
 
-# TODO: CUDA
-# TODO: export model
-# TODO: arguments parser
+parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Transformer Language Model')
+
+parser.add_argument('--cuda', action='store_true',
+                    help='use CUDA')
+
+args = parser.parse_args()
+
+if torch.cuda.is_available():
+    if not args.cuda:
+        print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+
+device = torch.device("cuda" if args.cuda else "cpu")
 
 # Set the random seed manually for reproducibility.
 torch.manual_seed(1111)
 # device = torch.device("cpu")
-device = torch.device("cuda")
-corpus = data.Corpus('./data/wikitext-2')
+
+cur_path = os.path.abspath(os.getcwd())
+
+corpus = data.Corpus(cur_path + '/mixtures/data/wikitext-2')
 
 
 def batchify(data, bsz):
