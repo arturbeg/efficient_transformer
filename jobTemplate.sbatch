@@ -7,7 +7,7 @@
 #SBATCH --job-name=mog_transformer
 
 # set number of GPUs
-#SBATCH --gres=gpu:8
+#SBATCH --gres=gpu:1
 
 # set number of CPUs
 #SBATCH --cpus-per-task=5
