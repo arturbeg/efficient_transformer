@@ -6,10 +6,14 @@ from mixtures.transformer_lm import TransformerLM
 from mixtures import data
 import time
 
+# TODO: CUDA
+# TODO: export model
+# TODO: arguments parser
 
 # Set the random seed manually for reproducibility.
 torch.manual_seed(1111)
-device = torch.device("cpu") # TODO: change to cuda
+# device = torch.device("cpu")
+device = torch.device("cuda")
 corpus = data.Corpus('./data/wikitext-2')
 
 
@@ -41,6 +45,15 @@ def get_batch(source, i):
     target = source[i+1:i+1+seq_len].view(-1)
     return data, target
 
+
+
+def export_onnx(path, batch_size, seq_len):
+    print('The model is also exported in ONNX format at {}'.
+          format(""))
+    model.eval()
+    dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
+    hidden = model.init_hidden(batch_size)
+    torch.onnx.export(model, (dummy_input, hidden), path)
 
 
 def evaluate(data_source):
@@ -124,3 +137,5 @@ print('=' * 89)
 print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
     test_loss, math.exp(test_loss)))
 print('=' * 89)
+
+export_onnx('', batch_size=1, seq_len=35)
