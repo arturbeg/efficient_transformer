@@ -1,9 +1,7 @@
 import sys
 import os
 
-sys.path.extend(['/Users/arturbegyan/Desktop/OATML/mog_transformer'])
-# sys.path.extend(['/Users/arturbegyan/Desktop/OATML/mog_transformer/mixtures'])
-# sys.path.extend(['/Users/arturbegyan/Desktop/OATML/mog_transformer/main'])
+sys.path.extend([os.getcwd()])
 
 import torch
 import torch.nn as nn
