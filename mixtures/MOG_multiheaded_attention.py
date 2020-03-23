@@ -1,13 +1,11 @@
 import torch
 import torch.nn as nn
 from torch.distributions.normal import Normal
-# from mlp import MLP
 from mixtures.multiheaded_attention import MultiheadAttention
 import numpy as np
-# TODO: rewrite the docstrings
-# TODO: make more general purporse
-class SparseDispatcher(object):
+from math import pi
 
+class SparseDispatcher(object):
     def __init__(self, num_experts, gates):
         """Create a SparseDispatcher."""
 
@@ -26,15 +24,6 @@ class SparseDispatcher(object):
         self._nonzero_gates = torch.gather(gates_exp, 1, self._expert_index)
 
     def dispatch(self, experts, query, key, value, key_padding_mask, need_weights, attn_mask):
-        """Create one input Tensor for each expert.
-        The `Tensor` for a expert `i` contains the slices of `inp` corresponding
-        to the batch elements `b` where `gates[b, i] > 0`.
-        Args:
-          inp: a `Tensor` of shape "[batch_size, <extra_input_dims>]`
-        Returns:
-          a list of `num_experts` `Tensor`s with shapes
-            `[expert_batch_size_i, <extra_input_dims>]`.
-        """
         # query_exp = query[self._batch_index].squeeze(1)
         # key_exp = key[self._batch_index].squeeze(1)
         # value_exp = value[self._batch_index].squeeze(1)
@@ -43,9 +32,7 @@ class SparseDispatcher(object):
         key_exp = key[:, self._batch_index, :]
         value_exp = value[:, self._batch_index, :]
 
-
-        # Dimension changed to 1 since the batch is along the first dimension and not the first one like in the original
-        # paper
+        # Dimension changed to 1 since the batch is along the first dimension and not the first one like in the original paper
         queries_exp = torch.split(query_exp, self._part_sizes, dim=1)
         keys_exp = torch.split(key_exp, self._part_sizes, dim=1)
         values_exp = torch.split(value_exp, self._part_sizes, dim=1)
@@ -53,30 +40,28 @@ class SparseDispatcher(object):
 
 
         expert_outputs = []
+        # TODO: handle cases where one of the experts gets assigned to observations, could populate with zeros?
 
         for i in range(len(experts)):
-            expert_outputs.append(experts[i](queries_exp[i], keys_exp[i], values_exp[i], key_padding_mask, need_weights, attn_mask))
+
+            # TODO: refactor, make sure actually requires_grad
+            if queries_exp[i].size(1) == 0:
+                print("One of the experts has no observations")
+                # no observations were passed onto this expert
+                attn_zeros_out = torch.zeros(queries_exp[i].size(0), 0, queries_exp[i].size(2), requires_grad=True)
+
+                attn_zeros_weights = torch.zeros(0, queries_exp[i].size(0),
+                                                 queries_exp[i].size(0), requires_grad=True)
+                expert_outputs.append((attn_zeros_out, attn_zeros_weights))
+
+            else:
+                expert_outputs.append(
+                    experts[i](queries_exp[i], keys_exp[i], values_exp[i], key_padding_mask, need_weights, attn_mask))
 
         return expert_outputs
 
 
     def combine(self, expert_out, multiply_by_gates=True):
-        """Sum together the expert output, weighted by the gates.
-        The slice corresponding to a particular batch element `b` is computed
-        as the sum over all experts `i` of the expert output, weighted by the
-        corresponding gate values.  If `multiply_by_gates` is set to False, the
-        gate values are ignored.
-        Args:
-          expert_out: a list of `num_experts` `Tensor`s, each with shape
-            `[expert_batch_size_i, <extra_output_dims>]`.
-          multiply_by_gates: a boolean
-        Returns:
-          a `Tensor` with shape `[batch_size, <extra_output_dims>]`.
-        """
-
-
-
-
         # expert_out_
         expert_out_attn_output = [expert_out[i][0] for i in range(len(expert_out))]
         expert_out_attn_output_weights = [expert_out[i][1] for i in range(len(expert_out))]
@@ -108,31 +93,13 @@ class SparseDispatcher(object):
         return combined_out.log(), combined_weights.log()
 
     def expert_to_gates(self):
-        """Gate values corresponding to the examples in the per-expert `Tensor`s.
-        Returns:
-          a list of `num_experts` one-dimensional `Tensor`s with type `tf.float32`
-              and shapes `[expert_batch_size_i]`
-        """
-        # split nonzero gates for each expert
         return torch.split(self._nonzero_gates, self._part_sizes, dim=0)
 
 
 
 
-# TODO: refactor / OOP principles
 class MoG(nn.Module):
-
-    """Call a Sparsely gated mixture of experts layer with 1-layer Feed-Forward networks as experts.
-    Args:
-    input_size: integer - size of the input
-    output_size: integer - size of the input
-    num_experts: an integer - number of experts
-    hidden_size: an integer - hidden size of the experts
-    noisy_gating: a boolean
-    k: an integer - how many experts to use for each batch element
-    """
-
-    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=2):
+    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=2, latent_dimension_divisor=8):
         # TODO: k is 2
         super(MoG, self).__init__()
         self.noisy_gating = noisy_gating
@@ -140,14 +107,28 @@ class MoG(nn.Module):
         # self.output_size = output_size
         # self.input_size = input_size
         self.embed_dim = embed_dim
+        self.latent_dim = embed_dim / latent_dimension_divisor
         self.num_heads = num_heads
         self.dropout = dropout
         self.k = k
         # instantiate experts
-        self.experts = nn.ModuleList(MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads, dropout=dropout) for i in range(self.num_experts))
-        self.w_gate = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
+        self.experts = nn.ModuleList(
+            MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads, dropout=dropout) for _ in
+            range(self.num_experts))
+
+        # TODO: change the dimensionality
+        # TODO: check when parameter initialisation is performed
+        # self.w_gate = nn.Parameter(torch.zeros(self.latent_dim, num_experts), requires_grad=True)
+        # TODO: implement means initialisation
+        self.gaussian_means = nn.Parameter(torch.zeros(1, num_experts, self.latent_dim), requires_grad=True)
+        # the covariance matrix is diagonal
+        self.gaussian_variances = nn.Parameter(torch.zeroes(1, num_experts, self.latent_dim), requires_grad=True)
+        # TODO: add gaussian weights
+
+        self.w_latent = nn.Parameter(torch.zeros(embed_dim, self.latent_dim), requires_grad=True)
+
+
         self.w_noise = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
-        
 
         self.softplus = nn.Softplus()
         self.softmax = nn.Softmax(1)
@@ -155,16 +136,60 @@ class MoG(nn.Module):
 
         assert(self.k <= self.num_experts)
 
-    def cv_squared(self, x):
-        """The squared coefficient of variation of a sample.
-        Useful as a loss to encourage a positive distribution to be more uniform.
-        Epsilons added for numerical stability.
-        Returns 0 for an empty Tensor.
-        Args:
-        x: a `Tensor`.
-        Returns:
-        a `Scalar`.
+    def __p_k(self, x):
         """
+        Returns a tensor with dimensions (n, k, 1) indicating the likelihood of data belonging to the k-th Gaussian.
+        args:
+            x:      torch.Tensor (n, d)
+            mu:     torch.Tensor (1, k, d)
+            var:    torch.Tensor (1, k, d)
+        returns:
+            p_k:    torch.Tensor (n, k, 1)
+        """
+
+        x = x.unsqueeze(1).expand(x.size(0), self.n_components, x.size(1))
+
+        # (1, k, d) --> (n, k, d)
+        mu = self.expand(x.size(0), self.num_experts, self.latent_dim)
+        var = self.expand(x.size(0), self.num_experts, self.latent_dim)
+
+        # (n, k, d) --> (n, k, 1)
+        exponent = torch.exp(-.5 * torch.sum((x - mu) * (x - mu) / var, 2, keepdim=True))
+        # (n, k, d) --> (n, k, 1)
+        prefactor = torch.rsqrt(((2. * pi) ** self.n_features) * torch.prod(var, dim=2, keepdim=True) + self.eps)
+
+        return prefactor * exponent
+
+    def __score(self, pi, p_k, sum_data=True):
+        """
+        Computes the log-likelihood of the data under the model.
+        args:
+            pi:         torch.Tensor (1, k, 1)
+            p_k:        torch.Tensor (n, k, 1)
+        """
+
+        weights = pi * p_k
+        if sum_data:
+            return torch.sum(torch.log(torch.sum(weights, 1) + self.eps))
+        else:
+            return torch.log(torch.sum(weights, 1) + self.eps)
+
+    def score_samples(self, x):
+        """
+        Computes log-likelihood of data (x) under the current model.
+        args:
+            x:          torch.Tensor (n, d) or (n, k, d)
+        returns:
+            score:      torch.LongTensor (n)
+        """
+        if len(x.size()) == 2:
+            # (n, d) --> (n, k, d)
+            x = x.unsqueeze(1).expand(x.size(0), self.n_components, x.size(1))
+
+        score = self.__score(self.pi, self.__p_k(x, self.mu, self.var), sum_data=False)
+        return score
+
+    def cv_squared(self, x):
         eps = 1e-10
         # if only num_experts = 1
         if x.shape[0] == 1:
@@ -173,36 +198,12 @@ class MoG(nn.Module):
 
 
     def _gates_to_load(self, gates):
-        """Compute the true load per expert, given the gates.
-        The load is the number of examples for which the corresponding gate is >0.
-        Args:
-        gates: a `Tensor` of shape [batch_size, n]
-        Returns:
-        a float32 `Tensor` of shape [n]
-        """
         return (gates > 0).sum(0)
 
 
 
 
     def _prob_in_top_k(self, clean_values, noisy_values, noise_stddev, noisy_top_values):
-        """Helper function to NoisyTopKGating.
-        Computes the probability that value is in top k, given different random noise.
-        This gives us a way of backpropagating from a loss that balances the number
-        of times each expert is in the top k experts per example.
-        In the case of no noise, pass in None for noise_stddev, and the result will
-        not be differentiable.
-        Args:
-        clean_values: a `Tensor` of shape [batch, n].
-        noisy_values: a `Tensor` of shape [batch, n].  Equal to clean values plus
-          normally distributed noise with standard deviation noise_stddev.
-        noise_stddev: a `Tensor` of shape [batch, n], or None
-        noisy_top_values: a `Tensor` of shape [batch, m].
-           "values" Output of tf.top_k(noisy_top_values, m).  m >= k+1
-        Returns:
-        a `Tensor` of shape [batch, n].
-        """
-
         batch = clean_values.size(0)
         m = noisy_top_values.size(1)
         top_values_flat = noisy_top_values.flatten()
@@ -218,58 +219,52 @@ class MoG(nn.Module):
         return prob
 
 
-    def mog_gating(self, x):
-
-        # Convert x into a latent space ?
-        # run through each Gaussian
-        # find the top k Gaussians associated with the top experts for a given x
-        # proceed as before
-
-
-
-        pass
-
-
     def noisy_top_k_gating(self, x, train, noise_epsilon=1e-2):
-        """Noisy top-k gating.
-          See paper: https://arxiv.org/abs/1701.06538.
-          Args:
-            x: input Tensor with shape [batch_size, input_size]
-            train: a boolean - we only add noise at training time.
-            noise_epsilon: a float
-          Returns:
-            gates: a Tensor with shape [batch_size, num_experts]
-            load: a Tensor with shape [num_experts]
-        """
-        # TODO: change the shape of the query, figure out the best way to reshape the query
-        # TODO: make sure the shape inconsistencies are handeled since original moe paper assumes a shape of
-        # [batch_size, input_size]
-
-        # x is the query
-
         '''
-        Shape of x is [10, 32, 512] where 
+        Shape of x is [10, 32, 512] where; x is the query;
+        TODO: could convert the sequence into bag of words instead ?
+        TODO: can also pass each word through the w_gate and them sum the resulted logits?? --> the current approach
+        TODO: sum the resulted logits using some sort of latent layer (similar to the one that will be used for the MoG
+        TODO: change the shape of the query, figure out the best way to reshape the query
+        TODO: make sure the shape inconsistencies are handled since original moe paper assumes a shape of
         '''
 
-        # TODO: could convert the sequence into bag of words instead ?
-        # TODO: can also pass each word through the w_gate and them sum the resulted logits?? --> the current appraoch
+        # TODO: (remove) temporary fill nans with zeroes
+        x[x != x] = float(0.0)
 
+        # TODO: turn into a separate method?
+        clean_likelihoods = torch.tensor((), dtype=torch.float)
+        clean_likelihoods = clean_likelihoods.new_zeros(
+            (x.size(1), self.num_experts))  # x.size(1) refers to the batch size
+        gmm_loss = torch.tensor(0.0, dtype=torch.float)
 
+        for i in range(len(x)):
+            # TODO: perhaps apply another weight matrix in this sum
 
+            # TODO: for MoG map the embedding into a latent space
 
-        x = x[0]
+            word_in_latent_dim = x[i] @ self.w_latent
 
+            # TODO: GMM in here
 
-        clean_logits = x @ self.w_gate
+            # [32, 32] --> [32, 4] where 4 is the number of mixtures
+            clean_likelihoods += self.__p_k(word_in_latent_dim)
 
+            # gmm loss incremented here
 
         if self.noisy_gating:
-            raw_noise_stddev = x @ self.w_noise
+            # raw_noise_stddev = x @ self.w_noise
+            raw_noise_stddev = torch.tensor((), dtype=torch.float)
+            raw_noise_stddev = raw_noise_stddev.new_zeros((x.size(1), self.num_experts))
+
+            for i in range(len(x)):
+                raw_noise_stddev += x[i] @ self.w_noise
+
             noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
-            noisy_logits = clean_logits + ( torch.randn_like(clean_logits) * noise_stddev)
+            noisy_logits = clean_likelihoods + (torch.randn_like(clean_likelihoods) * noise_stddev)
             logits = noisy_logits
         else:
-            logits = clean_logits
+            logits = clean_likelihoods
 
         # calculate topk + 1 that will be needed for the noisy gates
         top_logits, top_indices = logits.topk(min(self.k + 1, self.num_experts), dim=1)
@@ -277,37 +272,28 @@ class MoG(nn.Module):
         top_k_indices = top_indices[:, :self.k]
         top_k_gates = self.softmax(top_k_logits)
 
+        top_k_gates += float(1e-9)  # TODO: make smaller ? (making sure all gates have non zero weights
+
         zeros = torch.zeros_like(logits, requires_grad=True)
         gates = zeros.scatter(1, top_k_indices, top_k_gates)
 
         if self.noisy_gating and self.k < self.num_experts:
-            load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
+            load = (self._prob_in_top_k(clean_likelihoods, noisy_logits, noise_stddev, top_logits)).sum(0)
         else:
             load = self._gates_to_load(gates)
-        return gates, load
 
+        ''' 
+        After going through softmax some of the logit values turn into zeros; fixed by adding a small epsilon to all top_k_gates
+        values
+        '''
+        return gates, load, gmm_loss
 
-
+    # TODO: have a paramter to specify which losses should be computed
     def forward(self, query, key, value, key_padding_mask=None,
                 need_weights=True, attn_mask=None, train=True, loss_coef=1e-2):
-        """Args:
-        x: tensor shape [batch_size, input_size]
-        train: a boolean scalar.
-        loss_coef: a scalar - multiplier on load-balancing losses
-
-        Returns:
-        y: a tensor with shape [batch_size, output_size].
-        extra_training_loss: a scalar.  This should be added into the overall
-        training loss of the model.  The backpropagation of this loss
-        encourages all experts to be approximately equally used across a batch.
-        """
-        gates, load = self.noisy_top_k_gating(query, train)
-        # what do we use to determine the gating (key, value or query)?
-        # the query seems more intuitive
-        # calculate importance loss
+        gates, load, gmm_loss = self.noisy_top_k_gating(query, train)
         importance = gates.sum(0)
-        #
-        loss = self.cv_squared(importance) + self.cv_squared(load)
+        loss = self.cv_squared(importance) + self.cv_squared(load) + gmm_loss
         loss *= loss_coef
 
         dispatcher = SparseDispatcher(self.num_experts, gates)
