@@ -4,13 +4,13 @@
 #SBATCH --nodes=1
 
 # set name of job
-#SBATCH --job-name=mog_transformer
+#SBATCH --job-name=mog_transformer_no_cuda
 
 # set number of GPUs
 #SBATCH --gres=gpu:1
 
 # set number of CPUs
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=1
 
 # set partition
 #SBATCH --partition=small
@@ -22,7 +22,7 @@
 #SBATCH --mail-user=artur.begyan@kellogg.ox.ac.uk
 
 # Standard output and error log
-#SBATCH --output=mog_transformer_%j.log
+#SBATCH --output=mog_transformer_no_cuda_%j.log
 
 # run the application
-srun python mixtures/transformer_moe_example.py --cuda
+srun python mixtures/transformer_moe_example.py
