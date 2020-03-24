@@ -47,7 +47,6 @@ class SparseDispatcher(object):
 
             # TODO: refactor, make sure actually requires_grad
             if queries_exp[i].size(1) == 0:
-                print("One of the experts has no observations")
                 # no observations were passed onto this expert
                 attn_zeros_out = torch.zeros(queries_exp[i].size(0), 0, queries_exp[i].size(2), requires_grad=True)
 

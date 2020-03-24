@@ -17,6 +17,9 @@ parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Transformer Lan
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 
+parser.add_argument('--gating', type=str, default='moe',
+                    help='gating method to use: either moe or mog')
+
 args = parser.parse_args()
 
 if torch.cuda.is_available():
@@ -27,12 +30,10 @@ device = torch.device("cuda" if args.cuda else "cpu")
 
 # Set the random seed manually for reproducibility.
 torch.manual_seed(1111)
-# device = torch.device("cpu")
 
 cur_path = os.path.abspath(os.getcwd())
 
 corpus = data.Corpus(cur_path + '/mixtures/data/wikitext-2')
-
 
 def batchify(data, bsz):
     # Work out how cleanly we can divide the dataset into bsz parts.
@@ -52,7 +53,10 @@ test_data = batchify(corpus.test, eval_batch_size)
 
 ntokens = len(corpus.dictionary)
 
-model = TransformerLM(ntoken=ntokens, nhead=4).to(device)
+if args.gating and args.gating == "mog":
+    model = TransformerLM(ntoken=ntokens, nhead=4, gating="mog").to(device)
+else:
+    model = TransformerLM(ntoken=ntokens, nhead=4, gating="moe").to(device)
 
 criterion = nn.NLLLoss()
 

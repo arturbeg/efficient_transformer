@@ -9,22 +9,22 @@ from torch.nn import Dropout
 from torch.nn import Linear
 from torch.nn import LayerNorm
 from mixtures.moe_multiheaded_attention import MoE
+from mixtures.MOG_multiheaded_attention import MoG
 from torch.nn import Embedding
 import torch.nn.functional as F
 import math
 
 
-
 class TransformerLM(Module):
     def __init__(self, ntoken, d_model=512, nhead=8,
                  num_decoder_layers=6, dim_feedforward=2048, dropout=0.1,
-                 activation="relu", custom_decoder=None):
+                 activation="relu", custom_decoder=None, gating='moe'):
         super(TransformerLM, self).__init__()
 
         if custom_decoder is not None:
             self.decoder = custom_decoder
         else:
-            decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward, dropout, activation)
+            decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward, dropout, activation, gating=gating)
             decoder_norm = LayerNorm(d_model)
             self.decoder = TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm)
 
@@ -32,6 +32,7 @@ class TransformerLM(Module):
 
         self.d_model = d_model
         self.nhead = nhead
+        self.gating = gating  # can either be moe or mog
 
         self.embedding = Embedding(ntoken, d_model)
         self.pos_encoder = PositionalEncoding(d_model=d_model, dropout=dropout)
@@ -109,16 +110,6 @@ class PositionalEncoding(Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        r"""Inputs of forward function
-        Args:
-            x: the sequence fed to the positional encoder model (required).
-        Shape:
-            x: [sequence length, batch size, embed dim]
-            output: [sequence length, batch size, embed dim]
-        Examples:
-            >>> output = pos_encoder(x)
-        """
-
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
@@ -151,9 +142,16 @@ class TransformerDecoder(Module):
         return output, aux_loss
 
 class TransformerDecoderLayer(Module):
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu"):
+    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu", gating="moe"):
         super(TransformerDecoderLayer, self).__init__()
-        self.self_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
+
+        if gating == "moe":
+            self.self_attn = MoE(d_model, nhead, num_experts=4, dropout=dropout)
+        elif gating == "mog":
+            self.self_attn = MoG(d_model, nhead, num_experts=4, dropout=dropout)
+        else:
+            raise Exception("Provide a valid gating procedure: can either be moe or mog, you have provided ", gating)
+
         self.linear1 = Linear(d_model, dim_feedforward)
         self.dropout = Dropout(dropout)
         self.linear2 = Linear(dim_feedforward, d_model)

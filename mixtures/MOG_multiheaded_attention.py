@@ -48,7 +48,6 @@ class SparseDispatcher(object):
 
             # TODO: refactor, make sure actually requires_grad
             if queries_exp[i].size(1) == 0:
-                print("One of the experts has no observations")
                 # no observations were passed onto this expert
                 attn_zeros_out = torch.zeros(queries_exp[i].size(0), 0, queries_exp[i].size(2), requires_grad=True)
 
@@ -109,7 +108,7 @@ class MoG(nn.Module):
         # self.output_size = output_size
         # self.input_size = input_size
         self.embed_dim = embed_dim
-        self.latent_dim = embed_dim / latent_dimension_divisor
+        self.latent_dim = int(embed_dim / latent_dimension_divisor)
         self.num_heads = num_heads
         self.dropout = dropout
         self.k = k
@@ -124,7 +123,7 @@ class MoG(nn.Module):
         # TODO: implement means initialisation
         self.gaussian_means = nn.Parameter(torch.zeros(1, num_experts, self.latent_dim), requires_grad=True)
         # the covariance matrix is diagonal
-        self.gaussian_variances = nn.Parameter(torch.zeroes(1, num_experts, self.latent_dim), requires_grad=True)
+        self.gaussian_variances = nn.Parameter(torch.zeros(1, num_experts, self.latent_dim), requires_grad=True)
         # TODO: add gaussian weights
 
         self.w_latent = nn.Parameter(torch.zeros(embed_dim, self.latent_dim), requires_grad=True)
@@ -139,7 +138,7 @@ class MoG(nn.Module):
 
         self.reset_parameters()
 
-    def __p_k(self, x):
+    def __p_k(self, x, eps=1.e-6):
         """
         Returns a tensor with dimensions (n, k, 1) indicating the likelihood of data belonging to the k-th Gaussian.
         args:
@@ -150,18 +149,21 @@ class MoG(nn.Module):
             p_k:    torch.Tensor (n, k, 1)
         """
 
-        x = x.unsqueeze(1).expand(x.size(0), self.n_components, x.size(1))
+        x = x.unsqueeze(1).expand(x.size(0), self.num_experts, x.size(1))
 
         # (1, k, d) --> (n, k, d)
-        mu = self.expand(x.size(0), self.num_experts, self.latent_dim)
-        var = self.expand(x.size(0), self.num_experts, self.latent_dim)
+        mu = self.gaussian_means.expand(x.size(0), self.num_experts, self.latent_dim)
+        var = self.gaussian_variances.expand(x.size(0), self.num_experts, self.latent_dim)
 
         # (n, k, d) --> (n, k, 1)
         exponent = torch.exp(-.5 * torch.sum((x - mu) * (x - mu) / var, 2, keepdim=True))
         # (n, k, d) --> (n, k, 1)
-        prefactor = torch.rsqrt(((2. * pi) ** self.n_features) * torch.prod(var, dim=2, keepdim=True) + self.eps)
+        prefactor = torch.rsqrt(((2. * pi) ** self.latent_dim) * torch.prod(var, dim=2, keepdim=True) + eps)
 
-        return prefactor * exponent
+        result = prefactor * exponent
+        result = torch.squeeze(result)
+
+        return result
 
     def __score(self, pi, p_k, sum_data=True):
         """
