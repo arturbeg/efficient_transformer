@@ -28,7 +28,7 @@ class TransformerLM(Module):
             decoder_norm = LayerNorm(d_model)
             self.decoder = TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm)
 
-        self._reset_parameters()
+        # self._reset_parameters()
 
         self.d_model = d_model
         self.nhead = nhead

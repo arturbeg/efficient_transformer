@@ -52,7 +52,7 @@ test_data = batchify(corpus.test, eval_batch_size)
 
 ntokens = len(corpus.dictionary)
 
-model = TransformerLM(ntoken=ntokens, nhead=4)
+model = TransformerLM(ntoken=ntokens, nhead=4).to(device)
 
 criterion = nn.NLLLoss()
 
