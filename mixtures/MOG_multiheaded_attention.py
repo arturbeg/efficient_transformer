@@ -4,6 +4,8 @@ from torch.distributions.normal import Normal
 from mixtures.multiheaded_attention import MultiheadAttention
 import numpy as np
 from math import pi
+from torch.nn.init import xavier_uniform_
+
 
 class SparseDispatcher(object):
     def __init__(self, num_experts, gates):
@@ -127,7 +129,6 @@ class MoG(nn.Module):
 
         self.w_latent = nn.Parameter(torch.zeros(embed_dim, self.latent_dim), requires_grad=True)
 
-
         self.w_noise = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
 
         self.softplus = nn.Softplus()
@@ -135,6 +136,8 @@ class MoG(nn.Module):
         self.normal = Normal(torch.tensor([0.0]), torch.tensor([1.0]))
 
         assert(self.k <= self.num_experts)
+
+        self.reset_parameters()
 
     def __p_k(self, x):
         """
@@ -200,7 +203,16 @@ class MoG(nn.Module):
     def _gates_to_load(self, gates):
         return (gates > 0).sum(0)
 
-
+    def reset_parameters(self):
+        # self.gaussian_means = nn.Parameter(torch.zeros(1, num_experts, self.latent_dim), requires_grad=True)
+        # self.gaussian_variances = nn.Parameter(torch.zeroes(1, num_experts, self.latent_dim), requires_grad=True)
+        # self.w_latent = nn.Parameter(torch.zeros(embed_dim, self.latent_dim), requires_grad=True)
+        # self.w_noise = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
+        for p in self.parameters():
+            if p.dim() > 1:
+                xavier_uniform_(p)
+            # TODO: not the case for gaussian_means --> need to be equidistant
+            # TODO: best initialisation for gaussian_varainces
 
 
     def _prob_in_top_k(self, clean_values, noisy_values, noise_stddev, noisy_top_values):
