@@ -3,6 +3,7 @@ import torch.nn as nn
 from playground.Layers import EncoderLayer, DecoderLayer
 from playground.Embed import Embedder, PositionalEncoder
 from playground.Sublayers import Norm
+from torch.nn import functional as F
 import copy
 
 
@@ -60,6 +61,8 @@ class Transformer(nn.Module):
             e_outputs = self.encoder(src, src_mask)
         d_output = self.decoder(trg, e_outputs, src_mask, trg_mask, is_lm)
         output = self.out(d_output)
+        # softmax layer
+        output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
         return output
 
 
