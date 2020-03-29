@@ -67,22 +67,21 @@ class Transformer(nn.Module):
         output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
         return output
 
-
-def get_model(opt, src_vocab, trg_vocab):
-    assert opt.d_model % opt.heads == 0
-    assert opt.dropout < 1
-
-    model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
-
-    if opt.load_weights is not None:
-        print("loading pretrained weights...")
-        model.load_state_dict(torch.load(f'{opt.load_weights}/model_weights'))
-    else:
-        for p in model.parameters():
-            if p.dim() > 1:
-                nn.init.xavier_uniform_(p)
-
-    if opt.device == 0:
-        model = model.cuda()
-
-    return model
+# def get_model(opt, src_vocab, trg_vocab):
+#     assert opt.d_model % opt.heads == 0
+#     assert opt.dropout < 1
+#
+#     model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
+#
+#     if opt.load_weights is not None:
+#         print("loading pretrained weights...")
+#         model.load_state_dict(torch.load(f'{opt.load_weights}/model_weights'))
+#     else:
+#         for p in model.parameters():
+#             if p.dim() > 1:
+#                 nn.init.xavier_uniform_(p)
+#
+#     if opt.device == 0:
+#         model = model.cuda()
+#
+#     return model
