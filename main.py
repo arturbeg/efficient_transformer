@@ -176,6 +176,9 @@ def train(train_data):
 
         total_loss += loss.item()
 
+        if batch == 0:
+            print("Running without errors")
+
         if batch % LOG_INTERVAL == 0 and batch > 0:
             cur_loss = total_loss / LOG_INTERVAL
             elapsed = time.time() - start_time
