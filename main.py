@@ -8,7 +8,33 @@ import numpy as np
 from torch.autograd import Variable  # depreciated
 import time
 import math
+import argparse
 
+parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Transformer Language Model')
+
+parser.add_argument('--cuda', action='store_true',
+                    help='use CUDA')
+
+args = parser.parse_args()
+
+BATCH_SIZE = 20
+N_LAYERS = 6
+EPOCHS = 20
+DROPOUT = 0.2
+N_HEADS = 2
+D_MODEL = 512
+BPTT = 35  # seems to be the sequence length
+CLIP = 0.25
+LR = 0.20  # initial learning rate
+LOG_INTERVAL = 200  # report interval
+ONNX_EXPORT = ''  # path to export the final model in onnx format
+SAVE = 'model.pt'  # path to save the final model
+
+if torch.cuda.is_available():
+    if not args.cuda:
+        print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+
+device = torch.device("cuda" if args.cuda else "cpu")
 
 class Dictionary(object):
     def __init__(self):
@@ -55,24 +81,7 @@ class Corpus(object):
 
         return ids
 
-
-BATCH_SIZE = 20
-N_LAYERS = 6
-EPOCHS = 40
-DROPOUT = 0.2
-N_HEADS = 2
-D_MODEL = 512
-BPTT = 35  # seems to be the sequence length
-CLIP = 0.25
-LR = 0.20  # initial learning rate
-LOG_INTERVAL = 5  # report interval
-ONNX_EXPORT = ''  # path to export the final model in onnx format
-SAVE = 'model.pt'  # path to save the final model
-
-device = torch.device("cpu")
-
 corpus = Corpus('./data/wikitext-2')
-
 
 def batchify(data, bsz):
     # Work out how cleanly we can divide the dataset into bsz parts.
