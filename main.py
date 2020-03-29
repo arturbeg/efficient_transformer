@@ -5,7 +5,7 @@ from io import open
 import torch
 from torch import nn
 import numpy as np
-from torch.autograd import Variable
+from torch.autograd import Variable  # depreciated
 import time
 import math
 
@@ -65,7 +65,7 @@ D_MODEL = 512
 BPTT = 35  # seems to be the sequence length
 CLIP = 0.25
 LR = 0.20  # initial learning rate
-LOG_INTERVAL = 200  # report interval
+LOG_INTERVAL = 5  # report interval
 ONNX_EXPORT = ''  # path to export the final model in onnx format
 SAVE = 'model.pt'  # path to save the final model
 
@@ -92,11 +92,11 @@ test_data = batchify(corpus.test, eval_batch_size)
 # Build the model
 ntokens = len(corpus.dictionary)
 
-# model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT).to(device)
-model = TransformerLM(ntoken=ntokens, nhead=4, gating="moe").to(device)
+model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
+                    is_lm=True).to(device)
 
 criterion = nn.NLLLoss()  # changes depending on the last layer of the transformer
-
+optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 
 # Training code
 
@@ -154,16 +154,15 @@ def train(train_data):
     ntokens = len(corpus.dictionary)
     for batch, i in enumerate(range(0, train_data.size(0) - 1, BPTT)):
         data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
-        model.zero_grad()
         trg_mask = create_mask(data)
-        # output = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
-        output, aux_loss = model(trg=None, src=data)
+        model.zero_grad()
+        output = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
         output = output.view(-1, ntokens)
+
         loss = criterion(output, targets)
         loss.backward()
 
-        # torch.nn.utils.clip_grad_norm_(model.parameters(), CLIP)
-        for p in model.parameters():  # TODO: fix zero gradient
+        for p in model.parameters():
             p.data.add_(-LR, p.grad.data)
 
         total_loss += loss.item()

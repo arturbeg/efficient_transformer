@@ -29,12 +29,12 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout):
+    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True):
         super().__init__()
         self.N = N
         self.embed = Embedder(vocab_size, d_model)
         self.pe = PositionalEncoder(d_model, dropout=dropout)
-        self.layers = get_clones(DecoderLayer(d_model, heads, dropout), N)
+        self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm), N)
         self.norm = Norm(d_model)
 
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True):
@@ -48,10 +48,12 @@ class Decoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout):
+    # is_lm stands for is a Language Model --> Transformer without the encoder
+    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True):
         super().__init__()
-        self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
-        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout)
+        if not is_lm:
+            self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm)
         self.out = nn.Linear(d_model, trg_vocab)
 
     def forward(self, src, trg, src_mask, trg_mask, is_lm=True):
