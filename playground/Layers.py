@@ -58,7 +58,7 @@ class DecoderLayer(nn.Module):
         elif is_lm and self.mixing == "moe":
             x2 = self.norm_1(x)
             attn_out, additional_loss = self.attn_1(x2, x2, x2, trg_mask)
-            aux_loss += additional_loss
+            aux_loss = aux_loss + additional_loss
             x = x + self.dropout_1(attn_out)
             x2 = self.norm_2(x)
             x = x + self.dropout_2(self.ff(x2))

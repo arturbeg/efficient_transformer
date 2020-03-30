@@ -40,12 +40,13 @@ class Decoder(nn.Module):
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True):
         x = self.embed(trg)
         x = self.pe(x)
+
         aux_loss = torch.tensor(0.0, dtype=torch.float)
         for i in range(self.N):
             if is_lm:
                 assert not e_outputs
             x, additional_loss = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm)
-            aux_loss += additional_loss
+            aux_loss = aux_loss + additional_loss
         return self.norm(x), aux_loss
 
 
