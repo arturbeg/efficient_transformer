@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 BATCH_SIZE = 20
 N_LAYERS = 6
-EPOCHS = 20
+EPOCHS = 60
 DROPOUT = 0.2
 N_HEADS = 2
 D_MODEL = 512
