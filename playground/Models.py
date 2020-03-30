@@ -40,15 +40,16 @@ class Decoder(nn.Module):
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True):
         x = self.embed(trg)
         x = self.pe(x)
+        aux_loss = torch.tensor(0.0, dtype=torch.float)
         for i in range(self.N):
             if is_lm:
                 assert not e_outputs
-            x = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm)  # is_lm, e_outputs is expected to be None
-        return self.norm(x)
+            x, additional_loss = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm)
+            aux_loss += additional_loss
+        return self.norm(x), aux_loss
 
 
 class Transformer(nn.Module):
-    # is_lm stands for is a Language Model --> Transformer without the encoder
     def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none"):
         super().__init__()
         if not is_lm:
@@ -62,8 +63,7 @@ class Transformer(nn.Module):
             e_outputs = None
         else:
             e_outputs = self.encoder(src, src_mask)
-        d_output = self.decoder(trg, e_outputs, src_mask, trg_mask, is_lm)
+        d_output, aux_loss = self.decoder(trg, e_outputs, src_mask, trg_mask, is_lm)
         output = self.out(d_output)
-        # softmax layer
         output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
-        return output
+        return output, aux_loss

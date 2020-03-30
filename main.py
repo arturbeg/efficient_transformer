@@ -20,8 +20,6 @@ parser.add_argument('--gating', type=str, default='none',
 
 args = parser.parse_args(['--gating', 'moe'])
 
-args = parser.parse_args(['--gating', 'moe'])  # remove after tests are done
-
 BATCH_SIZE = 20
 N_LAYERS = 6
 EPOCHS = 20
@@ -153,7 +151,7 @@ def evaluate(data_source):
 
             trg_mask = create_mask(data)  # make sure there are three dimensions
 
-            output = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
             output = output.view(-1, ntokens)
             total_loss += len(data) * criterion(output, targets).item()
 
@@ -170,10 +168,11 @@ def train(train_data):
         data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
         trg_mask = create_mask(data)
         model.zero_grad()
-        output = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+        output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
         output = output.view(-1, ntokens)
 
         loss = criterion(output, targets)
+        loss += aux_loss  # gradients stemming from the aux_loss calculation? None really..
         loss.backward()
 
         for p in model.parameters():
