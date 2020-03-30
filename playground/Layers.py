@@ -48,7 +48,7 @@ class DecoderLayer(nn.Module):
             self.attn_2 = MultiHeadAttention(heads, d_model, dropout=dropout)
             self.dropout_3 = nn.Dropout(dropout)
 
-    def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True):
+    def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
         aux_loss = torch.tensor(0.0, dtype=torch.float)
         if is_lm and self.mixing == "none":
             x2 = self.norm_1(x)
@@ -57,7 +57,7 @@ class DecoderLayer(nn.Module):
             x = x + self.dropout_2(self.ff(x2))
         elif is_lm and self.mixing == "moe":
             x2 = self.norm_1(x)
-            attn_out, additional_loss = self.attn_1(x2, x2, x2, trg_mask)
+            attn_out, additional_loss = self.attn_1(x2, x2, x2, mask=trg_mask, train=train)
             aux_loss = aux_loss + additional_loss
             x = x + self.dropout_1(attn_out)
             x2 = self.norm_2(x)

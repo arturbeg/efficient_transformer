@@ -148,11 +148,9 @@ def evaluate(data_source):
         for i in range(0, data_source.size(1) - 1, BPTT):
             data, targets = get_batch(data_source, i)
 
-            # need a target mask
-
             trg_mask = create_mask(data)  # make sure there are three dimensions
 
-            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True, train=False)
             output = output.view(-1, ntokens)
             total_loss += len(data) * criterion(output, targets).item()
 

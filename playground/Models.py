@@ -37,7 +37,7 @@ class Decoder(nn.Module):
         self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing), N)
         self.norm = Norm(d_model)
 
-    def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True):
+    def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
         x = self.embed(trg)
         x = self.pe(x)
 
@@ -45,7 +45,7 @@ class Decoder(nn.Module):
         for i in range(self.N):
             if is_lm:
                 assert not e_outputs
-            x, additional_loss = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm)
+            x, additional_loss = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm, train=train)
             aux_loss = aux_loss + additional_loss
         return self.norm(x), aux_loss
 
@@ -59,12 +59,12 @@ class Transformer(nn.Module):
         self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing)
         self.out = nn.Linear(d_model, trg_vocab)
 
-    def forward(self, src, trg, src_mask, trg_mask, is_lm=True):
+    def forward(self, src, trg, src_mask, trg_mask, is_lm=True, train=True):
         if is_lm:
             e_outputs = None
         else:
             e_outputs = self.encoder(src, src_mask)
-        d_output, aux_loss = self.decoder(trg, e_outputs, src_mask, trg_mask, is_lm)
+        d_output, aux_loss = self.decoder(trg, e_outputs, src_mask, trg_mask, is_lm, train=train)
         output = self.out(d_output)
         output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
         return output, aux_loss

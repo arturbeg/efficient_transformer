@@ -16,10 +16,10 @@ class SparseDispatcher(object):
         self._part_sizes = list((gates > 0).sum(0).numpy())
         gates_exp = gates[self._batch_index.flatten()]
         self._nonzero_gates = torch.gather(gates_exp, 1, self._expert_index)
-        # quick hack (go through)
+        # quick hack
         self._nonzero_gates = self._nonzero_gates.view(-1, 1, 1)
 
-    def dispatch(self, experts, q, k, v, mask, need_weights):
+    def dispatch(self, experts, q, k, v, mask):
         query_exp = q[self._batch_index, :, :]
         key_exp = k[self._batch_index, :, :]
         value_exp = v[self._batch_index, :, :]
@@ -150,14 +150,14 @@ class MoeMultiHeadAttention(nn.Module):
                 xavier_uniform_(p)
 
     def forward(self, q, k, v, mask,
-                need_weights=True, attn_mask=None, train=True, loss_coef=1e-2):
+                train=True, loss_coef=1e-2):
         gates, load = self.noisy_top_k_gating(q, train)
         importance = gates.sum(0)
         loss = self.cv_squared(importance) + self.cv_squared(load)
-        loss *= loss_coef
+        loss *= loss_coef  # can the loss coefficient be trainable?
 
         dispatcher = SparseDispatcher(self.num_experts, gates)
-        expert_outputs = dispatcher.dispatch(experts=self.experts, q=q, k=k, v=v, mask=mask, need_weights=need_weights)
+        expert_outputs = dispatcher.dispatch(experts=self.experts, q=q, k=k, v=v, mask=mask)
         gates = dispatcher.expert_to_gates()
         attn_output = dispatcher.combine(expert_outputs)
         return attn_output, loss
