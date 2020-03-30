@@ -104,6 +104,7 @@ test_data = batchify(corpus.test, eval_batch_size)
 # Build the model
 ntokens = len(corpus.dictionary)
 
+print("Gating function is: ", args.gating)
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
                     is_lm=True, mixing=args.gating).to(device)
 
@@ -144,7 +145,7 @@ def evaluate(data_source):
 
     with torch.no_grad():
         """Temporarily sets all the requires_grad flag to false"""
-        for i in range(0, data_source.size(0) - 1, BPTT):
+        for i in range(0, data_source.size(1) - 1, BPTT):
             data, targets = get_batch(data_source, i)
 
             # need a target mask
@@ -155,7 +156,7 @@ def evaluate(data_source):
             output = output.view(-1, ntokens)
             total_loss += len(data) * criterion(output, targets).item()
 
-    return total_loss / (len(data_source) - 1)
+    return total_loss / data_source.size(1) - 1
 
 
 def train(train_data):
@@ -164,35 +165,33 @@ def train(train_data):
     total_loss = 0.
     start_time = time.time()
     ntokens = len(corpus.dictionary)
-    for batch, i in enumerate(range(0, train_data.size(0) - 1, BPTT)):
+    for batch, i in enumerate(range(0, train_data.size(1) - 1, BPTT)):
+        data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
+        trg_mask = create_mask(data)
+        model.zero_grad()
+        output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+        output = output.view(-1, ntokens)
+        loss = criterion(output, targets)
+        loss = loss + aux_loss  # gradients stemming from the aux_loss calculation? None really..
+        loss.backward()
 
-        with torch.autograd.set_detect_anomaly(True):
-            data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
-            trg_mask = create_mask(data)
-            model.zero_grad()
-            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
-            output = output.view(-1, ntokens)
-            loss = criterion(output, targets)
-            loss = loss + aux_loss  # gradients stemming from the aux_loss calculation? None really..
-            loss.backward()
+        for p in model.parameters():
+            p.data.add_(-LR, p.grad.data)
 
-            for p in model.parameters():
-                p.data.add_(-LR, p.grad.data)
+        total_loss += loss.item()
 
-            total_loss += loss.item()
+        if batch == 0:
+            print("Running without errors")
 
-            if batch == 0:
-                print("Running without errors")
-
-            if batch % LOG_INTERVAL == 0 and batch > 0:
-                cur_loss = total_loss / LOG_INTERVAL
-                elapsed = time.time() - start_time
-                print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
-                      'loss {:5.2f} | ppl {:8.2f}'.format(
-                    epoch, batch, len(train_data) // BPTT, LR,
-                                  elapsed * 1000 / LOG_INTERVAL, cur_loss, math.exp(cur_loss)))
-                total_loss = 0
-                start_time = time.time()
+        if batch % LOG_INTERVAL == 0 and batch > 0:
+            cur_loss = total_loss / LOG_INTERVAL
+            elapsed = time.time() - start_time
+            print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
+                  'loss {:5.2f} | ppl {:8.2f}'.format(
+                epoch, batch, train_data.size(1) // BPTT, LR,
+                              elapsed * 1000 / LOG_INTERVAL, cur_loss, math.exp(cur_loss)))
+            total_loss = 0
+            start_time = time.time()
 
 
 def export_onnx(path, batch_size, seq_len):

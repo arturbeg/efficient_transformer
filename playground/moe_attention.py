@@ -16,6 +16,8 @@ class SparseDispatcher(object):
         self._part_sizes = list((gates > 0).sum(0).numpy())
         gates_exp = gates[self._batch_index.flatten()]
         self._nonzero_gates = torch.gather(gates_exp, 1, self._expert_index)
+        # quick hack (go through)
+        self._nonzero_gates = self._nonzero_gates.view(-1, 1, 1)
 
     def dispatch(self, experts, q, k, v, mask, need_weights):
         query_exp = q[self._batch_index, :, :]
@@ -41,6 +43,10 @@ class SparseDispatcher(object):
 
     def combine(self, expert_out, multiply_by_gates=True):
         stitched = torch.cat(expert_out, 0).exp()
+
+        if multiply_by_gates:
+            stitched = stitched.mul(self._nonzero_gates)
+
         zeros = torch.zeros(self._gates.size(0), expert_out[-1].size(1), expert_out[-1].size(2), requires_grad=True)
         combined = zeros.index_add(0, self._batch_index, stitched.float())
         combined[combined == 0] = np.finfo(float).eps
@@ -51,7 +57,7 @@ class SparseDispatcher(object):
 
 
 class MoeMultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=False, k=2):
+    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=2):
         super(MoeMultiHeadAttention, self).__init__()
         # initialise some components of moe only if noisy_gating is activated
         self.noisy_gating = noisy_gating
@@ -63,11 +69,11 @@ class MoeMultiHeadAttention(nn.Module):
         self.experts = nn.ModuleList(
             MultiHeadAttention(heads=num_heads, d_model=embed_dim, dropout=dropout) for _ in range(self.num_experts))
         self.w_gate = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
-        # self.w_noise = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
+        self.w_noise = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
 
         self.softplus = nn.Softplus()
         self.softmax = nn.Softmax(1)
-        # self.normal = Normal(torch.tensor([0.0]), torch.tensor([1.0]))
+        self.normal = Normal(torch.tensor([0.0]), torch.tensor([1.0]))
 
         assert (self.k <= self.num_experts)
 
@@ -83,20 +89,20 @@ class MoeMultiHeadAttention(nn.Module):
     def _gates_to_load(self, gates):
         return (gates > 0).sum(0)
 
-    # def _prob_in_top_k(self, clean_values, noisy_values, noise_stddev, noisy_top_values):
-    #     batch = clean_values.size(0)
-    #     m = noisy_top_values.size(1)
-    #     top_values_flat = noisy_top_values.flatten()
-    #     threshold_positions_if_in = torch.arange(batch) * m + self.k
-    #     threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1)
-    #     is_in = torch.gt(noisy_values, threshold_if_in)
-    #     threshold_positions_if_out = threshold_positions_if_in - 1
-    #     threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_out), 1)
-    #     # is each value currently in the top k.
-    #     prob_if_in = self.normal.cdf((clean_values - threshold_if_in) / noise_stddev)
-    #     prob_if_out = self.normal.cdf((clean_values - threshold_if_out) / noise_stddev)
-    #     prob = torch.where(is_in, prob_if_in, prob_if_out)
-    #     return prob
+    def _prob_in_top_k(self, clean_values, noisy_values, noise_stddev, noisy_top_values):
+        batch = clean_values.size(0)
+        m = noisy_top_values.size(1)
+        top_values_flat = noisy_top_values.flatten()
+        threshold_positions_if_in = torch.arange(batch) * m + self.k
+        threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1)
+        is_in = torch.gt(noisy_values, threshold_if_in)
+        threshold_positions_if_out = threshold_positions_if_in - 1
+        threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_out), 1)
+        # is each value currently in the top k.
+        prob_if_in = self.normal.cdf((clean_values - threshold_if_in) / noise_stddev)
+        prob_if_out = self.normal.cdf((clean_values - threshold_if_out) / noise_stddev)
+        prob = torch.where(is_in, prob_if_in, prob_if_out)
+        return prob
 
     def noisy_top_k_gating(self, x, train, noise_epsilon=1e-2):
 
@@ -104,22 +110,37 @@ class MoeMultiHeadAttention(nn.Module):
 
         clean_logits = torch.tensor((), dtype=torch.float)
         clean_logits = clean_logits.new_zeros((x.size(0), self.num_experts))
+        raw_noise_stddev = torch.tensor((), dtype=torch.float)
+        raw_noise_stddev = raw_noise_stddev.new_zeros((x.size(0), self.num_experts))
 
-        for i in range(len(x)):
+        for i in range(x.size(1)):
             word_clone = x[:, i, :].clone()
             clean_logits = clean_logits + word_clone @ self.w_gate
 
-        top_logits, top_indices = clean_logits.topk(min(self.k + 1, self.num_experts), dim=1)
+            if self.noisy_gating:
+                raw_noise_stddev = raw_noise_stddev + word_clone @ self.w_noise
+
+        if self.noisy_gating:
+            noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
+            noisy_logits = clean_logits + (torch.randn_like(clean_logits) * noise_stddev)
+            logits = noisy_logits
+        else:
+            logits = clean_logits
+
+        top_logits, top_indices = logits.topk(min(self.k + 1, self.num_experts), dim=1)
         top_k_logits = top_logits[:, :self.k].clone()
         top_k_indices = top_indices[:, :self.k].clone()
         top_k_gates = self.softmax(top_k_logits)
 
         top_k_gates = top_k_gates + float(1e-9)
 
-        zeros = torch.zeros_like(clean_logits, requires_grad=True)
+        zeros = torch.zeros_like(logits, requires_grad=True)
         gates = zeros.scatter(1, top_k_indices, top_k_gates)
 
-        load = self._gates_to_load(gates)
+        if self.noisy_gating and self.k < self.num_experts:
+            load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
+        else:
+            load = self._gates_to_load(gates)
 
         return gates, load
 
