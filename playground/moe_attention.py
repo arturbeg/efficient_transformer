@@ -68,8 +68,9 @@ class MoeMultiHeadAttention(nn.Module):
         self.k = k
         self.experts = nn.ModuleList(
             MultiHeadAttention(heads=num_heads, d_model=embed_dim, dropout=dropout) for _ in range(self.num_experts))
-        self.w_gate = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
-        self.w_noise = nn.Parameter(torch.zeros(embed_dim, num_experts), requires_grad=True)
+
+        self.w_gate = nn.Parameter(torch.Tensor(embed_dim, num_experts))
+        self.w_noise = nn.Parameter(torch.Tensor(embed_dim, num_experts))
 
         self.softplus = nn.Softplus()
         self.softmax = nn.Softmax(1)
