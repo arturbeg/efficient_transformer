@@ -29,12 +29,12 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True):
+    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none"):
         super().__init__()
         self.N = N
         self.embed = Embedder(vocab_size, d_model)
         self.pe = PositionalEncoder(d_model, dropout=dropout)
-        self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm), N)
+        self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing), N)
         self.norm = Norm(d_model)
 
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True):
@@ -49,11 +49,12 @@ class Decoder(nn.Module):
 
 class Transformer(nn.Module):
     # is_lm stands for is a Language Model --> Transformer without the encoder
-    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True):
+    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none"):
         super().__init__()
         if not is_lm:
             self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
-        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm)
+
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing)
         self.out = nn.Linear(d_model, trg_vocab)
 
     def forward(self, src, trg, src_mask, trg_mask, is_lm=True):
@@ -66,22 +67,3 @@ class Transformer(nn.Module):
         # softmax layer
         output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
         return output
-
-# def get_model(opt, src_vocab, trg_vocab):
-#     assert opt.d_model % opt.heads == 0
-#     assert opt.dropout < 1
-#
-#     model = Transformer(src_vocab, trg_vocab, opt.d_model, opt.n_layers, opt.heads, opt.dropout)
-#
-#     if opt.load_weights is not None:
-#         print("loading pretrained weights...")
-#         model.load_state_dict(torch.load(f'{opt.load_weights}/model_weights'))
-#     else:
-#         for p in model.parameters():
-#             if p.dim() > 1:
-#                 nn.init.xavier_uniform_(p)
-#
-#     if opt.device == 0:
-#         model = model.cuda()
-#
-#     return model

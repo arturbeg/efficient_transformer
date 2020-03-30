@@ -15,7 +15,12 @@ parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Transformer Lan
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 
-args = parser.parse_args()
+parser.add_argument('--gating', type=str, default='none',
+                    help='gating method to use: either moe or mog or none')
+
+args = parser.parse_args(['--gating', 'moe'])
+
+args = parser.parse_args(['--gating', 'moe'])  # remove after tests are done
 
 BATCH_SIZE = 20
 N_LAYERS = 6
