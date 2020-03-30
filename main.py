@@ -148,7 +148,7 @@ def evaluate(data_source):
         for i in range(0, data_source.size(1) - 1, BPTT):
             data, targets = get_batch(data_source, i)
 
-            trg_mask = create_mask(data)  # make sure there are three dimensions
+            trg_mask = create_mask(data).to(device)  # make sure there are three dimensions
 
             output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True, train=False)
             output = output.view(-1, ntokens)
@@ -165,7 +165,7 @@ def train(train_data):
     ntokens = len(corpus.dictionary)
     for batch, i in enumerate(range(0, train_data.size(1) - 1, BPTT)):
         data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
-        trg_mask = create_mask(data)
+        trg_mask = create_mask(data).to(device)
         model.zero_grad()
         output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
         output = output.view(-1, ntokens)
