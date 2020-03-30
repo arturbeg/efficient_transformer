@@ -17,7 +17,7 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-args = parser.parse_args(['--gating', 'moe'])
+args = parser.parse_args()
 
 BATCH_SIZE = 20
 N_LAYERS = 6
@@ -28,7 +28,7 @@ D_MODEL = 512
 BPTT = 35  # seems to be the sequence length
 CLIP = 0.25
 LR = 0.20  # initial learning rate
-LOG_INTERVAL = 5  # report interval
+LOG_INTERVAL = 200  # report interval
 ONNX_EXPORT = ''  # path to export the final model in onnx format
 SAVE = 'model.pt'  # path to save the final model
 
