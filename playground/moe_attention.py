@@ -7,13 +7,20 @@ from torch.nn.init import xavier_uniform_
 
 
 class SparseDispatcher(object):
-    def __init__(self, num_experts, gates):
+    def __init__(self, num_experts, gates, is_cuda=True):
+        self.is_cuda = is_cuda
+        self.device = torch.device("cuda" if is_cuda else "cpu")
         self._gates = gates
         self._num_experts = num_experts
         sorted_experts, index_sorted_experts = torch.nonzero(gates).sort(0)
         _, self._expert_index = sorted_experts.split(1, dim=1)
         self._batch_index = sorted_experts[index_sorted_experts[:, 1], 0]
-        self._part_sizes = list((gates > 0).sum(0).numpy())
+
+        if self.is_cuda:
+            self._part_sizes = list((gates > 0).sum(0)).cpu().numpy()
+        else:
+            self._part_sizes = list((gates > 0).sum(0)).numpy()
+
         gates_exp = gates[self._batch_index.flatten()]
         self._nonzero_gates = torch.gather(gates_exp, 1, self._expert_index)
         # quick hack
@@ -33,7 +40,8 @@ class SparseDispatcher(object):
         for i in range(len(experts)):
 
             if queries_exp[i].size(0) == 0:
-                attn_zeros_out = torch.zeros(0, queries_exp[i].size(1), queries_exp[i].size(2), requires_grad=True)
+                attn_zeros_out = torch.zeros(0, queries_exp[i].size(1), queries_exp[i].size(2), requires_grad=True).to(
+                    self.device)
                 expert_outputs.append(attn_zeros_out)
 
             else:
@@ -47,8 +55,9 @@ class SparseDispatcher(object):
         if multiply_by_gates:
             stitched = stitched.mul(self._nonzero_gates)
 
-        zeros = torch.zeros(self._gates.size(0), expert_out[-1].size(1), expert_out[-1].size(2), requires_grad=True)
-        combined = zeros.index_add(0, self._batch_index, stitched.float())
+        zeros = torch.zeros(self._gates.size(0), expert_out[-1].size(1), expert_out[-1].size(2), requires_grad=True).to(
+            self.device)
+        combined = zeros.index_add(0, self._batch_index, stitched.float()).to(self.device)
         combined[combined == 0] = np.finfo(float).eps
         return combined.log()
 
@@ -102,9 +111,9 @@ class MoeMultiHeadAttention(nn.Module):
         threshold_positions_if_out = (threshold_positions_if_in - 1).to(self.device)
         threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_out), 1).to(self.device)
         # is each value currently in the top k.
-        self.check_what_device_tensors_are_on(top_values_flat, threshold_positions_if_in, threshold_if_in, is_in,
-                                              threshold_positions_if_out,
-                                              threshold_if_out)
+        # self.check_what_device_tensors_are_on(top_values_flat, threshold_positions_if_in, threshold_if_in, is_in,
+        #                                       threshold_positions_if_out,
+        #                                       threshold_if_out)
         prob_if_in = self.normal.cdf((clean_values - threshold_if_in) / noise_stddev)
         prob_if_out = self.normal.cdf((clean_values - threshold_if_out) / noise_stddev)
         prob = torch.where(is_in, prob_if_in, prob_if_out)
@@ -162,7 +171,7 @@ class MoeMultiHeadAttention(nn.Module):
         self.debugging(gates=gates, top_k_gates=top_k_gates, logits=logits)
 
         if self.noisy_gating and self.k < self.num_experts:
-            self.check_what_device_tensors_are_on(clean_logits, noisy_logits, noise_stddev, top_logits)
+            # self.check_what_device_tensors_are_on(clean_logits, noisy_logits, noise_stddev, top_logits)
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
         else:
             load = self._gates_to_load(gates)
@@ -181,7 +190,7 @@ class MoeMultiHeadAttention(nn.Module):
         loss = self.cv_squared(importance) + self.cv_squared(load)
         loss *= loss_coef  # can the loss coefficient be trainable?
 
-        dispatcher = SparseDispatcher(self.num_experts, gates)
+        dispatcher = SparseDispatcher(self.num_experts, gates, is_cuda=self.is_cuda)
         expert_outputs = dispatcher.dispatch(experts=self.experts, q=q, k=k, v=v, mask=mask)
         gates = dispatcher.expert_to_gates()
         attn_output = dispatcher.combine(expert_outputs)
