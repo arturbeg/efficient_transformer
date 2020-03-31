@@ -122,7 +122,7 @@ class MoeMultiHeadAttention(nn.Module):
 
     def noisy_top_k_gating(self, x, train, noise_epsilon=1e-2):
 
-        x[x != x] = float(0.0)
+        x[x != x] = float(0.0)  # deal with nans
 
         clean_logits = torch.tensor((), dtype=torch.float, requires_grad=True).to(self.device)
         clean_logits = clean_logits.new_zeros((x.size(0), self.num_experts))
@@ -137,8 +137,8 @@ class MoeMultiHeadAttention(nn.Module):
                 raw_noise_stddev = raw_noise_stddev + word_clone @ self.w_noise
 
         if self.noisy_gating:
-            noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
-            noisy_logits = clean_logits + (torch.randn_like(clean_logits) * noise_stddev)
+            noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train).to(self.device)
+            noisy_logits = clean_logits + (torch.randn_like(clean_logits) * noise_stddev).to(self.device)
             logits = noisy_logits
         else:
             logits = clean_logits
@@ -151,7 +151,7 @@ class MoeMultiHeadAttention(nn.Module):
         top_k_gates = top_k_gates + float(1e-9)
 
         zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
-        gates = zeros.scatter(1, top_k_indices, top_k_gates)
+        gates = zeros.scatter(1, top_k_indices, top_k_gates).to(self.device)
         self.debugging(gates=gates, top_k_gates=top_k_gates, logits=logits)
         if self.noisy_gating and self.k < self.num_experts:
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
