@@ -76,7 +76,7 @@ class MoeMultiHeadAttention(nn.Module):
 
         self.softplus = nn.Softplus()
         self.softmax = nn.Softmax(1)
-        self.normal = Normal(torch.tensor([0.0]), torch.tensor([1.0]))
+        self.normal = Normal(torch.tensor([0.0]).to(self.device), torch.tensor([1.0]).to(self.device))
 
         assert (self.k <= self.num_experts)
 
