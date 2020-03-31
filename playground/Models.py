@@ -29,12 +29,12 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none"):
+    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True):
         super().__init__()
         self.N = N
         self.embed = Embedder(vocab_size, d_model)
         self.pe = PositionalEncoder(d_model, dropout=dropout)
-        self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing), N)
+        self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda), N)
         self.norm = Norm(d_model)
 
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
@@ -51,12 +51,12 @@ class Decoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none"):
+    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True):
         super().__init__()
         if not is_lm:
             self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
 
-        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing)
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda)
         self.out = nn.Linear(d_model, trg_vocab)
 
     def forward(self, src, trg, src_mask, trg_mask, is_lm=True, train=True):

@@ -17,7 +17,7 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-args = parser.parse_args()
+args = parser.parse_args(['--gating', 'moe'])
 
 BATCH_SIZE = 20
 N_LAYERS = 6
@@ -106,7 +106,7 @@ ntokens = len(corpus.dictionary)
 
 print("Gating function is: ", args.gating)
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
-                    is_lm=True, mixing=args.gating).to(device)
+                    is_lm=True, mixing=args.gating, is_cuda=args.cuda).to(device)
 
 criterion = nn.NLLLoss()  # changes depending on the last layer of the transformer
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)

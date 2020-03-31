@@ -24,7 +24,7 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, d_model, heads, dropout=0.1, is_lm=True, mixing="none"):
+    def __init__(self, d_model, heads, dropout=0.1, is_lm=True, mixing="none", is_cuda=True):
         super().__init__()
         self.mixing = mixing
 
@@ -37,7 +37,8 @@ class DecoderLayer(nn.Module):
         if mixing == "none":
             self.attn_1 = MultiHeadAttention(heads, d_model, dropout=dropout)
         elif mixing == "moe":
-            self.attn_1 = MoeMultiHeadAttention(d_model, heads, num_experts=DEFAULT_NUMBER_OF_EXPERTS, dropout=dropout)
+            self.attn_1 = MoeMultiHeadAttention(d_model, heads, num_experts=DEFAULT_NUMBER_OF_EXPERTS, dropout=dropout,
+                                                is_cuda=is_cuda)
         else:
             raise Exception("Please provide a valid mixing method! Current options are none and moe")
 

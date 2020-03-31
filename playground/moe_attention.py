@@ -57,9 +57,10 @@ class SparseDispatcher(object):
 
 
 class MoeMultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=2):
+    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=2, is_cuda=True):
         super(MoeMultiHeadAttention, self).__init__()
         # initialise some components of moe only if noisy_gating is activated
+        self.device = torch.device("cuda" if is_cuda else "cpu")
         self.noisy_gating = noisy_gating
         self.num_experts = num_experts
         self.embed_dim = embed_dim
@@ -105,13 +106,20 @@ class MoeMultiHeadAttention(nn.Module):
         prob = torch.where(is_in, prob_if_in, prob_if_out)
         return prob
 
+    def debugging(self, gates, top_k_gates, logits):
+        if sum(list((gates > 0).sum(0).numpy())) != 40:
+            print(gates)
+            print(top_k_gates)
+            print(logits)
+            print(self.w_gate)
+
     def noisy_top_k_gating(self, x, train, noise_epsilon=1e-2):
 
         x[x != x] = float(0.0)
 
-        clean_logits = torch.tensor((), dtype=torch.float)
+        clean_logits = torch.tensor((), dtype=torch.float, requires_grad=True).to(self.device)
         clean_logits = clean_logits.new_zeros((x.size(0), self.num_experts))
-        raw_noise_stddev = torch.tensor((), dtype=torch.float)
+        raw_noise_stddev = torch.tensor((), dtype=torch.float, requires_grad=True).to(self.device)
         raw_noise_stddev = raw_noise_stddev.new_zeros((x.size(0), self.num_experts))
 
         for i in range(x.size(1)):
@@ -135,9 +143,9 @@ class MoeMultiHeadAttention(nn.Module):
 
         top_k_gates = top_k_gates + float(1e-9)
 
-        zeros = torch.zeros_like(logits, requires_grad=True)
+        zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
         gates = zeros.scatter(1, top_k_indices, top_k_gates)
-
+        self.debugging(gates=gates, top_k_gates=top_k_gates, logits=logits)
         if self.noisy_gating and self.k < self.num_experts:
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
         else:
