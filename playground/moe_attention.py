@@ -96,11 +96,11 @@ class MoeMultiHeadAttention(nn.Module):
         batch = clean_values.size(0)
         m = noisy_top_values.size(1)
         top_values_flat = noisy_top_values.flatten()
-        threshold_positions_if_in = torch.arange(batch) * m + self.k
-        threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1)
-        is_in = torch.gt(noisy_values, threshold_if_in)
-        threshold_positions_if_out = threshold_positions_if_in - 1
-        threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_out), 1)
+        threshold_positions_if_in = (torch.arange(batch) * m + self.k).to(self.device)
+        threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1).to(self.device)
+        is_in = torch.gt(noisy_values, threshold_if_in).to(self.device)
+        threshold_positions_if_out = (threshold_positions_if_in - 1).to(self.device)
+        threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_out), 1).to(self.device)
         # is each value currently in the top k.
         prob_if_in = self.normal.cdf((clean_values - threshold_if_in) / noise_stddev)
         prob_if_out = self.normal.cdf((clean_values - threshold_if_out) / noise_stddev)
