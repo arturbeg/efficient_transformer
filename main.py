@@ -152,7 +152,7 @@ def evaluate(data_source):
 
             output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True, train=False)
             output = output.view(-1, ntokens)
-            total_loss += len(data) * criterion(output, targets).item()
+            total_loss += data_source.size(1) * criterion(output, targets).item()
 
     return total_loss / data_source.size(1) - 1
 
@@ -161,6 +161,7 @@ def train(train_data):
     # Turn on training mode which enables dropout.
     model.train()
     total_loss = 0.
+    total_aux_loss = 0.
     start_time = time.time()
     ntokens = len(corpus.dictionary)
     for batch, i in enumerate(range(0, train_data.size(1) - 1, BPTT)):
@@ -170,25 +171,29 @@ def train(train_data):
         output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
         output = output.view(-1, ntokens)
         loss = criterion(output, targets)
-        loss = loss + aux_loss  # gradients stemming from the aux_loss calculation? None really..
-        loss.backward()
+        final_loss = loss + aux_loss
+        final_loss.backward()
 
         for p in model.parameters():
             p.data.add_(-LR, p.grad.data)
 
         total_loss += loss.item()
+        aux_loss += aux_loss.item()
 
         if batch == 0:
             print("Running without errors")
 
         if batch % LOG_INTERVAL == 0 and batch > 0:
-            cur_loss = total_loss / LOG_INTERVAL
+            cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
+            curr_aux_loss = total_aux_loss / LOG_INTERVAL
+
             elapsed = time.time() - start_time
             print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
-                  'loss {:5.2f} | ppl {:8.2f}'.format(
+                  'loss {:5.2f} | aux_loss {:5.2f} | ppl {:8.2f}'.format(
                 epoch, batch, train_data.size(1) // BPTT, LR,
-                              elapsed * 1000 / LOG_INTERVAL, cur_loss, math.exp(cur_loss)))
-            total_loss = 0
+                              elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+            total_loss = 0.
+            total_aux_loss = 0.
             start_time = time.time()
 
 
