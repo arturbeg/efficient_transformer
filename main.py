@@ -17,7 +17,7 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-args = parser.parse_args(['--gating', 'moe'])
+args = parser.parse_args()
 
 BATCH_SIZE = 20
 N_LAYERS = 6
