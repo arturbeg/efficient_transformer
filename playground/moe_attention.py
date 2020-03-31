@@ -102,10 +102,17 @@ class MoeMultiHeadAttention(nn.Module):
         threshold_positions_if_out = (threshold_positions_if_in - 1).to(self.device)
         threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_out), 1).to(self.device)
         # is each value currently in the top k.
+        self.check_what_device_tensors_are_on(top_values_flat, threshold_positions_if_in, threshold_if_in, is_in,
+                                              threshold_positions_if_out,
+                                              threshold_if_out)
         prob_if_in = self.normal.cdf((clean_values - threshold_if_in) / noise_stddev)
         prob_if_out = self.normal.cdf((clean_values - threshold_if_out) / noise_stddev)
         prob = torch.where(is_in, prob_if_in, prob_if_out)
         return prob
+
+    def check_what_device_tensors_are_on(self, *args):
+        for tensor in args:
+            print(tensor.device)
 
     def debugging(self, gates, top_k_gates, logits):
 
@@ -153,7 +160,9 @@ class MoeMultiHeadAttention(nn.Module):
         zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
         gates = zeros.scatter(1, top_k_indices, top_k_gates).to(self.device)
         self.debugging(gates=gates, top_k_gates=top_k_gates, logits=logits)
+
         if self.noisy_gating and self.k < self.num_experts:
+            self.check_what_device_tensors_are_on(clean_logits, noisy_logits, noise_stddev, top_logits)
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
         else:
             load = self._gates_to_load(gates)
