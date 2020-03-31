@@ -17,9 +17,9 @@ class SparseDispatcher(object):
         self._batch_index = sorted_experts[index_sorted_experts[:, 1], 0]
 
         if self.is_cuda:
-            self._part_sizes = list((gates > 0).sum(0)).cpu().numpy()
+            self._part_sizes = list((gates > 0).sum(0).cpu().numpy())
         else:
-            self._part_sizes = list((gates > 0).sum(0)).numpy()
+            self._part_sizes = list((gates > 0).sum(0).numpy())
 
         gates_exp = gates[self._batch_index.flatten()]
         self._nonzero_gates = torch.gather(gates_exp, 1, self._expert_index)
