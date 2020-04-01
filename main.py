@@ -17,7 +17,8 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-args = parser.parse_args()
+# args = parser.parse_args()
+args = parser.parse_args(['--gating', 'moe'])
 
 BATCH_SIZE = 20
 N_LAYERS = 6
@@ -177,7 +178,7 @@ def train(train_data):
             p.data.add_(-LR, p.grad.data)
 
         total_loss += loss.item()
-        aux_loss += aux_loss.item()
+        total_aux_loss += aux_loss.item()
 
         if batch == 0:
             print("Running without errors")

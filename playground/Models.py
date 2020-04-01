@@ -43,7 +43,7 @@ class Decoder(nn.Module):
         x = self.embed(trg)
         x = self.pe(x)
 
-        aux_loss = torch.tensor(0.0, dtype=torch.float).to(self.device)
+        aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device)
         for i in range(self.N):
             if is_lm:
                 assert not e_outputs

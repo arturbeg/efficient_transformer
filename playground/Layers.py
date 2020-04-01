@@ -51,7 +51,7 @@ class DecoderLayer(nn.Module):
             self.dropout_3 = nn.Dropout(dropout)
 
     def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
-        aux_loss = torch.tensor(0.0, dtype=torch.float).to(self.device)
+        aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device)
         if is_lm and self.mixing == "none":
             x2 = self.norm_1(x)
             x = x + self.dropout_1(self.attn_1(x2, x2, x2, trg_mask))
