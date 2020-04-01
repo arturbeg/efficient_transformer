@@ -152,10 +152,9 @@ def evaluate(data_source):
 
             output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True, train=False)
             output = output.view(-1, ntokens)
-            total_loss += data_source.size(1) * criterion(output, targets).item()
+            total_loss += criterion(output, targets).item()
 
-    return total_loss / data_source.size(1) - 1
-
+    return total_loss / len(list(range(0, data_source.size(1) - 1, BPTT)))
 
 def train(train_data):
     # Turn on training mode which enables dropout.
