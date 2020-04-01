@@ -168,7 +168,7 @@ class MoeMultiHeadAttention(nn.Module):
 
         zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
         gates = zeros.scatter(1, top_k_indices, top_k_gates).to(self.device)
-        self.debugging(gates=gates, top_k_gates=top_k_gates, logits=logits)
+        # self.debugging(gates=gates, top_k_gates=top_k_gates, logits=logits)
 
         if self.noisy_gating and self.k < self.num_experts:
             # self.check_what_device_tensors_are_on(clean_logits, noisy_logits, noise_stddev, top_logits)

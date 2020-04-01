@@ -8,7 +8,9 @@ from torch.autograd import Variable  # depreciated
 import time
 import math
 import argparse
-
+from playground.Optim import ScheduledOptim
+from torch.optim import Adam
+from torch import autograd
 parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Transformer Language Model')
 
 parser.add_argument('--cuda', action='store_true',
@@ -20,17 +22,16 @@ parser.add_argument('--gating', type=str, default='none',
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
-BATCH_SIZE = 20
+BATCH_SIZE = 128
 N_LAYERS = 6
-EPOCHS = 60
-DROPOUT = 0.2
+EPOCHS = 50
+DROPOUT = 0.15
 N_HEADS = 2
 D_MODEL = 512
 BPTT = 35  # seems to be the sequence length
 CLIP = 0.25
-LR = 0.20  # initial learning rate
+LR = 2.0  # initial learning rate
 LOG_INTERVAL = 200  # report interval
-ONNX_EXPORT = ''  # path to export the final model in onnx format
 SAVE = 'model.pt'  # path to save the final model
 
 if torch.cuda.is_available():
@@ -110,7 +111,10 @@ model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_L
                     is_lm=True, mixing=args.gating, is_cuda=args.cuda).to(device)
 
 criterion = nn.NLLLoss()  # changes depending on the last layer of the transformer
-optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+# optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+optimizer = ScheduledOptim(optimizer=
+                           Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-09),
+                           init_lr=LR, d_model=D_MODEL, n_warmup_steps=4000)
 
 # Training code
 
@@ -165,45 +169,40 @@ def train(train_data):
     start_time = time.time()
     ntokens = len(corpus.dictionary)
     for batch, i in enumerate(range(0, train_data.size(1) - 1, BPTT)):
-        data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
-        trg_mask = create_mask(data).to(device)
-        model.zero_grad()
-        output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
-        output = output.view(-1, ntokens)
-        loss = criterion(output, targets)
-        final_loss = loss + aux_loss
-        final_loss.backward()
+        with autograd.detect_anomaly():
+            data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
+            trg_mask = create_mask(data).to(device)
+            # model.zero_grad()
+            optimizer.zero_grad()
+            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+            output = output.view(-1, ntokens)
+            loss = criterion(output, targets)
+            final_loss = loss + aux_loss
+            final_loss.backward()
 
-        for p in model.parameters():
-            p.data.add_(-LR, p.grad.data)
+            # for p in model.parameters():
+            #     p.data.add_(-LR, p.grad.data)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), CLIP)
+            optimizer.step_and_update_lr()
 
-        total_loss += loss.item()
-        total_aux_loss += aux_loss.item()
+            total_loss += loss.item()
+            total_aux_loss += aux_loss.item()
 
-        if batch == 0:
-            print("Running without errors")
+            if batch == 0:
+                print("Running without errors")
 
-        if batch % LOG_INTERVAL == 0 and batch > 0:
-            cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
-            curr_aux_loss = total_aux_loss / LOG_INTERVAL
+            if batch % LOG_INTERVAL == 0 and batch > 0:
+                cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
+                curr_aux_loss = total_aux_loss / LOG_INTERVAL
 
-            elapsed = time.time() - start_time
-            print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
-                  'loss {:5.2f} | aux_loss {:5.2f} | ppl {:8.2f}'.format(
-                epoch, batch, train_data.size(1) // BPTT, LR,
-                              elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
-            total_loss = 0.
-            total_aux_loss = 0.
-            start_time = time.time()
-
-
-def export_onnx(path, batch_size, seq_len):
-    print('The model is also exported in ONNX format at {}'.
-          format(os.path.realpath(ONNX_EXPORT)))
-    model.eval()
-    dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
-    hidden = model.init_hidden(batch_size)
-    torch.onnx.export(model, (dummy_input, hidden), path)
+                elapsed = time.time() - start_time
+                print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
+                      'loss {:5.2f} | aux_loss {:5.2f} | ppl {:8.2f}'.format(
+                    epoch, batch, train_data.size(1) // BPTT, LR,
+                                  elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+                total_loss = 0.
+                total_aux_loss = 0.
+                start_time = time.time()
 
 
 # look over epochs
@@ -240,7 +239,3 @@ print('=' * 89)
 print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
     test_loss, math.exp(test_loss)))
 print('=' * 89)
-
-if len(ONNX_EXPORT) > 0:
-    # Export the model in ONNX format.
-    export_onnx(ONNX_EXPORT, batch_size=1, seq_len=BPTT)

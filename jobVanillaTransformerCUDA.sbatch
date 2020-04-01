@@ -25,4 +25,4 @@
 #SBATCH --output=vanilla_transformer_cuda_%j.log
 
 # run the application
-srun python main.py --cuda --gating none
+srun python main.py --gating none --cuda
