@@ -32,6 +32,8 @@ class Decoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True):
         super().__init__()
         self.N = N
+        self.is_cuda = is_cuda
+        self.device = torch.device("cuda" if is_cuda else "cpu")
         self.embed = Embedder(vocab_size, d_model)
         self.pe = PositionalEncoder(d_model, dropout=dropout)
         self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda), N)
@@ -41,7 +43,7 @@ class Decoder(nn.Module):
         x = self.embed(trg)
         x = self.pe(x)
 
-        aux_loss = torch.tensor(0.0, dtype=torch.float)
+        aux_loss = torch.tensor(0.0, dtype=torch.float).to(self.device)
         for i in range(self.N):
             if is_lm:
                 assert not e_outputs

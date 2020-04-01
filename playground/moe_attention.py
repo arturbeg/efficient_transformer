@@ -95,8 +95,8 @@ class MoeMultiHeadAttention(nn.Module):
         eps = 1e-10
         # if only num_experts = 1
         if x.shape[0] == 1:
-            return torch.Tensor([0])
-        return x.float().var() / (x.float().mean() ** 2 + eps)
+            return torch.Tensor([0]).to(self.device)
+        return (x.float().var() / (x.float().mean() ** 2 + eps)).to(self.device)
 
     def _gates_to_load(self, gates):
         return (gates > 0).sum(0)
@@ -188,7 +188,7 @@ class MoeMultiHeadAttention(nn.Module):
         gates, load = self.noisy_top_k_gating(q, train)
         importance = gates.sum(0)
         loss = self.cv_squared(importance) + self.cv_squared(load)
-        loss *= loss_coef  # can the loss coefficient be trainable?
+        loss *= loss_coef
 
         dispatcher = SparseDispatcher(self.num_experts, gates, is_cuda=self.is_cuda)
         expert_outputs = dispatcher.dispatch(experts=self.experts, q=q, k=k, v=v, mask=mask)
