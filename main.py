@@ -38,7 +38,8 @@ BPTT = 35  # seems to be the sequence length
 CLIP = 0.25
 LR = 2.0  # initial learning rate
 LOG_INTERVAL = 128  # report interval
-SAVE = 'model.pt'  # path to save the final model
+# path to save the final model
+SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
 
 if torch.cuda.is_available():
     if not args.cuda:
