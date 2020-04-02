@@ -68,5 +68,15 @@ class Transformer(nn.Module):
             e_outputs = self.encoder(src, src_mask)
         d_output, aux_loss = self.decoder(trg, e_outputs, src_mask, trg_mask, is_lm, train=train)
         output = self.out(d_output)
-        output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
-        return output, aux_loss
+        final_output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
+
+        # TODO: if self.debug = True:
+        nan_mask = torch.isnan(final_output)
+        if nan_mask.any():
+            print(nan_mask.nonzero())
+            indices = nan_mask.nonzero()[:, 0].unique(sorted=True)
+            print("Input:", output[indices])
+            print("Output:", final_output[indices])
+            raise RuntimeError("NaN encountered in log_softmaxs")
+
+        return final_output, aux_loss

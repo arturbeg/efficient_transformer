@@ -25,4 +25,4 @@
 #SBATCH --output=moe_transformer_cuda_%j.log
 
 # run the application
-srun python main.py --gating moe --cuda
+srun python main.py --gating moe --lr 0.05 --cuda

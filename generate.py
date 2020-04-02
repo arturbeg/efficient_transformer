@@ -1,4 +1,5 @@
 # This file generates new sentences sampled from the language model
+# TODO: Adjust to account for the fact that batch dimension comes first in my code
 
 import argparse
 import torch

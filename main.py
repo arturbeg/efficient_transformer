@@ -11,6 +11,7 @@ import argparse
 from playground.Optim import ScheduledOptim
 from torch.optim import Adam
 from torch import autograd
+import datetime
 
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
@@ -25,21 +26,28 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
+parser.add_argument('--lr', type=float, default=2.0,
+                    help='Initial learning rate')
+
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
 BATCH_SIZE = 32
 N_LAYERS = 6
-EPOCHS = 10
+EPOCHS = 20
 DROPOUT = 0.15
 N_HEADS = 2
 D_MODEL = 512
 BPTT = 35  # seems to be the sequence length
 CLIP = 0.25
-LR = 2.0  # initial learning rate
+LR = args.lr  # initial learning rate
 LOG_INTERVAL = 128  # report interval
 # path to save the final model
+now = datetime.datetime.now().timestamp()
+now_str = str(now)
 SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
+SAVE = now_str + '_' + SAVE
+print(SAVE)
 
 if torch.cuda.is_available():
     if not args.cuda:
@@ -133,6 +141,19 @@ def nopeak_mask(size):
     return np_mask
 
 
+def nan_hook(self, inp, output):
+    if not isinstance(output, tuple):
+        outputs = [output]
+    else:
+        outputs = output
+
+    for i, out in enumerate(outputs):
+        nan_mask = torch.isnan(out)
+        if nan_mask.any():
+            print("In ", self.__class__.__name__)
+            raise RuntimeError(f"Found NAN in output {i} at indices: ", nan_mask.nonzero(), "where:",
+                               out[nan_mask.nonzero()[:, 0].unique(sorted=True)])
+
 def create_mask(trg):
     size = trg.size(1)  # get seq_len for matrix
     np_mask = nopeak_mask(size)
@@ -191,16 +212,15 @@ def train(train_data):
         with autograd.detect_anomaly():
             data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
             trg_mask = create_mask(data).to(device)
-            # model.zero_grad()
             optimizer.zero_grad()
+            for submodule in model.modules():
+                submodule.register_forward_hook(nan_hook)
             output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
             output = output.view(-1, ntokens)
             loss = criterion(output, targets)
             final_loss = loss + aux_loss
             final_loss.backward()
 
-            # for p in model.parameters():
-            #     p.data.add_(-LR, p.grad.data)
             torch.nn.utils.clip_grad_norm_(model.parameters(), CLIP)
             optimizer.step_and_update_lr()
 
