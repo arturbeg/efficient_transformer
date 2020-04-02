@@ -11,6 +11,12 @@ import argparse
 from playground.Optim import ScheduledOptim
 from torch.optim import Adam
 from torch import autograd
+
+torch.manual_seed(0)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(0)
+
 parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Transformer Language Model')
 
 parser.add_argument('--cuda', action='store_true',
@@ -22,16 +28,16 @@ parser.add_argument('--gating', type=str, default='none',
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 N_LAYERS = 6
-EPOCHS = 50
+EPOCHS = 10
 DROPOUT = 0.15
 N_HEADS = 2
 D_MODEL = 512
 BPTT = 35  # seems to be the sequence length
 CLIP = 0.25
 LR = 2.0  # initial learning rate
-LOG_INTERVAL = 200  # report interval
+LOG_INTERVAL = 128  # report interval
 SAVE = 'model.pt'  # path to save the final model
 
 if torch.cuda.is_available():
@@ -161,6 +167,18 @@ def evaluate(data_source):
 
     return total_loss / len(list(range(0, data_source.size(1) - 1, BPTT)))
 
+
+def check_for_nans(model):
+    number_of_nans = 0
+    for name, parameter in model.named_parameters():
+        if torch.isnan(parameter).any():
+            print(name)
+            print(parameter)
+            number_of_nans += 1
+
+    return number_of_nans > 0
+
+
 def train(train_data):
     # Turn on training mode which enables dropout.
     model.train()
@@ -184,6 +202,10 @@ def train(train_data):
             #     p.data.add_(-LR, p.grad.data)
             torch.nn.utils.clip_grad_norm_(model.parameters(), CLIP)
             optimizer.step_and_update_lr()
+
+            model_has_nan = check_for_nans(model)
+            if model_has_nan:
+                print("Nans have been identified")
 
             total_loss += loss.item()
             total_aux_loss += aux_loss.item()
