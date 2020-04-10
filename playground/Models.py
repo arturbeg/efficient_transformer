@@ -10,7 +10,6 @@ import copy
 def get_clones(module, N):
     return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
 
-
 class Encoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads, dropout):
         super().__init__()
