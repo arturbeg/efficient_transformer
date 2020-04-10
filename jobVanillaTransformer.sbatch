@@ -25,4 +25,4 @@
 #SBATCH --output=vanilla_transformer_%j.log
 
 # run the application
-srun python main.py --gating none
+srun python main2.py --gating none

@@ -18,7 +18,9 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(0)
 
-parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Transformer Language Model')
+print("Running on lm1b dataset")
+
+parser = argparse.ArgumentParser(description='PyTorch LM1b Transformer Language Model')
 
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
