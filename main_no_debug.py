@@ -10,7 +10,6 @@ import math
 import argparse
 from playground.Optim import ScheduledOptim
 from torch.optim import Adam
-from torch import autograd
 import datetime
 
 torch.manual_seed(0)
@@ -54,6 +53,7 @@ if torch.cuda.is_available():
         print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
 device = torch.device("cuda" if args.cuda else "cpu")
+
 
 class Dictionary(object):
     def __init__(self):
@@ -100,15 +100,13 @@ class Corpus(object):
 
         return ids
 
+
 corpus = Corpus('./data/wikitext-2')
 
+
 def batchify(data, bsz):
-    # Work out how cleanly we can divide the dataset into bsz parts.
     nbatch = data.size(0) // bsz
-    # Trim off any extra elements that wouldn't cleanly fit (remainders).
     data = data.narrow(0, 0, nbatch * bsz)
-    # Evenly divide the data across the bsz batches.
-    # data = data.view(bsz, -1).t().contiguous()
     data = data.view(bsz, -1).contiguous()
     return data.to(device)
 
@@ -123,35 +121,21 @@ ntokens = len(corpus.dictionary)
 
 print("Gating function is: ", args.gating)
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
-                    is_lm=True, mixing=args.gating, is_cuda=args.cuda).to(device)
+                    is_lm=True, mixing=args.gating, is_cuda=args.cuda, is_debug=False).to(device)
 
 criterion = nn.NLLLoss()  # changes depending on the last layer of the transformer
-# optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 optimizer = ScheduledOptim(optimizer=
                            Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-09),
                            init_lr=LR, d_model=D_MODEL, n_warmup_steps=4000)
+
 
 # Training code
 def nopeak_mask(size):
     np_mask = np.triu(np.ones((1, size, size)),
                       k=1).astype('uint8')
     np_mask = Variable(torch.from_numpy(np_mask) == 0)
-    # np_mask = np_mask.cuda()
     return np_mask
 
-
-def nan_hook(self, inp, output):
-    if not isinstance(output, tuple):
-        outputs = [output]
-    else:
-        outputs = output
-
-    for i, out in enumerate(outputs):
-        nan_mask = torch.isnan(out)
-        if nan_mask.any():
-            print("In ", self.__class__.__name__)
-            raise RuntimeError(f"Found NAN in output {i} at indices: ", nan_mask.nonzero(), "where:",
-                               out[nan_mask.nonzero()[:, 0].unique(sorted=True)])
 
 def create_mask(trg):
     size = trg.size(1)  # get seq_len for matrix
@@ -168,7 +152,6 @@ def get_batch(source, i):
 
 
 def evaluate(data_source):
-    # Turn on evaluation mode which disables dropout
     model.eval()
 
     total_loss = 0.0
@@ -189,65 +172,44 @@ def evaluate(data_source):
     return total_loss / len(list(range(0, data_source.size(1) - 1, BPTT)))
 
 
-def check_for_nans(model):
-    number_of_nans = 0
-    for name, parameter in model.named_parameters():
-        if torch.isnan(parameter).any():
-            print(name)
-            print(parameter)
-            number_of_nans += 1
-
-    return number_of_nans > 0
-
-
 def train(train_data):
-    # Turn on training mode which enables dropout.
     model.train()
     total_loss = 0.
     total_aux_loss = 0.
     start_time = time.time()
     ntokens = len(corpus.dictionary)
     for batch, i in enumerate(range(0, train_data.size(1) - 1, BPTT)):
-        with autograd.detect_anomaly():
-            data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
-            trg_mask = create_mask(data).to(device)
-            optimizer.zero_grad()
-            for submodule in model.modules():
-                submodule.register_forward_hook(nan_hook)
-            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
-            output = output.view(-1, ntokens)
-            loss = criterion(output, targets)
-            final_loss = loss + aux_loss
-            final_loss.backward()
+        data, targets = get_batch(train_data, i)  # data is [35, 20], targets is [700]
+        trg_mask = create_mask(data).to(device)
+        optimizer.zero_grad()
+        output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+        output = output.view(-1, ntokens)
+        loss = criterion(output, targets)
+        final_loss = loss + aux_loss
+        final_loss.backward()
 
-            torch.nn.utils.clip_grad_norm_(model.parameters(), CLIP)
-            optimizer.step_and_update_lr()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), CLIP)
+        optimizer.step_and_update_lr()
 
-            model_has_nan = check_for_nans(model)
-            if model_has_nan:
-                print("Nans have been identified")
+        total_loss += loss.item()
+        total_aux_loss += aux_loss.item()
 
-            total_loss += loss.item()
-            total_aux_loss += aux_loss.item()
+        if batch == 0:
+            print("Running without errors")
 
-            if batch == 0:
-                print("Running without errors")
+        if batch % LOG_INTERVAL == 0 and batch > 0:
+            cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
+            curr_aux_loss = total_aux_loss / LOG_INTERVAL
 
-            if batch % LOG_INTERVAL == 0 and batch > 0:
-                cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
-                curr_aux_loss = total_aux_loss / LOG_INTERVAL
+            elapsed = time.time() - start_time
+            print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
+                  'loss {:5.2f} | aux_loss {:5.2f} | ppl {:8.2f}'.format(
+                epoch, batch, train_data.size(1) // BPTT, LR,
+                              elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+            total_loss = 0.
+            total_aux_loss = 0.
+            start_time = time.time()
 
-                elapsed = time.time() - start_time
-                print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
-                      'loss {:5.2f} | aux_loss {:5.2f} | ppl {:8.2f}'.format(
-                    epoch, batch, train_data.size(1) // BPTT, LR,
-                                  elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
-                total_loss = 0.
-                total_aux_loss = 0.
-                start_time = time.time()
-
-
-# look over epochs
 
 best_val_loss = None
 
@@ -262,7 +224,6 @@ try:
                                          val_loss, math.exp(val_loss)))
 
         print('-' * 89)
-        # Save the model if validation loss is the best we have seen so far
         if not best_val_loss or val_loss < best_val_loss:
             with open(SAVE, 'wb') as f:
                 torch.save(model, f)

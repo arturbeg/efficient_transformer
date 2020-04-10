@@ -52,11 +52,13 @@ class Decoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True):
+    def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True,
+                 is_debug=True):
         super().__init__()
         if not is_lm:
             self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
 
+        self.is_debug = is_debug
         self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda)
         self.out = nn.Linear(d_model, trg_vocab)
 
@@ -69,13 +71,13 @@ class Transformer(nn.Module):
         output = self.out(d_output)
         final_output = F.log_softmax(output, dim=-1)  # along the embedding (d_model) dimension
 
-        # TODO: if self.debug = True:
-        nan_mask = torch.isnan(final_output)
-        if nan_mask.any():
-            print(nan_mask.nonzero())
-            indices = nan_mask.nonzero()[:, 0].unique(sorted=True)
-            print("Input:", output[indices])
-            print("Output:", final_output[indices])
-            raise RuntimeError("NaN encountered in log_softmaxs")
+        if self.is_debug:
+            nan_mask = torch.isnan(final_output)
+            if nan_mask.any():
+                print(nan_mask.nonzero())
+                indices = nan_mask.nonzero()[:, 0].unique(sorted=True)
+                print("Input:", output[indices])
+                print("Output:", final_output[indices])
+                raise RuntimeError("NaN encountered in log_softmaxs")
 
         return final_output, aux_loss
