@@ -22,7 +22,7 @@
 #SBATCH --mail-user=artur.begyan@kellogg.ox.ac.uk
 
 # Standard output and error log
-#SBATCH --output=vanilla_transformer_cuda_%j.log
+#SBATCH --output=vanilla_transformer_cuda_%j.out
 
 # run the application
 srun python main2.py --gating none --cuda
