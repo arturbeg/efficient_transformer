@@ -54,6 +54,7 @@ now_str = str(now)
 LOG = 'model_vanilla_transformer.log' if args.gating == "none" else "model_moe_transformer.log"
 SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
 SAVE = now_str + '_' + SAVE
+SAVE = './model_files/' + SAVE
 LOG = now_str + '_' + LOG
 # print(SAVE, flush=True)
 logging.basicConfig(filename='./log_files/' + LOG, level=logging.DEBUG)
