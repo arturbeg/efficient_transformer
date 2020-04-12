@@ -7,7 +7,7 @@
 #SBATCH --job-name=moe_transformer_cuda
 
 # set number of GPUs
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:4
 
 # set number of CPUs
 #SBATCH --cpus-per-task=5
@@ -25,4 +25,4 @@
 #SBATCH --output=moe_transformer_cuda_%j.out
 
 # run the application
-srun python main.py --gating moe --lr 0.0001 --optimizer sgd --cuda
+srun python main.py --gating moe --lr 0.0001 --optimizer sgd --bsz 32 --cuda

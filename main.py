@@ -26,6 +26,9 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
+parser.add_argument('--bsz', type=int, default=32,
+                    help='The batch size used by the transformer')
+
 parser.add_argument('--lr', type=float, default=0.01,
                     help='Initial learning rate')
 
@@ -35,7 +38,7 @@ parser.add_argument('--optimizer', type=str, default='adam',
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
-BATCH_SIZE = 2
+BATCH_SIZE = args.bsz
 N_LAYERS = 6
 EPOCHS = 40
 DROPOUT = 0.15
@@ -64,7 +67,7 @@ if torch.cuda.is_available():
     if not args.cuda:
         logging.warning("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-device = torch.device("cuda" if args.cuda else "cpu")
+device = torch.device("cuda:0" if args.cuda else "cpu")
 
 corpus = get_lm_corpus(datadir=DATA, dataset=DATASET, vocab=VOCAB)
 ntokens = len(corpus.vocab)
@@ -79,10 +82,15 @@ te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
 logging.info("Gating function is: " + str(args.gating))
 
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
-                    is_lm=True, mixing=args.gating, is_cuda=args.cuda).to(device)
+                    is_lm=True, mixing=args.gating, is_cuda=args.cuda)
+
+if args.cuda and torch.cuda.device_count()  > 1:
+    logging.info("Let's use " + str(torch.cuda.device_count()) + " GPUs!")
+    model = nn.DataParallel(model)
+
+model.to(device)
 
 criterion = nn.NLLLoss()  # changes depending on the last layer of the transformer
-
 
 if args.optimizer == "adam":
     optimization_method = Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-09)
