@@ -71,11 +71,6 @@ class LMShuffledIterator(object):
 
             yield data, target, self.bptt
 
-            n_retain = min(data.size(0), self.ext_len)
-            if n_retain > 0:
-                data[:n_retain] = data[-n_retain:]
-            data.resize_(n_retain + self.bptt, data.size(1))
-
     def __iter__(self):
         # sent_stream is an iterator
         sent_stream = self.get_sent_stream()

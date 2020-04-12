@@ -1,3 +1,6 @@
 /data/one-billion-words/
 .DS_Store
 .idea/
+__pycache__/
+playground/__pycache__/
+
