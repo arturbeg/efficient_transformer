@@ -160,8 +160,8 @@ def train(data_iter):
             curr_aux_loss = total_aux_loss / LOG_INTERVAL
 
             elapsed = time.time() - start_time
-            logging.info('| epoch {:3d} | batch {:5d} | lr {:02.2f} | ms/batch {:5.2f} | '
-                  'loss {:5.2f} | aux_loss {:5.2f} | ppl {:8.2f}'.format(
+            logging.info('| epoch {:3d} | batch {:5d} | lr {:06.6f} | ms/batch {:5.2f} | '
+                  'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
                 epoch, batch, LR,
                 elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
             total_loss = 0.
@@ -176,8 +176,8 @@ for epoch in range(1, EPOCHS + 1):
     train(data_iter=tr_iter)
     val_loss = evaluate(data_iter=va_iter)
     logging.info('-' * 89)
-    logging.info('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
-          'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
+    logging.info('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:6.4f} | '
+          'valid ppl {:10.4f}'.format(epoch, (time.time() - epoch_start_time),
                                      val_loss, math.exp(val_loss)))
     logging.info('-' * 89)
     # Save the model if validation loss is the best we have seen so far
@@ -189,6 +189,6 @@ for epoch in range(1, EPOCHS + 1):
 # Run on test data.
 test_loss = evaluate(data_iter=te_iter)
 logging.info('-' * 89)
-logging.info('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
+logging.info('| End of training | test loss {:6.4f} | test ppl {:10.4f}'.format(
     test_loss, math.exp(test_loss)))
 logging.info('-' * 89)
