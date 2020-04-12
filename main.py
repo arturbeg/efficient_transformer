@@ -8,7 +8,7 @@ import time
 import math
 import argparse
 from playground.Optim import ScheduledOptim
-from torch.optim import Adam
+from torch.optim import Adam, SGD
 import datetime
 from data_utils import get_lm_corpus
 import logging
@@ -28,6 +28,9 @@ parser.add_argument('--gating', type=str, default='none',
 
 parser.add_argument('--lr', type=float, default=0.01,
                     help='Initial learning rate')
+
+parser.add_argument('--optimizer', type=str, default='adam',
+                    help='the optimizer used to train the transformer')
 
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
@@ -50,7 +53,7 @@ SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_t
 SAVE = now_str + '_' + SAVE
 LOG = now_str + '_' + LOG
 # print(SAVE, flush=True)
-logging.basicConfig(filename=LOG, level=logging.DEBUG)
+logging.basicConfig(filename='./log_files/' + LOG, level=logging.DEBUG)
 logging.info(SAVE)
 
 DATA = './data/one-billion-words'
@@ -79,10 +82,20 @@ model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_L
                     is_lm=True, mixing=args.gating, is_cuda=args.cuda).to(device)
 
 criterion = nn.NLLLoss()  # changes depending on the last layer of the transformer
-optimizer = ScheduledOptim(optimizer=
-                           Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-09),
-                           init_lr=LR, d_model=D_MODEL, n_warmup_steps=4000)
 
+
+if args.optimizer == "adam":
+    optimization_method = Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-09)
+elif args.optimizer == "sgd_momentum":
+    optimization_method = SGD(model.parameters(), lr=LR, momentum=0.9)
+elif args.optimizer == "sgd":
+    optimization_method = SGD(model.parameters(), lr=LR)
+else:
+    raise RuntimeError("Please provide a valid optimization method: adam, sgd or sgd_momentum")
+
+logging.info("The optimizer used is: " + args.optimizer)
+optimizer = ScheduledOptim(optimizer=optimization_method,
+                           init_lr=LR, d_model=D_MODEL, n_warmup_steps=4000)
 
 # Training code
 def nopeak_mask(size):

@@ -25,4 +25,4 @@
 #SBATCH --output=vanilla_transformer_cuda_%j.out
 
 # run the application
-srun python main.py --gating none --cuda
+srun python main.py --gating none --optimizer sgd --cuda
