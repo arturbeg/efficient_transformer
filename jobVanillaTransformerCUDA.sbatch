@@ -13,7 +13,7 @@
 #SBATCH --cpus-per-task=5
 
 # set partition
-#SBATCH --partition=small
+#SBATCH --partition=big
 
 # mail alert at start, end and abortion of execution
 #SBATCH --mail-type=ALL
