@@ -22,7 +22,7 @@
 #SBATCH --mail-user=artur.begyan@kellogg.ox.ac.uk
 
 # Standard output and error log
-#SBATCH --output=vanilla_transformer_%j.log
+#SBATCH --output=vanilla_transformer_%j.out
 
 # run the application
-srun python main.py --gating none
+srun python ../main.py --gating none

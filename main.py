@@ -11,13 +11,12 @@ from playground.Optim import ScheduledOptim
 from torch.optim import Adam
 import datetime
 from data_utils import get_lm_corpus
+import logging
 
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(0)
-
-print("Running on lm1b dataset", flush=True)
 
 parser = argparse.ArgumentParser(description='PyTorch LM1b Transformer Language Model')
 
@@ -46,9 +45,13 @@ LOG_INTERVAL = 128  # report interval
 # path to save the final model
 now = datetime.datetime.now().timestamp()
 now_str = str(now)
+LOG = 'model_vanilla_transformer.log' if args.gating == "none" else "model_moe_transformer.log"
 SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
 SAVE = now_str + '_' + SAVE
-print(SAVE, flush=True)
+LOG = now_str + '_' + LOG
+# print(SAVE, flush=True)
+logging.basicConfig(filename=LOG, level=logging.DEBUG)
+logging.info(SAVE)
 
 DATA = './data/one-billion-words'
 DATASET = 'lm1b'
@@ -56,13 +59,9 @@ VOCAB = 'word'
 
 if torch.cuda.is_available():
     if not args.cuda:
-        print("WARNING: You have a CUDA device, so you should probably run with --cuda", flush=True)
+        logging.warning("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
 device = torch.device("cuda" if args.cuda else "cpu")
-
-###########################################################################
-#                            Load data                                    #
-###########################################################################
 
 corpus = get_lm_corpus(datadir=DATA, dataset=DATASET, vocab=VOCAB)
 ntokens = len(corpus.vocab)
@@ -74,8 +73,8 @@ va_iter = corpus.get_iterator('valid', BATCH_SIZE, BPTT,
                               device=device, ext_len=0)
 te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
                               device=device, ext_len=0)
+logging.info("Gating function is: " + str(args.gating))
 
-print("Gating function is: ", args.gating, flush=True)
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
                     is_lm=True, mixing=args.gating, is_cuda=args.cuda).to(device)
 
@@ -135,24 +134,23 @@ def train(data_iter):
         final_loss = loss + aux_loss
         final_loss.backward()
 
-        torch.nn.utils.clip_grad_norm_(model.parameters(), CLIP)
         optimizer.step_and_update_lr()
 
         total_loss += loss.item()
         total_aux_loss += aux_loss.item()
 
         if batch == 0:
-            print("Running without errors", flush=True)
+            logging.info("Running without errors")
 
         if batch % LOG_INTERVAL == 0 and batch > 0:
             cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
             curr_aux_loss = total_aux_loss / LOG_INTERVAL
 
             elapsed = time.time() - start_time
-            print('| epoch {:3d} | batch {:5d} | lr {:02.2f} | ms/batch {:5.2f} | '
+            logging.info('| epoch {:3d} | batch {:5d} | lr {:02.2f} | ms/batch {:5.2f} | '
                   'loss {:5.2f} | aux_loss {:5.2f} | ppl {:8.2f}'.format(
                 epoch, batch, LR,
-                elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)), flush=True)
+                elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
             total_loss = 0.
             total_aux_loss = 0.
             start_time = time.time()
@@ -164,12 +162,11 @@ for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train(data_iter=tr_iter)
     val_loss = evaluate(data_iter=va_iter)
-    print('-' * 89, flush=True)
-    print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
+    logging.info('-' * 89)
+    logging.info('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
           'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
-                                     val_loss, math.exp(val_loss)), flush=True)
-
-    print('-' * 89, flush=True)
+                                     val_loss, math.exp(val_loss)))
+    logging.info('-' * 89)
     # Save the model if validation loss is the best we have seen so far
     if not best_val_loss or val_loss < best_val_loss:
         with open(SAVE, 'wb') as f:
@@ -178,7 +175,7 @@ for epoch in range(1, EPOCHS + 1):
 
 # Run on test data.
 test_loss = evaluate(data_iter=te_iter)
-print('=' * 89, flush=True)
-print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
-    test_loss, math.exp(test_loss)), flush=True)
-print('=' * 89, flush=True)
+logging.info('-' * 89)
+logging.info('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
+    test_loss, math.exp(test_loss)))
+logging.info('-' * 89)
