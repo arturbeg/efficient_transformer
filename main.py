@@ -42,7 +42,7 @@ D_MODEL = 512
 BPTT = 32  # seems to be the sequence length
 CLIP = 0.25
 LR = args.lr  # initial learning rate
-LOG_INTERVAL = 1  # report interval
+LOG_INTERVAL = 128  # report interval
 # path to save the final model
 now = datetime.datetime.now().timestamp()
 now_str = str(now)
