@@ -47,6 +47,7 @@ D_MODEL = 512
 BPTT = 32  # seems to be the sequence length
 CLIP = 0.25
 LR = args.lr  # initial learning rate
+WARMUP = 4000
 LOG_INTERVAL = 128  # report interval
 # path to save the final model
 now = datetime.datetime.now().timestamp()
@@ -56,9 +57,16 @@ SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_t
 SAVE = now_str + '_' + SAVE
 SAVE = './model_files/' + SAVE
 LOG = now_str + '_' + LOG
-# print(SAVE, flush=True)
 logging.basicConfig(filename='./log_files/' + LOG, level=logging.DEBUG)
 logging.info(SAVE)
+logging.info("The batch size is: " + str(BATCH_SIZE))
+logging.info("Number of epochs is : " + str(EPOCHS))
+logging.info("The context length is : " + str(BPTT))
+logging.info("D_model is : " + str(D_MODEL))
+logging.info("Number of attention heads is : " + str(N_HEADS))
+logging.info("Number of decoder layers is : " + str(N_LAYERS))
+logging.info("Initial learning rate is : " + str(LR))
+logging.info("Number of warmup steps is : " + str(WARMUP))
 
 DATA = './data/one-billion-words'
 DATASET = 'lm1b'
@@ -104,7 +112,7 @@ else:
 
 logging.info("The optimizer used is: " + args.optimizer)
 optimizer = ScheduledOptim(optimizer=optimization_method,
-                           init_lr=LR, d_model=D_MODEL, n_warmup_steps=4000)
+                           init_lr=LR, d_model=D_MODEL, n_warmup_steps=WARMUP)
 
 # Training code
 def nopeak_mask(size):
@@ -130,7 +138,7 @@ def evaluate(data_iter):
 
     with torch.no_grad():
         for batch, (data, target, seq_len) in enumerate(data_iter):
-            targets = target.contiguous().view(-1)
+            targets = target.contiguous().view(-1).to(device)
             trg_mask = create_mask(data).to(device)
             output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True, train=False)
             output = output.view(-1, ntokens)
@@ -147,7 +155,7 @@ def train(data_iter):
     start_time = time.time()
     ntokens = len(corpus.vocab)
     for batch, (data, target, seq_len) in enumerate(data_iter):
-        targets = target.contiguous().view(-1)
+        targets = target.contiguous().view(-1).to(device)
         trg_mask = create_mask(data).to(device)
         optimizer.zero_grad()
         output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
