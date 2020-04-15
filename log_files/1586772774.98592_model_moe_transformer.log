@@ -1,0 +1,4 @@
+INFO:root:./model_files/1586772774.98592_model_moe_transformer.pt
+INFO:root:Loading cached dataset...
+INFO:root:Gating function is: moe
+INFO:root:The optimizer used is: sgd
