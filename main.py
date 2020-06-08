@@ -10,7 +10,7 @@ import argparse
 from playground.Optim import ScheduledOptim
 from torch.optim import Adam, SGD
 import datetime
-from data_utils import get_lm_corpus
+from data_utils_subword import get_lm_corpus
 import logging
 
 torch.manual_seed(0)
@@ -26,7 +26,7 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--bsz', type=int, default=32,
+parser.add_argument('--bsz', type=int, default=256,
                     help='The batch size used by the transformer')
 
 parser.add_argument('--lr', type=float, default=0.01,
@@ -38,13 +38,14 @@ parser.add_argument('--optimizer', type=str, default='adam',
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
+NTOKENS = 32711  # lm1b/subwords32k
 BATCH_SIZE = args.bsz
-N_LAYERS = 6
+N_LAYERS = 3
 EPOCHS = 40
 DROPOUT = 0.15
-N_HEADS = 2
+N_HEADS = 4
 D_MODEL = 512
-BPTT = 32  # seems to be the sequence length
+BPTT = 128
 CLIP = 0.25
 LR = args.lr  # initial learning rate
 WARMUP = 4000
@@ -68,26 +69,22 @@ logging.info("Number of decoder layers is : " + str(N_LAYERS))
 logging.info("Initial learning rate is : " + str(LR))
 logging.info("Number of warmup steps is : " + str(WARMUP))
 
-DATA = './data/one-billion-words'
-DATASET = 'lm1b'
-VOCAB = 'word'
-
 if torch.cuda.is_available():
     if not args.cuda:
         logging.warning("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
 device = torch.device("cuda:0" if args.cuda else "cpu")
 
-corpus = get_lm_corpus(datadir=DATA, dataset=DATASET, vocab=VOCAB)
-ntokens = len(corpus.vocab)
-vocab = corpus.vocab
+corpus = get_lm_corpus()
+ntokens = NTOKENS
 
 tr_iter = corpus.get_iterator('train', BATCH_SIZE, BPTT,
-                              device=device, ext_len=0)
+                              device=device)
 va_iter = corpus.get_iterator('valid', BATCH_SIZE, BPTT,
-                              device=device, ext_len=0)
+                              device=device)
 te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
-                              device=device, ext_len=0)
+                              device=device)
+
 logging.info("Gating function is: " + str(args.gating))
 
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
@@ -133,7 +130,7 @@ def create_mask(trg):
 def evaluate(data_iter):
     model.eval()
     total_loss = 0.0
-    ntokens = len(corpus.vocab)
+    ntokens = NTOKENS
     number_of_batches = 0
 
     with torch.no_grad():
@@ -153,7 +150,7 @@ def train(data_iter):
     total_loss = 0.
     total_aux_loss = 0.
     start_time = time.time()
-    ntokens = len(corpus.vocab)
+    ntokens = NTOKENS
     for batch, (data, target, seq_len) in enumerate(data_iter):
         targets = target.contiguous().view(-1).to(device)
         trg_mask = create_mask(data).to(device)
@@ -171,6 +168,7 @@ def train(data_iter):
 
         if batch == 0:
             logging.info("Running without errors")
+            print("Running without errors")
 
         if batch % LOG_INTERVAL == 0 and batch > 0:
             cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss

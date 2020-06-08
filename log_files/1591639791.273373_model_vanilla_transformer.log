@@ -1,0 +1,9 @@
+INFO:root:./model_files/1591639791.273373_model_vanilla_transformer.pt
+INFO:root:The batch size is: 256
+INFO:root:Number of epochs is : 40
+INFO:root:The context length is : 128
+INFO:root:D_model is : 512
+INFO:root:Number of attention heads is : 4
+INFO:root:Number of decoder layers is : 3
+INFO:root:Initial learning rate is : 0.01
+INFO:root:Number of warmup steps is : 4000

@@ -105,6 +105,7 @@ corpus = Corpus('./data/wikitext-2')
 
 
 def batchify(data, bsz):
+
     nbatch = data.size(0) // bsz
     data = data.narrow(0, 0, nbatch * bsz)
     data = data.view(bsz, -1).contiguous()

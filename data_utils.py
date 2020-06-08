@@ -5,7 +5,6 @@ import re
 from collections import Counter
 from collections import OrderedDict
 import numpy as np
-import sacremoses
 import torch
 
 
@@ -349,14 +348,3 @@ def get_lm_corpus(datadir, dataset, vocab):
         torch.save(corpus, fn)
 
     return corpus
-
-
-def tokenize_raw(text, lang='en'):
-    mt = sacremoses.MosesTokenizer(lang)
-    text = mt.tokenize(text, return_str=True)
-    text = re.sub(r'&quot;', '"', text)
-    text = re.sub(r'&apos;', "'", text)
-    text = re.sub(r'(\d)\.(\d)', r'\1 @.@ \2', text)
-    text = re.sub(r'(\d),(\d)', r'\1 @,@ \2', text)
-    text = re.sub(r'(\w)-(\w)', r'\1 @-@ \2', text)
-    return text
