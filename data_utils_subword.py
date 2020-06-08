@@ -66,13 +66,13 @@ class lm1bIterator(object):
 class Corpus(object):
     def get_iterator(self, split, bsz, bptt, device='cpu'):
         if split == 'train':
-            ds = tfds.load("lm1b/subwords32k", split="train[:80%]", data_dir="./subwords32k")
+            ds = tfds.load("lm1b/subwords32k", split="train", data_dir="./subwords32k")
             ds = ds.as_numpy_iterator()
             data_iter = lm1bIterator(ds=ds, bsz=bsz, bptt=bptt, device=device)
-        elif split == 'valid':
-            ds = tfds.load("lm1b/subwords32k", split="train[80%:]", data_dir="./subwords32k")
-            ds = ds.as_numpy_iterator()
-            data_iter = lm1bIterator(ds=ds, bsz=bsz, bptt=bptt, device=device)
+        # elif split == 'valid':
+        #     ds = tfds.load("lm1b/subwords32k", split="train[80%:]", data_dir="./subwords32k")
+        #     ds = ds.as_numpy_iterator()
+        #     data_iter = lm1bIterator(ds=ds, bsz=bsz, bptt=bptt, device=device)
         else:
             # test set
             ds = tfds.load("lm1b/subwords32k", split="test", data_dir="./subwords32k")

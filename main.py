@@ -41,11 +41,11 @@ args = parser.parse_args()
 NTOKENS = 32711  # lm1b/subwords32k
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
-EPOCHS = 40
+EPOCHS = 2
 DROPOUT = 0.15
 N_HEADS = 4
 D_MODEL = 512
-BPTT = 128
+BPTT = 256
 CLIP = 0.25
 LR = args.lr  # initial learning rate
 WARMUP = 4000
@@ -80,8 +80,8 @@ ntokens = NTOKENS
 
 tr_iter = corpus.get_iterator('train', BATCH_SIZE, BPTT,
                               device=device)
-va_iter = corpus.get_iterator('valid', BATCH_SIZE, BPTT,
-                              device=device)
+# va_iter = corpus.get_iterator('valid', BATCH_SIZE, BPTT,
+#                               device=device)
 te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
                               device=device)
 
@@ -168,7 +168,6 @@ def train(data_iter):
 
         if batch == 0:
             logging.info("Running without errors")
-            print("Running without errors")
 
         if batch % LOG_INTERVAL == 0 and batch > 0:
             cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
@@ -184,22 +183,22 @@ def train(data_iter):
             start_time = time.time()
 
 
-best_val_loss = None
+# best_val_loss = None
 
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train(data_iter=tr_iter)
-    val_loss = evaluate(data_iter=va_iter)
-    logging.info('-' * 89)
-    logging.info('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:6.4f} | '
-          'valid ppl {:10.4f}'.format(epoch, (time.time() - epoch_start_time),
-                                     val_loss, math.exp(val_loss)))
-    logging.info('-' * 89)
-    # Save the model if validation loss is the best we have seen so far
-    if not best_val_loss or val_loss < best_val_loss:
-        with open(SAVE, 'wb') as f:
-            torch.save(model, f)
-        best_val_loss = val_loss
+    # val_loss = evaluate(data_iter=va_iter)
+    # logging.info('-' * 89)
+    # logging.info('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:6.4f} | '
+    #       'valid ppl {:10.4f}'.format(epoch, (time.time() - epoch_start_time),
+    #                                  val_loss, math.exp(val_loss)))
+    # logging.info('-' * 89)
+    # # Save the model if validation loss is the best we have seen so far
+    # if not best_val_loss or val_loss < best_val_loss:
+    #     with open(SAVE, 'wb') as f:
+    #         torch.save(model, f)
+    #     best_val_loss = val_loss
 
 # Run on test data.
 test_loss = evaluate(data_iter=te_iter)
