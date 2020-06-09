@@ -38,6 +38,7 @@ parser.add_argument('--optimizer', type=str, default='adam',
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
+DEBUG = True
 NTOKENS = 32711  # lm1b/subwords32k
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
@@ -80,8 +81,6 @@ ntokens = NTOKENS
 
 tr_iter = corpus.get_iterator('train', BATCH_SIZE, BPTT,
                               device=device)
-# va_iter = corpus.get_iterator('valid', BATCH_SIZE, BPTT,
-#                               device=device)
 te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
                               device=device)
 
@@ -155,7 +154,13 @@ def train(data_iter):
         targets = target.contiguous().view(-1).to(device)
         trg_mask = create_mask(data).to(device)
         optimizer.zero_grad()
+        if DEBUG:
+            # logging.info("Output dimensions: " + str(output.size()))
+            logging.info("Targets dimensions: " + str(targets.size()))
         output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+        if DEBUG:
+            logging.info("Output dimensions: " + str(output.size()))
+            logging.info("Targets dimensions: " + str(targets.size()))
         output = output.view(-1, ntokens)
         loss = criterion(output, targets)
         final_loss = loss + aux_loss
