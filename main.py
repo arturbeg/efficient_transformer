@@ -154,9 +154,6 @@ def train(data_iter):
         targets = target.contiguous().view(-1).to(device)
         trg_mask = create_mask(data).to(device)
         optimizer.zero_grad()
-        if DEBUG:
-            # logging.info("Output dimensions: " + str(output.size()))
-            logging.info("Targets dimensions: " + str(targets.size()))
         output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
         if DEBUG:
             logging.info("Output dimensions: " + str(output.size()))

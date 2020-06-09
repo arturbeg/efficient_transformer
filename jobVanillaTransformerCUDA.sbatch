@@ -7,7 +7,7 @@
 #SBATCH --job-name=vanilla_transformer_cuda
 
 # set number of GPUs
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:4
 
 # set number of CPUs
 #SBATCH --cpus-per-task=5
