@@ -153,6 +153,7 @@ def train(data_iter):
     for batch, (data, target, seq_len) in enumerate(data_iter):
         targets = target.contiguous().view(-1).to(device)
         trg_mask = create_mask(data).to(device)
+        data = data.to(device) # TODO: data_utils_subword (to device)
         optimizer.zero_grad()
         output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
         if DEBUG:
@@ -190,17 +191,6 @@ def train(data_iter):
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train(data_iter=tr_iter)
-    # val_loss = evaluate(data_iter=va_iter)
-    # logging.info('-' * 89)
-    # logging.info('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:6.4f} | '
-    #       'valid ppl {:10.4f}'.format(epoch, (time.time() - epoch_start_time),
-    #                                  val_loss, math.exp(val_loss)))
-    # logging.info('-' * 89)
-    # # Save the model if validation loss is the best we have seen so far
-    # if not best_val_loss or val_loss < best_val_loss:
-    #     with open(SAVE, 'wb') as f:
-    #         torch.save(model, f)
-    #     best_val_loss = val_loss
 
 # Run on test data.
 test_loss = evaluate(data_iter=te_iter)
