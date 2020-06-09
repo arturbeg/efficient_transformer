@@ -51,7 +51,7 @@ LR = args.lr  # initial learning rate
 WARMUP = 4000
 LOG_INTERVAL = 128  # report interval
 # path to save the final model
-now = datetime.datetime.now().timestamp()
+now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 now_str = str(now)
 LOG = 'model_vanilla_transformer.log' if args.gating == "none" else "model_moe_transformer.log"
 SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
