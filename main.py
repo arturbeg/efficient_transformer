@@ -23,6 +23,9 @@ parser = argparse.ArgumentParser(description='PyTorch LM1b Transformer Language 
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 
+parser.add_argument('--debug', action='store_true',
+                    help='debugging')
+
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
@@ -38,7 +41,7 @@ parser.add_argument('--optimizer', type=str, default='adam',
 args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
-DEBUG = True
+DEBUG = args.debug
 NTOKENS = 32711  # lm1b/subwords32k
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
