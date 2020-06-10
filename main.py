@@ -92,7 +92,7 @@ logging.info("Gating function is: " + str(args.gating))
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
                     is_lm=True, mixing=args.gating, is_cuda=args.cuda)
 
-if args.cuda and torch.cuda.device_count()  > 1:
+if args.cuda and torch.cuda.device_count() > 1:
     logging.info("Let's use " + str(torch.cuda.device_count()) + " GPUs!")
     model = nn.DataParallel(model)
 
@@ -146,7 +146,6 @@ def evaluate(data_iter):
 
     return total_loss / number_of_batches
 
-
 def train(data_iter):
     model.train()
     total_loss = 0.
@@ -180,16 +179,12 @@ def train(data_iter):
             curr_aux_loss = total_aux_loss / LOG_INTERVAL
 
             elapsed = time.time() - start_time
-            logging.info('| epoch {:3d} | batch {:5d} | lr {:06.6f} | ms/batch {:5.2f} | '
+            logging.info('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
                   'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
-                epoch, batch, LR,
-                elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+                epoch, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
             total_loss = 0.
             total_aux_loss = 0.
             start_time = time.time()
-
-
-# best_val_loss = None
 
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
