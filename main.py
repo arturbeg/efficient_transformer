@@ -146,7 +146,7 @@ def evaluate(data_iter):
 
     return total_loss / number_of_batches
 
-def train(data_iter):
+def train(data_iter, epoch_counter):
     model.train()
     total_loss = 0.
     total_aux_loss = 0.
@@ -181,14 +181,14 @@ def train(data_iter):
             elapsed = time.time() - start_time
             logging.info('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
                   'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
-                epoch, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+                epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
             total_loss = 0.
             total_aux_loss = 0.
             start_time = time.time()
 
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
-    train(data_iter=tr_iter)
+    train(data_iter=tr_iter, epoch_counter=epoch)
 
 # Run on test data.
 test_loss = evaluate(data_iter=te_iter)
