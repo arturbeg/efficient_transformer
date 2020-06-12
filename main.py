@@ -1,5 +1,4 @@
 from playground.Models import Transformer
-from io import open
 import torch
 from torch import nn
 import numpy as np
@@ -29,10 +28,10 @@ parser.add_argument('--debug', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--bsz', type=int, default=256,
+parser.add_argument('--bsz', type=int, default=128,
                     help='The batch size used by the transformer')
 
-parser.add_argument('--lr', type=float, default=0.01,
+parser.add_argument('--lr', type=float, default=1.0,
                     help='Initial learning rate')
 
 parser.add_argument('--optimizer', type=str, default='adam',
@@ -45,7 +44,7 @@ DEBUG = args.debug
 NTOKENS = 32711  # lm1b/subwords32k
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
-EPOCHS = 2
+EPOCHS = 3
 DROPOUT = 0.15
 N_HEADS = 4
 D_MODEL = 512

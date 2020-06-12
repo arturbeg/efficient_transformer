@@ -1,5 +1,6 @@
 import torch
 import tensorflow_datasets as tfds
+import numpy as np
 
 class lm1bIterator(object):
 
@@ -10,9 +11,10 @@ class lm1bIterator(object):
         self.bptt = bptt
 
     def get_sent_stream(self):
-
         for ex in self.data:
-            processed_example = torch.from_numpy(ex['text'])
+            ex_adjusted = np.insert(ex['text'], 0, 40000)  # 40k is out of range of the number of tokens, so is safe
+            ex_adjusted = np.append(ex_adjusted, 40001)
+            processed_example = torch.from_numpy(ex_adjusted)
             yield processed_example
 
     def stream_iterator(self, sent_stream):
