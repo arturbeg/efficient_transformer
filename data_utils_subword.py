@@ -12,8 +12,8 @@ class lm1bIterator(object):
 
     def get_sent_stream(self):
         for ex in self.data:
-            ex_adjusted = np.insert(ex['text'], 0, 40000)  # 40k is out of range of the number of tokens, so is safe
-            ex_adjusted = np.append(ex_adjusted, 40001)
+            ex_adjusted = np.insert(ex['text'], 0, 32711)
+            ex_adjusted = np.append(ex_adjusted, 32712)
             processed_example = torch.from_numpy(ex_adjusted)
             yield processed_example
 

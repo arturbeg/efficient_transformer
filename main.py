@@ -72,6 +72,13 @@ logging.info("Number of decoder layers is : " + str(N_LAYERS))
 logging.info("Initial learning rate is : " + str(LR))
 logging.info("Number of warmup steps is : " + str(WARMUP))
 
+if DEBUG:
+    N_LAYERS = 1
+    D_MODEL = 16
+    LOG_INTERVAL = 1
+    BPTT = 16
+    N_HEADS = 2
+
 if torch.cuda.is_available():
     if not args.cuda:
         logging.warning("WARNING: You have a CUDA device, so you should probably run with --cuda")
