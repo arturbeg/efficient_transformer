@@ -41,7 +41,7 @@ args = parser.parse_args()
 # args = parser.parse_args(['--gating', 'moe'])
 
 DEBUG = args.debug
-NTOKENS = 32711  # lm1b/subwords32k
+NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
 EPOCHS = 3
