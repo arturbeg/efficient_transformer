@@ -66,22 +66,25 @@ class lm1bIterator(object):
 
 
 class Corpus(object):
+
+    def __init__(self, number_of_epochs=10):
+        ds_train = tfds.load("lm1b/subwords32k", split="train", data_dir="./subwords32k")
+        self.ds_train = ds_train.shuffle(number_of_epochs, reshuffle_each_iteration=True)
+        ds_test = tfds.load("lm1b/subwords32k", split="test", data_dir="./subwords32k")
+        self.ds_test = ds_test
+
     def get_iterator(self, split, bsz, bptt, device='cpu'):
         if split == 'train':
-            ds = tfds.load("lm1b/subwords32k", split="train", data_dir="./subwords32k")
-            ds = ds.as_numpy_iterator()
+            ds = self.ds_train.as_numpy_iterator()
             data_iter = lm1bIterator(ds=ds, bsz=bsz, bptt=bptt, device=device)
         else:
-            # test set
-            ds = tfds.load("lm1b/subwords32k", split="test", data_dir="./subwords32k")
-            ds = ds.as_numpy_iterator()
+            ds = self.ds_test.as_numpy_iterator()
             data_iter = lm1bIterator(ds=ds, bsz=bsz, bptt=bptt, device=device)
-
         return data_iter
 
 
-def get_lm_corpus():
-    corpus = Corpus()
+def get_lm_corpus(number_of_epochs=10):
+    corpus = Corpus(number_of_epochs=number_of_epochs)
     return corpus
 
 

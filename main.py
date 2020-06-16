@@ -44,7 +44,7 @@ DEBUG = args.debug
 NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
-EPOCHS = 3
+EPOCHS = 10
 DROPOUT = 0.1
 N_HEADS = 4
 D_MODEL = 512
@@ -74,9 +74,9 @@ logging.info("Number of warmup steps is : " + str(WARMUP))
 
 if DEBUG:
     N_LAYERS = 1
-    D_MODEL = 16
+    D_MODEL = 32
     LOG_INTERVAL = 1
-    BPTT = 16
+    BPTT = 32
     N_HEADS = 2
 
 if torch.cuda.is_available():
@@ -85,11 +85,9 @@ if torch.cuda.is_available():
 
 device = torch.device("cuda:0" if args.cuda else "cpu")
 
-corpus = get_lm_corpus()
+corpus = get_lm_corpus(number_of_epochs=EPOCHS)
 ntokens = NTOKENS
 
-tr_iter = corpus.get_iterator('train', BATCH_SIZE, BPTT,
-                              device=device)
 te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
                               device=device)
 
@@ -152,16 +150,21 @@ def evaluate(data_iter):
 
     return total_loss / number_of_batches
 
-def train(data_iter, epoch_counter):
+def train(epoch_counter):
+    logging.info("Current Epoch is: " + str(epoch_counter))
+    tr_iter = corpus.get_iterator('train', BATCH_SIZE, BPTT,
+                                  device=device)
     model.train()
     total_loss = 0.
     total_aux_loss = 0.
     start_time = time.time()
     ntokens = NTOKENS
-    for batch, (data, target, seq_len) in enumerate(data_iter):
+    for batch, (data, target, seq_len) in enumerate(tr_iter):
+        if DEBUG:
+            print(data)
         targets = target.contiguous().view(-1).to(device)
         trg_mask = create_mask(data).to(device)
-        data = data.to(device) # TODO: data_utils_subword (to device)
+        data = data.to(device)  # TODO: data_utils_subword (to device)
         optimizer.zero_grad()
         output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
         if DEBUG:
@@ -191,10 +194,15 @@ def train(data_iter, epoch_counter):
             total_loss = 0.
             total_aux_loss = 0.
             start_time = time.time()
+            if DEBUG:
+                print('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
+                  'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
+                epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+                break
 
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
-    train(data_iter=tr_iter, epoch_counter=epoch)
+    train(epoch_counter=epoch)
 
 # Run on test data.
 test_loss = evaluate(data_iter=te_iter)
