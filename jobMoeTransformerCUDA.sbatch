@@ -25,4 +25,4 @@
 #SBATCH --output=moe_transformer_cuda_%j.out
 
 # run the application
-srun python main.py --gating moe --optimizer adam --bsz 64 --cuda
+srun python main.py --gating moe --optimizer adam --bsz 16 --cuda
