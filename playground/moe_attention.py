@@ -66,7 +66,7 @@ class SparseDispatcher(object):
 
 
 class MoeMultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=2, is_cuda=True):
+    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=1, is_cuda=True):
         super(MoeMultiHeadAttention, self).__init__()
         # initialise some components of moe only if noisy_gating is activated
         self.is_cuda = is_cuda

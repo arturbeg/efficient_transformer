@@ -4,6 +4,7 @@ from playground.Layers import EncoderLayer, DecoderLayer
 from playground.Embed import Embedder, PositionalEncoder
 from playground.Sublayers import Norm
 from torch.nn import functional as F
+from playground.moe_decoder_layer import MoeDecoderLayer
 import copy
 
 
@@ -28,14 +29,21 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True):
+    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True, decoder_mixing="none"):
         super().__init__()
         self.N = N
         self.is_cuda = is_cuda
         self.device = torch.device("cuda" if is_cuda else "cpu")
         self.embed = Embedder(vocab_size, d_model)
         self.pe = PositionalEncoder(d_model, dropout=dropout)
-        self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda), N)
+
+        # TODO: in here we can use MoEDecoder Layer
+
+        if decoder_mixing == "none":
+            self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda), N)
+        elif decoder_mixing == "moe":
+            self.layers = get_clones(MoeDecoderLayer(d_model=d_model, heads=heads, num_experts=4, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda),
+                                     N)
         self.norm = Norm(d_model)
 
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
@@ -53,13 +61,13 @@ class Decoder(nn.Module):
 
 class Transformer(nn.Module):
     def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True,
-                 is_debug=True):
+                 is_debug=True, decoder_mixing="none"):
         super().__init__()
         if not is_lm:
             self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
 
         self.is_debug = is_debug
-        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda)
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda, decoder_mixing=decoder_mixing)
         self.out = nn.Linear(d_model, trg_vocab)
 
     def forward(self, src, trg, src_mask, trg_mask, is_lm=True, train=True):

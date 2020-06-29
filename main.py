@@ -28,6 +28,9 @@ parser.add_argument('--debug', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
+parser.add_argument('--decoder-mixing', type=str, default='none',
+                    help='moe for the decoder layer in Transformer LM')
+
 parser.add_argument('--bsz', type=int, default=128,
                     help='The batch size used by the transformer')
 
@@ -94,7 +97,7 @@ te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
 logging.info("Gating function is: " + str(args.gating))
 
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
-                    is_lm=True, mixing=args.gating, is_cuda=args.cuda)
+                    is_lm=True, mixing=args.gating, is_cuda=args.cuda, decoder_mixing=args.decoder_mixing)
 
 if args.cuda and torch.cuda.device_count() > 1:
     logging.info("Let's use " + str(torch.cuda.device_count()) + " GPUs!")
