@@ -80,9 +80,10 @@ now_str = str(now)
 LOG = 'model_vanilla_transformer.log' if args.gating == "none" else "model_moe_transformer.log"
 SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
 
-if args.decoder_mixing:
+if args.decoder_mixing == "moe":
     LOG = "model_moe_decoder.log"
     SAVE = "model_moe_decoder.pt"
+    logging.info("Performing decoder mixing")
 
 SAVE = now_str + '_' + SAVE
 SAVE = './model_files/' + SAVE
