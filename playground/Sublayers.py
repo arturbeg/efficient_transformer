@@ -53,6 +53,7 @@ class MultiHeadAttention(nn.Module):
         self.out = nn.Linear(d_model, d_model)
 
     def forward(self, q, k, v, mask=None):
+
         bs = q.size(0)
 
         # perform linear operation and split into N heads

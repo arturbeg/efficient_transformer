@@ -160,7 +160,7 @@ class MoeMultiHeadAttention(nn.Module):
             logits = clean_logits
 
         top_logits, top_indices = logits.topk(min(self.k + 1, self.num_experts), dim=1)
-        top_k_logits = top_logits[:, :self.k].clone()
+        top_k_logits = top_logits[:, :self.k].clone()  # TODO: Cloning might mess up gradient calculation (read up on it)
         top_k_indices = top_indices[:, :self.k].clone()
         top_k_gates = self.softmax(top_k_logits)
 

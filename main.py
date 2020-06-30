@@ -28,11 +28,20 @@ parser.add_argument('--debug', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--decoder-mixing', type=str, default='none',
+parser.add_argument('--decoder-mixing', type=str, default='moe',
                     help='moe for the decoder layer in Transformer LM')
 
-parser.add_argument('--bsz', type=int, default=128,
+parser.add_argument('--bsz', type=int, default=64,
                     help='The batch size used by the transformer')
+
+parser.add_argument('--num-experts', type=int, default=2,
+                    help='Total number of experts')
+
+parser.add_argument('--k', type=int, default=1,
+                    help='Number of experts gated through')
+
+parser.add_argument('--d-model', type=int, default=256,
+                    help='Embedding dimension')
 
 parser.add_argument('--lr', type=float, default=1.0,
                     help='Initial learning rate')
@@ -45,13 +54,15 @@ args = parser.parse_args()
 
 DEBUG = args.debug
 NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
+NUM_EXPERTS = args.num_experts # total number of experts
+K = args.k # experts used
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
 EPOCHS = 10
 DROPOUT = 0.1
 N_HEADS = 4
-D_MODEL = 512
-BPTT = 256
+D_MODEL = args.d_model
+BPTT = 128
 CLIP = 0.25
 LR = args.lr  # initial learning rate
 WARMUP = 4000
@@ -81,6 +92,7 @@ if DEBUG:
     LOG_INTERVAL = 1
     BPTT = 32
     N_HEADS = 2
+
 
 if torch.cuda.is_available():
     if not args.cuda:

@@ -3,7 +3,7 @@ import torch.nn as nn
 from playground.Sublayers import FeedForward, MultiHeadAttention, Norm
 from playground.moe_attention import MoeMultiHeadAttention
 
-DEFAULT_NUMBER_OF_EXPERTS = 4
+DEFAULT_NUMBER_OF_EXPERTS = 2
 
 class EncoderLayer(nn.Module):
     def __init__(self, d_model, heads, dropout=0.1):
@@ -51,7 +51,7 @@ class DecoderLayer(nn.Module):
             self.dropout_3 = nn.Dropout(dropout)
 
     def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
-        aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device)
+        aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device) # TODO: maybe get rid of this
         if is_lm and self.mixing == "none":
             x2 = self.norm_1(x)
             x = x + self.dropout_1(self.attn_1(x2, x2, x2, trg_mask))

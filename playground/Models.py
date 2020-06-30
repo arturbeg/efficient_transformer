@@ -36,6 +36,7 @@ class Decoder(nn.Module):
         self.device = torch.device("cuda" if is_cuda else "cpu")
         self.embed = Embedder(vocab_size, d_model)
         self.pe = PositionalEncoder(d_model, dropout=dropout)
+        self.decoder_mixing = decoder_mixing
 
         # TODO: in here we can use MoEDecoder Layer
 
@@ -54,7 +55,11 @@ class Decoder(nn.Module):
         for i in range(self.N):
             if is_lm:
                 assert not e_outputs
-            x, additional_loss = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm, train=train)
+
+            if self.decoder_mixing == "none":
+                x, additional_loss = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm, train=train)
+            elif self.decoder_mixing == "moe":
+                x, additional_loss = self.layers[i](x, e_outputs, src_mask, trg_mask, is_lm, train=train)
             aux_loss = aux_loss + additional_loss
         return self.norm(x), aux_loss
 
