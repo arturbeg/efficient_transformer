@@ -138,19 +138,21 @@ class MoeMultiHeadAttention(nn.Module):
 
     def noisy_top_k_gating(self, x, train, noise_epsilon=1e-2):
 
-        x[x != x] = float(0.0)  # deal with nans
+        # clean_logits = x @ self.w_gate
+        # TODO: get rid of the hack (replace inf and/or -inf with the average value of the tensor)?
 
         clean_logits = torch.tensor((), dtype=torch.float, requires_grad=True).to(self.device)
         clean_logits = clean_logits.new_zeros((x.size(0), self.num_experts))
         raw_noise_stddev = torch.tensor((), dtype=torch.float, requires_grad=True).to(self.device)
         raw_noise_stddev = raw_noise_stddev.new_zeros((x.size(0), self.num_experts))
 
+
         for i in range(x.size(1)):
-            word_clone = x[:, i, :].clone()
-            clean_logits = clean_logits + word_clone @ self.w_gate
+            # word_clone = x[:, i, :].clone()
+            clean_logits = clean_logits + x[:, i, :] @ self.w_gate
 
             if self.noisy_gating:
-                raw_noise_stddev = raw_noise_stddev + word_clone @ self.w_noise
+                raw_noise_stddev = raw_noise_stddev + x[:, i, :] @ self.w_noise
 
         if self.noisy_gating:
             noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train).to(self.device)
@@ -159,23 +161,29 @@ class MoeMultiHeadAttention(nn.Module):
         else:
             logits = clean_logits
 
+        # if self.noisy_gating:
+        #     raw_noise_stddev = x @ self.w_noise
+        #     noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
+        #     noisy_logits = clean_logits + ( torch.randn_like(clean_logits) * noise_stddev)
+        #     logits = noisy_logits
+        # else:
+        #     logits = clean_logits
+
+        # calculate topk + 1 that will be needed for the noisy gates
         top_logits, top_indices = logits.topk(min(self.k + 1, self.num_experts), dim=1)
-        top_k_logits = top_logits[:, :self.k].clone()  # TODO: Cloning might mess up gradient calculation (read up on it)
-        top_k_indices = top_indices[:, :self.k].clone()
+        top_k_logits = top_logits[:, :self.k]
+        top_k_indices = top_indices[:, :self.k]
         top_k_gates = self.softmax(top_k_logits)
 
-        top_k_gates = top_k_gates + float(1e-9)
+        # top_k_gates = top_k_gates + float(1e-9)
 
         zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
         gates = zeros.scatter(1, top_k_indices, top_k_gates).to(self.device)
-        # self.debugging(gates=gates, top_k_gates=top_k_gates, logits=logits)
 
         if self.noisy_gating and self.k < self.num_experts:
-            # self.check_what_device_tensors_are_on(clean_logits, noisy_logits, noise_stddev, top_logits)
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
         else:
             load = self._gates_to_load(gates)
-
         return gates, load
 
     def reset_parameters(self):

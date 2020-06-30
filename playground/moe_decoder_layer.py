@@ -133,7 +133,7 @@ class MoeDecoderLayer(nn.Module):
     k: an integer - how many experts to use for each batch element
     """
 
-    def __init__(self, d_model, heads, num_experts = 2, dropout=0.1, is_lm=True, mixing="none", is_cuda=True, noisy_gating=True, k=2):
+    def __init__(self, d_model, heads, num_experts=4, k=2, dropout=0.1, is_lm=True, mixing="none", is_cuda=True, noisy_gating=True):
         super(MoeDecoderLayer, self).__init__()
         self.noisy_gating = noisy_gating
         self.num_experts = num_experts
@@ -164,7 +164,7 @@ class MoeDecoderLayer(nn.Module):
         eps = 1e-10
         # if only num_experts = 1
         if x.shape[0] == 1:
-            return torch.Tensor([0]).to(self.device)
+            return torch.Tensor([0]).to(self.device) # TODO: requires grad?
         return x.float().var() / (x.float().mean()**2 + eps)
 
 
@@ -202,11 +202,17 @@ class MoeDecoderLayer(nn.Module):
         batch = clean_values.size(0)
         m = noisy_top_values.size(1)
         top_values_flat = noisy_top_values.flatten()
-        threshold_positions_if_in = torch.arange(batch) * m + self.k
-        threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1)
-        is_in = torch.gt(noisy_values, threshold_if_in)
-        threshold_positions_if_out = threshold_positions_if_in - 1
-        threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat,0 , threshold_positions_if_out), 1)
+        # threshold_positions_if_in = torch.arange(batch) * m + self.k
+        # threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1)
+        # is_in = torch.gt(noisy_values, threshold_if_in)
+        # threshold_positions_if_out = threshold_positions_if_in - 1
+        # threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat,0 , threshold_positions_if_out), 1)
+        # TODO: too many to(device) statements
+        threshold_positions_if_in = (torch.arange(batch) * m + self.k).to(self.device)
+        threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1).to(self.device)
+        is_in = torch.gt(noisy_values, threshold_if_in).to(self.device)
+        threshold_positions_if_out = (threshold_positions_if_in - 1).to(self.device)
+        threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_out), 1).to(self.device)
         # is each value currently in the top k.
         prob_if_in = self.normal.cdf((clean_values - threshold_if_in)/noise_stddev)
         prob_if_out = self.normal.cdf((clean_values - threshold_if_out)/noise_stddev)
@@ -264,8 +270,8 @@ class MoeDecoderLayer(nn.Module):
 
         # top_k_gates = top_k_gates + float(1e-9)
 
-        zeros = torch.zeros_like(logits, requires_grad=True)
-        gates = zeros.scatter(1, top_k_indices, top_k_gates)
+        zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
+        gates = zeros.scatter(1, top_k_indices, top_k_gates).to(self.device)
 
         if self.noisy_gating and self.k < self.num_experts:
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)

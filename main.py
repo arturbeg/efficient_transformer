@@ -28,11 +28,17 @@ parser.add_argument('--debug', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--decoder-mixing', type=str, default='moe',
+parser.add_argument('--decoder-mixing', type=str, default='none',
                     help='moe for the decoder layer in Transformer LM')
 
 parser.add_argument('--bsz', type=int, default=64,
                     help='The batch size used by the transformer')
+
+parser.add_argument('--bptt', type=int, default=128,
+                    help='The sequence length')
+
+parser.add_argument('--n-heads', type=int, default=4,
+                    help="Number of heads in the multi headed attention layer")
 
 parser.add_argument('--num-experts', type=int, default=2,
                     help='Total number of experts')
@@ -60,10 +66,9 @@ BATCH_SIZE = args.bsz
 N_LAYERS = 3
 EPOCHS = 10
 DROPOUT = 0.1
-N_HEADS = 4
+N_HEADS = args.n_heads
 D_MODEL = args.d_model
-BPTT = 128
-CLIP = 0.25
+BPTT = args.bptt
 LR = args.lr  # initial learning rate
 WARMUP = 4000
 LOG_INTERVAL = 128  # report interval
@@ -72,6 +77,11 @@ now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 now_str = str(now)
 LOG = 'model_vanilla_transformer.log' if args.gating == "none" else "model_moe_transformer.log"
 SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
+
+if args.decoder_mixing:
+    LOG = "model_moe_decoder.log"
+    SAVE = "model_moe_decoder.pt"
+
 SAVE = now_str + '_' + SAVE
 SAVE = './model_files/' + SAVE
 LOG = now_str + '_' + LOG
@@ -85,6 +95,8 @@ logging.info("Number of attention heads is : " + str(N_HEADS))
 logging.info("Number of decoder layers is : " + str(N_LAYERS))
 logging.info("Initial learning rate is : " + str(LR))
 logging.info("Number of warmup steps is : " + str(WARMUP))
+logging.info("k is : " + str(K))
+logging.info("Number of experts is : " + str(NUM_EXPERTS))
 
 if DEBUG:
     N_LAYERS = 1
@@ -92,7 +104,6 @@ if DEBUG:
     LOG_INTERVAL = 1
     BPTT = 32
     N_HEADS = 2
-
 
 if torch.cuda.is_available():
     if not args.cuda:
@@ -109,7 +120,7 @@ te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
 logging.info("Gating function is: " + str(args.gating))
 
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
-                    is_lm=True, mixing=args.gating, is_cuda=args.cuda, decoder_mixing=args.decoder_mixing)
+                    is_lm=True, mixing=args.gating, is_cuda=args.cuda, decoder_mixing=args.decoder_mixing, num_experts=NUM_EXPERTS, k=K)
 
 if args.cuda and torch.cuda.device_count() > 1:
     logging.info("Let's use " + str(torch.cuda.device_count()) + " GPUs!")

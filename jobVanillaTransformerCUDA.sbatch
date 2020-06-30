@@ -25,4 +25,4 @@
 #SBATCH --output=vanilla_transformer_cuda_%j.out
 
 # run the application
-srun python main.py --gating none --optimizer adam --bsz 64 --cuda
+srun python main.py --gating none --optimizer adam --bsz 64 --bptt 128 --d-model 256 --lr 1.0 --n-heads 4 --decoder-mixing none --cuda

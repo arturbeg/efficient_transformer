@@ -25,4 +25,4 @@
 #SBATCH --output=moe_decoder_cuda_%j.out
 
 # run the application
-srun python main.py --gating none --decoder-mixing moe --optimizer adam --bsz 16 --cuda
+srun python main.py --gating none --optimizer adam --bsz 64 --bptt 128 --d-model 256 --lr 1.0 --n-heads 4 --decoder-mixing moe --num-experts 4 --k 2 --cuda

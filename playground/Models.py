@@ -29,7 +29,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True, decoder_mixing="none"):
+    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True, decoder_mixing="none", num_experts=4, k=2):
         super().__init__()
         self.N = N
         self.is_cuda = is_cuda
@@ -43,7 +43,7 @@ class Decoder(nn.Module):
         if decoder_mixing == "none":
             self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda), N)
         elif decoder_mixing == "moe":
-            self.layers = get_clones(MoeDecoderLayer(d_model=d_model, heads=heads, num_experts=4, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda),
+            self.layers = get_clones(MoeDecoderLayer(d_model=d_model, heads=heads, num_experts=num_experts, k=k, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda),
                                      N)
         self.norm = Norm(d_model)
 
@@ -66,13 +66,13 @@ class Decoder(nn.Module):
 
 class Transformer(nn.Module):
     def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none", is_cuda=True,
-                 is_debug=True, decoder_mixing="none"):
+                 is_debug=True, decoder_mixing="none", num_experts=4, k=2):
         super().__init__()
         if not is_lm:
             self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
 
         self.is_debug = is_debug
-        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda, decoder_mixing=decoder_mixing)
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda, decoder_mixing=decoder_mixing, num_experts=num_experts, k=k)
         self.out = nn.Linear(d_model, trg_vocab)
 
     def forward(self, src, trg, src_mask, trg_mask, is_lm=True, train=True):
