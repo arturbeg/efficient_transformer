@@ -3,8 +3,6 @@ import torch.nn as nn
 from playground.Sublayers import FeedForward, MultiHeadAttention, Norm
 from playground.moe_attention import MoeMultiHeadAttention
 
-DEFAULT_NUMBER_OF_EXPERTS = 2
-
 class EncoderLayer(nn.Module):
     def __init__(self, d_model, heads, dropout=0.1):
         super().__init__()
@@ -24,7 +22,7 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, d_model, heads, dropout=0.1, is_lm=True, mixing="none", is_cuda=True):
+    def __init__(self, d_model, heads, dropout=0.1, is_lm=True, mixing="none", is_cuda=True, num_experts=4, k=2):
         super().__init__()
         self.mixing = mixing
         self.is_cuda = is_cuda
@@ -38,7 +36,7 @@ class DecoderLayer(nn.Module):
         if mixing == "none":
             self.attn_1 = MultiHeadAttention(heads, d_model, dropout=dropout)
         elif mixing == "moe":
-            self.attn_1 = MoeMultiHeadAttention(d_model, heads, num_experts=DEFAULT_NUMBER_OF_EXPERTS, dropout=dropout,
+            self.attn_1 = MoeMultiHeadAttention(d_model, heads, num_experts=num_experts, k=k, dropout=dropout,
                                                 is_cuda=is_cuda)
         else:
             raise Exception("Please provide a valid mixing method! Current options are none and moe")

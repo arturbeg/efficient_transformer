@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.distributions.normal import Normal
 from playground.Sublayers import MultiHeadAttention
 import numpy as np
-from torch.nn.init import xavier_uniform_
+# from torch.nn.init import xavier_uniform_
 
 
 class SparseDispatcher(object):
@@ -50,7 +50,7 @@ class SparseDispatcher(object):
         return expert_outputs
 
     def combine(self, expert_out, multiply_by_gates=True):
-        stitched = torch.cat(expert_out, 0).exp()
+        stitched = torch.cat(expert_out, 0)# .exp()
 
         if multiply_by_gates:
             stitched = stitched.mul(self._nonzero_gates)
@@ -59,37 +59,35 @@ class SparseDispatcher(object):
             self.device)
         combined = zeros.index_add(0, self._batch_index, stitched.float()).to(self.device)
         combined[combined == 0] = np.finfo(float).eps
-        return combined.log()
+        return combined #combined.log()
 
     def expert_to_gates(self):
         return torch.split(self._nonzero_gates, self._part_sizes, dim=0)
 
 
 class MoeMultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, num_heads, dropout, num_experts, noisy_gating=True, k=1, is_cuda=True):
+    def __init__(self, d_model, heads, num_experts=4, k=2, dropout=0.1, is_lm=True, mixing="none", is_cuda=True, noisy_gating=True):
         super(MoeMultiHeadAttention, self).__init__()
         # initialise some components of moe only if noisy_gating is activated
         self.is_cuda = is_cuda
         self.device = torch.device("cuda" if is_cuda else "cpu")
         self.noisy_gating = noisy_gating
         self.num_experts = num_experts
-        self.embed_dim = embed_dim
-        self.num_heads = num_heads
         self.dropout = dropout
         self.k = k
         self.experts = nn.ModuleList(
-            MultiHeadAttention(heads=num_heads, d_model=embed_dim, dropout=dropout) for _ in range(self.num_experts))
+            MultiHeadAttention(heads=heads, d_model=d_model, dropout=dropout) for _ in range(self.num_experts))
 
-        self.w_gate = nn.Parameter(torch.Tensor(embed_dim, num_experts))
-        self.w_noise = nn.Parameter(torch.Tensor(embed_dim, num_experts))
+        self.w_gate = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
+        self.w_noise = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
 
         self.softplus = nn.Softplus()
         self.softmax = nn.Softmax(1)
-        self.normal = Normal(torch.tensor([0.0]).to(self.device), torch.tensor([1.0]).to(self.device))
+        self.normal = Normal(torch.tensor([0.0]).to(device=self.device), torch.tensor([1.0]).to(device=self.device))
 
         assert (self.k <= self.num_experts)
 
-        self.reset_parameters()
+        # self.reset_parameters()
 
     def cv_squared(self, x):
         eps = 1e-10
@@ -161,14 +159,6 @@ class MoeMultiHeadAttention(nn.Module):
         else:
             logits = clean_logits
 
-        # if self.noisy_gating:
-        #     raw_noise_stddev = x @ self.w_noise
-        #     noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
-        #     noisy_logits = clean_logits + ( torch.randn_like(clean_logits) * noise_stddev)
-        #     logits = noisy_logits
-        # else:
-        #     logits = clean_logits
-
         # calculate topk + 1 that will be needed for the noisy gates
         top_logits, top_indices = logits.topk(min(self.k + 1, self.num_experts), dim=1)
         top_k_logits = top_logits[:, :self.k]
@@ -186,10 +176,10 @@ class MoeMultiHeadAttention(nn.Module):
             load = self._gates_to_load(gates)
         return gates, load
 
-    def reset_parameters(self):
-        for p in self.parameters():
-            if p.dim() > 1:
-                xavier_uniform_(p)
+    # def reset_parameters(self):
+    #     for p in self.parameters():
+    #         if p.dim() > 1:
+    #             xavier_uniform_(p)
 
     def forward(self, q, k, v, mask,
                 train=True, loss_coef=1e-2):

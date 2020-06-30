@@ -12,6 +12,8 @@ import datetime
 from data_utils_subword import get_lm_corpus
 import logging
 
+# TODO: implement ENUM gating (lists all possible ways to perform gating, all different components?)
+
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False

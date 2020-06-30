@@ -254,14 +254,6 @@ class MoeDecoderLayer(nn.Module):
         else:
             logits = clean_logits
 
-        # if self.noisy_gating:
-        #     raw_noise_stddev = x @ self.w_noise
-        #     noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
-        #     noisy_logits = clean_logits + ( torch.randn_like(clean_logits) * noise_stddev)
-        #     logits = noisy_logits
-        # else:
-        #     logits = clean_logits
-
         # calculate topk + 1 that will be needed for the noisy gates
         top_logits, top_indices = logits.topk(min(self.k + 1, self.num_experts), dim=1)
         top_k_logits = top_logits[:, :self.k]
@@ -303,7 +295,7 @@ class MoeDecoderLayer(nn.Module):
         expert_inputs = dispatcher.dispatch(x)
         gates = dispatcher.expert_to_gates()
         # TODO: expert_outputs is a list of tuples because each expert also carries an moe_attention aux loss
-        expert_tuple_outputs = [self.experts[i](x=expert_inputs[i], e_outputs=e_outputs, src_mask=src_mask, trg_mask=trg_mask, is_lm=is_lm, train=train) for i in range(self.num_experts)]
+        expert_tuple_outputs = [self.experts[i](x=expert_inputs[i], e_outputs=e_outputs, src_mask=src_mask, trg_mask=trg_mask, is_lm=is_lm, train=train, k=self.k, num_experts=self.num_experts) for i in range(self.num_experts)]
         expert_outputs = [x[0] for x in expert_tuple_outputs]
         expert_aux_losses = [x[1] for x in expert_tuple_outputs] # TODO: (sum up and add to the loss term)from the moe_attention_layer, regard as zero for now
 

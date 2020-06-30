@@ -41,7 +41,7 @@ class Decoder(nn.Module):
         # TODO: in here we can use MoEDecoder Layer
 
         if decoder_mixing == "none":
-            self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda), N)
+            self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda, num_experts=num_experts, k=k), N)
         elif decoder_mixing == "moe":
             self.layers = get_clones(MoeDecoderLayer(d_model=d_model, heads=heads, num_experts=num_experts, k=k, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda),
                                      N)
