@@ -207,7 +207,9 @@ def train(epoch_counter):
         final_loss = loss + aux_loss
         final_loss.backward()
 
-        optimizer.step_and_update_lr()
+        performLogging = (batch % LOG_INTERVAL == 0 and batch > 0)
+
+        optimizer.step_and_update_lr(performLogging=performLogging)
 
         total_loss += loss.item()
         total_aux_loss += aux_loss.item()
@@ -215,7 +217,7 @@ def train(epoch_counter):
         if batch == 0:
             logging.info("Running without errors")
 
-        if batch % LOG_INTERVAL == 0 and batch > 0:
+        if performLogging:
             cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
             curr_aux_loss = total_aux_loss / LOG_INTERVAL
 

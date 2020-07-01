@@ -11,9 +11,9 @@ class ScheduledOptim():
         self.n_warmup_steps = n_warmup_steps
         self.n_steps = 0
 
-    def step_and_update_lr(self):
+    def step_and_update_lr(self, performLogging=False):
         "Step with the inner optimizer"
-        self._update_learning_rate()
+        self._update_learning_rate(performLogging=performLogging)
         self._optimizer.step()
 
     def zero_grad(self):
@@ -25,12 +25,14 @@ class ScheduledOptim():
         n_steps, n_warmup_steps = self.n_steps, self.n_warmup_steps
         return (d_model ** -0.5) * min(n_steps ** (-0.5), n_steps * n_warmup_steps ** (-1.5))
 
-    def _update_learning_rate(self):
+    def _update_learning_rate(self, performLogging=False):
         ''' Learning rate scheduling per step '''
 
         self.n_steps += 1
         lr = self.init_lr * self._get_lr_scale()
-        logging.info("Learning rate has changed to: " + str(lr))
+
+        if performLogging:
+            logging.info("Learning rate has changed to: " + str(lr))
 
         for param_group in self._optimizer.param_groups:
             param_group['lr'] = lr
