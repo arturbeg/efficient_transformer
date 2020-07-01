@@ -33,6 +33,9 @@ parser.add_argument('--gating', type=str, default='none',
 parser.add_argument('--decoder-mixing', type=str, default='none',
                     help='moe for the decoder layer in Transformer LM')
 
+parser.add_argument('--num-epochs', type=int, default=10,
+                    help='Number of epochs')
+
 parser.add_argument('--bsz', type=int, default=64,
                     help='The batch size used by the transformer')
 
@@ -66,7 +69,7 @@ NUM_EXPERTS = args.num_experts # total number of experts
 K = args.k # experts used
 BATCH_SIZE = args.bsz
 N_LAYERS = 3
-EPOCHS = 10
+EPOCHS = args.num_epochs
 DROPOUT = 0.1
 N_HEADS = args.n_heads
 D_MODEL = args.d_model
@@ -204,7 +207,9 @@ def train(epoch_counter):
         final_loss = loss + aux_loss
         final_loss.backward()
 
-        optimizer.step_and_update_lr()
+        performLogging = (batch % LOG_INTERVAL == 0 and batch > 0)
+
+        optimizer.step_and_update_lr(performLogging=performLogging)
 
         total_loss += loss.item()
         total_aux_loss += aux_loss.item()
@@ -212,7 +217,7 @@ def train(epoch_counter):
         if batch == 0:
             logging.info("Running without errors")
 
-        if batch % LOG_INTERVAL == 0 and batch > 0:
+        if performLogging:
             cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
             curr_aux_loss = total_aux_loss / LOG_INTERVAL
 
