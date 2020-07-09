@@ -133,7 +133,7 @@ class MoeDecoderLayer(nn.Module):
     k: an integer - how many experts to use for each batch element
     """
 
-    def __init__(self, d_model, heads, num_experts=4, k=2, dropout=0.1, is_lm=True, mixing="none", is_cuda=True, noisy_gating=True):
+    def __init__(self, d_model, heads, num_experts=4, k=2, dropout=0.1, is_lm=True, ff_gating="none", mixing="none", is_cuda=True, noisy_gating=True):
         super(MoeDecoderLayer, self).__init__()
         self.noisy_gating = noisy_gating
         self.num_experts = num_experts
@@ -141,7 +141,7 @@ class MoeDecoderLayer(nn.Module):
         self.is_cuda = is_cuda
         self.k = k
         # instantiate experts
-        self.experts = nn.ModuleList([DecoderLayer(d_model=d_model, heads=heads, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda) for i in range(self.num_experts)])
+        self.experts = nn.ModuleList([DecoderLayer(d_model=d_model, heads=heads, dropout=dropout, ff_gating=ff_gating, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda) for i in range(self.num_experts)])
         self.w_gate = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
         self.w_noise = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
 

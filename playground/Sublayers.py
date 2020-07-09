@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+from playground.moe_ffn import MoeTokenLevelFeedForward
 
 class Norm(nn.Module):
     def __init__(self, d_model, eps=1e-6):
@@ -75,26 +76,6 @@ class MultiHeadAttention(nn.Module):
 
         return output
 
-
-# TODO: explicit MoE FFN
-# TODO: handle each sequence separately as if it is a batch
-class FeedForward(nn.Module):
-    def __init__(self, d_model, d_ff=2048, dropout=0.1, gating="none"):
-        super().__init__()
-        if gating == "none":
-            self.token_level_ffn = TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
-        elif gating == "moe":
-            
-
-    def forward(self, x):
-        # TODO: a bit hacky, think of a more elegant implementation
-        out = torch.empty_like(x, requires_grad=False)
-        for i, sequence in enumerate(x):
-            sequence = self.token_level_ffn(x)
-            out[i] = sequence
-        return out
-
-
 class TokenLevelFeedForward(nn.Module):
     def __init__(self, d_model, d_ff=2048, dropout=0.1):
         super().__init__()
@@ -108,3 +89,23 @@ class TokenLevelFeedForward(nn.Module):
         x = self.dropout(F.relu(self.linear_1(x)))
         x = self.linear_2(x)
         return x
+
+# TODO: explicit MoE FFN
+# TODO: handle each sequence separately as if it is a batch
+class FeedForward(nn.Module):
+    def __init__(self, d_model, d_ff=2048, dropout=0.1, ff_gating="none"):
+        super().__init__()
+        if ff_gating == "none":
+            self.token_level_ffn = TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
+        elif ff_gating == "moe":
+            self.token_level_ffn = MoeTokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
+        else:
+            raise Exception("Please provide a valid gating function for the FFN layer")
+
+    def forward(self, x):
+        # TODO: a bit hacky, think of a more elegant implementation
+        out = torch.empty_like(x, requires_grad=False)
+        for i, sequence in enumerate(x):
+            sequence = self.token_level_ffn(sequence)
+            out[i] = sequence
+        return out

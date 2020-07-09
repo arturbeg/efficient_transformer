@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 from torch.distributions.normal import Normal
-from playground.Layers import DecoderLayer
+from torch.nn import functional as F
+# from playground import TokenLevelFeedForward # TODO: find out what causes the import error
 
 import numpy as np
 class SparseDispatcher(object):
@@ -55,19 +56,31 @@ class SparseDispatcher(object):
         return torch.split(self._nonzero_gates, self._part_sizes, dim=0)
 
 
+class TokenLevelFeedForward(nn.Module):
+    def __init__(self, d_model, d_ff=2048, dropout=0.1):
+        super().__init__()
 
+        # We set d_ff as a default to 2048
+        self.linear_1 = nn.Linear(d_model, d_ff)
+        self.dropout = nn.Dropout(dropout)
+        self.linear_2 = nn.Linear(d_ff, d_model)
 
-class MoeDecoderLayer(nn.Module):
+    def forward(self, x):
+        x = self.dropout(F.relu(self.linear_1(x)))
+        x = self.linear_2(x)
+        return x
 
-    def __init__(self, d_model, heads, num_experts=4, k=2, dropout=0.1, is_lm=True, mixing="none", is_cuda=True, noisy_gating=True):
-        super(MoeDecoderLayer, self).__init__()
+class MoeTokenLevelFeedForward(nn.Module):
+
+    def __init__(self, d_model, d_ff, num_experts=4, k=2, dropout=0.1, is_cuda=True, noisy_gating=True):
+        super(MoeTokenLevelFeedForward, self).__init__()
         self.noisy_gating = noisy_gating
         self.num_experts = num_experts
         self.device = torch.device("cuda" if is_cuda else "cpu")
         self.is_cuda = is_cuda
         self.k = k
         # instantiate experts
-        self.experts = nn.ModuleList([DecoderLayer(d_model=d_model, heads=heads, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda) for i in range(self.num_experts)])
+        self.experts = nn.ModuleList([TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout) for _ in range(self.num_experts)])
         self.w_gate = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
         self.w_noise = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
 
@@ -111,35 +124,11 @@ class MoeDecoderLayer(nn.Module):
 
 
     def noisy_top_k_gating(self, x, train, noise_epsilon=1e-2):
-        """Noisy top-k gating.
-          See paper: https://arxiv.org/abs/1701.06538.
-          Args:
-            x: input Tensor with shape [batch_size, input_size]
-            train: a boolean - we only add noise at training time.
-            noise_epsilon: a float
-          Returns:
-            gates: a Tensor with shape [batch_size, num_experts]
-            load: a Tensor with shape [num_experts]
-        """
-        # clean_logits = x @ self.w_gate
-        # TODO: get rid of the hack (replace inf and/or -inf with the average value of the tensor)?
-
-        clean_logits = torch.tensor((), dtype=torch.float, requires_grad=True).to(self.device)
-        clean_logits = clean_logits.new_zeros((x.size(0), self.num_experts))
-        raw_noise_stddev = torch.tensor((), dtype=torch.float, requires_grad=True).to(self.device)
-        raw_noise_stddev = raw_noise_stddev.new_zeros((x.size(0), self.num_experts))
-
-
-        for i in range(x.size(1)):
-            # word_clone = x[:, i, :].clone()
-            clean_logits = clean_logits + x[:, i, :] @ self.w_gate
-
-            if self.noisy_gating:
-                raw_noise_stddev = raw_noise_stddev + x[:, i, :] @ self.w_noise
-
+        clean_logits = x @ self.w_gate
         if self.noisy_gating:
-            noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train).to(self.device)
-            noisy_logits = clean_logits + (torch.randn_like(clean_logits) * noise_stddev).to(self.device)
+            raw_noise_stddev = x @ self.w_noise
+            noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
+            noisy_logits = clean_logits + ( torch.randn_like(clean_logits) * noise_stddev)
             logits = noisy_logits
         else:
             logits = clean_logits
@@ -150,10 +139,8 @@ class MoeDecoderLayer(nn.Module):
         top_k_indices = top_indices[:, :self.k]
         top_k_gates = self.softmax(top_k_logits)
 
-        # top_k_gates = top_k_gates + float(1e-9)
-
-        zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
-        gates = zeros.scatter(1, top_k_indices, top_k_gates).to(self.device)
+        zeros = torch.zeros_like(logits, requires_grad=True)
+        gates = zeros.scatter(1, top_k_indices, top_k_gates)
 
         if self.noisy_gating and self.k < self.num_experts:
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
@@ -163,21 +150,17 @@ class MoeDecoderLayer(nn.Module):
 
 
 
-    def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True, train=True, loss_coef=1e-2):
+    def forward(self, x, train=True, loss_coef=1e-2):
         gates, load = self.noisy_top_k_gating(x, train)
         # calculate importance loss
         importance = gates.sum(0)
-
+        #
         loss = self.cv_squared(importance) + self.cv_squared(load)
         loss *= loss_coef
 
-        dispatcher = SparseDispatcher(self.num_experts, gates, is_cuda=self.is_cuda)
+        dispatcher = SparseDispatcher(self.num_experts, gates)
         expert_inputs = dispatcher.dispatch(x)
         gates = dispatcher.expert_to_gates()
-        # TODO: expert_outputs is a list of tuples because each expert also carries an moe_attention aux loss
-        expert_tuple_outputs = [self.experts[i](x=expert_inputs[i], e_outputs=e_outputs, src_mask=src_mask, trg_mask=trg_mask, is_lm=is_lm, train=train) for i in range(self.num_experts)]
-        expert_outputs = [x[0] for x in expert_tuple_outputs]
-        expert_aux_losses = [x[1] for x in expert_tuple_outputs] # TODO: (sum up and add to the loss term)from the moe_attention_layer, regard as zero for now
-
+        expert_outputs = [self.experts[i](expert_inputs[i]) for i in range(self.num_experts)]
         y = dispatcher.combine(expert_outputs)
         return y, loss
