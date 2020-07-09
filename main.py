@@ -13,6 +13,10 @@ from data_utils_subword import get_lm_corpus
 import logging
 
 # TODO: implement ENUM gating (lists all possible ways to perform gating, all different components?)
+# TODO: implement random gating as a baseline
+# TODO: alternative learning schedule when training for moe, maybe need to wait for more epochs for it to learn
+# TODO: incorporate GShard tweaks
+# TODO: need many more experts (might need access to GCloud) --> GShard paper uses 512 experts with top 2 gating..
 
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True

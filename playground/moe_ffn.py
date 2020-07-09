@@ -3,39 +3,8 @@ import torch.nn as nn
 from torch.distributions.normal import Normal
 from playground.Layers import DecoderLayer
 
-# RuntimeError: split_with_sizes expects split_sizes to sum exactly to 128 (input tensor's size at dimension 0), but got split_sizes=[31, 30, 34, 31]
-
 import numpy as np
 class SparseDispatcher(object):
-    """Helper for implementing a mixture of experts.
-    The purpose of this class is to create input minibatches for the
-    experts and to combine the results of the experts to form a unified
-    output tensor.
-    There are two functions:
-    dispatch - take an input Tensor and create input Tensors for each expert.
-    combine - take output Tensors from each expert and form a combined output
-      Tensor.  Outputs from different experts for the same batch element are
-      summed together, weighted by the provided "gates".
-    The class is initialized with a "gates" Tensor, which specifies which
-    batch elements go to which experts, and the weights to use when combining
-    the outputs.  Batch element b is sent to expert e iff gates[b, e] != 0.
-    The inputs and outputs are all two-dimensional [batch, depth].
-    Caller is responsible for collapsing additional dimensions prior to
-    calling this class and reshaping the output to the original shape.
-    See common_layers.reshape_like().
-    Example use:
-    gates: a float32 `Tensor` with shape `[batch_size, num_experts]`
-    inputs: a float32 `Tensor` with shape `[batch_size, input_size]`
-    experts: a list of length `num_experts` containing sub-networks.
-    dispatcher = SparseDispatcher(num_experts, gates)
-    expert_inputs = dispatcher.dispatch(inputs)
-    expert_outputs = [experts[i](expert_inputs[i]) for i in range(num_experts)]
-    outputs = dispatcher.combine(expert_outputs)
-    The preceding code sets the output for a particular example b to:
-    output[b] = Sum_i(gates[b, i] * experts[i](inputs[b]))
-    This class takes advantage of sparsity in the gate matrix by including in the
-    `Tensor`s for expert i only the batch elements for which `gates[b, i] > 0`.
-    """
 
     def __init__(self, num_experts, gates, is_cuda=True):
         """Create a SparseDispatcher."""
@@ -64,38 +33,11 @@ class SparseDispatcher(object):
         self._nonzero_gates = self._nonzero_gates.view(-1, 1, 1)
 
     def dispatch(self, inp):
-        """Create one input Tensor for each expert.
-        The `Tensor` for a expert `i` contains the slices of `inp` corresponding
-        to the batch elements `b` where `gates[b, i] > 0`.
-        Args:
-          inp: a `Tensor` of shape "[batch_size, <extra_input_dims>]`
-        Returns:
-          a list of `num_experts` `Tensor`s with shapes
-            `[expert_batch_size_i, <extra_input_dims>]`.
-        """
-
-        # assigns samples to experts whose gate is nonzero
-
-        # expand according to batch index so we can just split by _part_sizes
         inp_exp = inp[self._batch_index].squeeze(1)
         return torch.split(inp_exp, self._part_sizes, dim=0)
 
 
     def combine(self, expert_out, multiply_by_gates=True):
-        """Sum together the expert output, weighted by the gates.
-        The slice corresponding to a particular batch element `b` is computed
-        as the sum over all experts `i` of the expert output, weighted by the
-        corresponding gate values.  If `multiply_by_gates` is set to False, the
-        gate values are ignored.
-        Args:
-          expert_out: a list of `num_experts` `Tensor`s, each with shape
-            `[expert_batch_size_i, <extra_output_dims>]`.
-          multiply_by_gates: a boolean
-        Returns:
-          a `Tensor` with shape `[batch_size, <extra_output_dims>]`.
-        """
-        # apply exp to expert outputs, so we are not longer in log space
-        # stitched = torch.cat(expert_out, 0).exp() # TODO: exp() creates 2 inf values!!!
         stitched = torch.cat(expert_out, 0)
 
         if multiply_by_gates:
@@ -104,17 +46,11 @@ class SparseDispatcher(object):
         # combine samples that have been processed by the same k experts
         combined = zeros.index_add(0, self._batch_index, stitched.float())
         # add eps to all zero values in order to avoid nans when going back to log space
-        combined[combined == 0] = np.finfo(float).eps # TODO: redundunt
-        # combined = combined.log() (since no longer exp above)
+        combined[combined == 0] = np.finfo(float).eps
         return combined
 
 
     def expert_to_gates(self):
-        """Gate values corresponding to the examples in the per-expert `Tensor`s.
-        Returns:
-          a list of `num_experts` one-dimensional `Tensor`s with type `tf.float32`
-              and shapes `[expert_batch_size_i]`
-        """
         # split nonzero gates for each expert
         return torch.split(self._nonzero_gates, self._part_sizes, dim=0)
 
@@ -122,16 +58,6 @@ class SparseDispatcher(object):
 
 
 class MoeDecoderLayer(nn.Module):
-
-    """Call a Sparsely gated mixture of experts layer with 1-layer Feed-Forward networks as experts.
-    Args:
-    input_size: integer - size of the input
-    output_size: integer - size of the input
-    num_experts: an integer - number of experts
-    hidden_size: an integer - hidden size of the experts
-    noisy_gating: a boolean
-    k: an integer - how many experts to use for each batch element
-    """
 
     def __init__(self, d_model, heads, num_experts=4, k=2, dropout=0.1, is_lm=True, mixing="none", is_cuda=True, noisy_gating=True):
         super(MoeDecoderLayer, self).__init__()
@@ -152,15 +78,6 @@ class MoeDecoderLayer(nn.Module):
         assert(self.k <= self.num_experts)
 
     def cv_squared(self, x):
-        """The squared coefficient of variation of a sample.
-        Useful as a loss to encourage a positive distribution to be more uniform.
-        Epsilons added for numerical stability.
-        Returns 0 for an empty Tensor.
-        Args:
-        x: a `Tensor`.
-        Returns:
-        a `Scalar`.
-        """
         eps = 1e-10
         # if only num_experts = 1
         if x.shape[0] == 1:
@@ -169,45 +86,18 @@ class MoeDecoderLayer(nn.Module):
 
 
     def _gates_to_load(self, gates):
-        """Compute the true load per expert, given the gates.
-        The load is the number of examples for which the corresponding gate is >0.
-        Args:
-        gates: a `Tensor` of shape [batch_size, n]
-        Returns:
-        a float32 `Tensor` of shape [n]
-        """
+
         return (gates > 0).sum(0)
 
 
 
 
     def _prob_in_top_k(self, clean_values, noisy_values, noise_stddev, noisy_top_values):
-        """Helper function to NoisyTopKGating.
-        Computes the probability that value is in top k, given different random noise.
-        This gives us a way of backpropagating from a loss that balances the number
-        of times each expert is in the top k experts per example.
-        In the case of no noise, pass in None for noise_stddev, and the result will
-        not be differentiable.
-        Args:
-        clean_values: a `Tensor` of shape [batch, n].
-        noisy_values: a `Tensor` of shape [batch, n].  Equal to clean values plus
-          normally distributed noise with standard deviation noise_stddev.
-        noise_stddev: a `Tensor` of shape [batch, n], or None
-        noisy_top_values: a `Tensor` of shape [batch, m].
-           "values" Output of tf.top_k(noisy_top_values, m).  m >= k+1
-        Returns:
-        a `Tensor` of shape [batch, n].
-        """
+
 
         batch = clean_values.size(0)
         m = noisy_top_values.size(1)
         top_values_flat = noisy_top_values.flatten()
-        # threshold_positions_if_in = torch.arange(batch) * m + self.k
-        # threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1)
-        # is_in = torch.gt(noisy_values, threshold_if_in)
-        # threshold_positions_if_out = threshold_positions_if_in - 1
-        # threshold_if_out = torch.unsqueeze(torch.gather(top_values_flat,0 , threshold_positions_if_out), 1)
-        # TODO: too many to(device) statements
         threshold_positions_if_in = (torch.arange(batch) * m + self.k).to(self.device)
         threshold_if_in = torch.unsqueeze(torch.gather(top_values_flat, 0, threshold_positions_if_in), 1).to(self.device)
         is_in = torch.gt(noisy_values, threshold_if_in).to(self.device)
@@ -274,16 +164,6 @@ class MoeDecoderLayer(nn.Module):
 
 
     def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True, train=True, loss_coef=1e-2):
-        """Args:
-        x: tensor shape [batch_size, input_size]
-        train: a boolean scalar.
-        loss_coef: a scalar - multiplier on load-balancing losses
-        Returns:
-        y: a tensor with shape [batch_size, output_size].
-        extra_training_loss: a scalar.  This should be added into the overall
-        training loss of the model.  The backpropagation of this loss
-        encourages all experts to be approximately equally used across a batch.
-        """
         gates, load = self.noisy_top_k_gating(x, train)
         # calculate importance loss
         importance = gates.sum(0)

@@ -41,7 +41,7 @@ class DecoderLayer(nn.Module):
         else:
             raise Exception("Please provide a valid mixing method! Current options are none and moe")
 
-        self.ff = FeedForward(d_model, dropout=dropout)
+        self.ff = FeedForward(d_model, dropout=dropout) # introduce moe feedforward
 
         if not is_lm:
             self.norm_3 = Norm(d_model)
@@ -54,7 +54,7 @@ class DecoderLayer(nn.Module):
             x2 = self.norm_1(x)
             x = x + self.dropout_1(self.attn_1(x2, x2, x2, trg_mask))
             x2 = self.norm_2(x)
-            x = x + self.dropout_2(self.ff(x2))
+            x = x + self.dropout_2(self.ff(x2)) # x + refers to a residual connectinon
         elif is_lm and self.mixing == "moe":
             x2 = self.norm_1(x)
             attn_out, additional_loss = self.attn_1(x2, x2, x2, mask=trg_mask, train=train)
