@@ -12,6 +12,7 @@ import datetime
 from data_utils_subword import get_lm_corpus
 import logging
 
+# TODO: Try to have MoE FFN in every other layer like in GShard
 # TODO: Find out what hyperparameters, lr, etc they used for the Transformer in GShard
 # TODO: later refactor (MoE interface --> abstract class to turn any layer into MoE)
 # TODO: provide the number of experts and k to the MoE FFN
