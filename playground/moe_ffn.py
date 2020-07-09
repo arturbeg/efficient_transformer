@@ -30,8 +30,8 @@ class SparseDispatcher(object):
         gates_exp = gates[self._batch_index.flatten()]
         self._nonzero_gates = torch.gather(gates_exp, 1, self._expert_index)
 
-        # TODO: quick hack
-        self._nonzero_gates = self._nonzero_gates.view(-1, 1, 1)
+        # # TODO: quick hack
+        # self._nonzero_gates = self._nonzero_gates.view(-1, 1, 1)
 
     def dispatch(self, inp):
         inp_exp = inp[self._batch_index].squeeze(1)
@@ -43,11 +43,10 @@ class SparseDispatcher(object):
 
         if multiply_by_gates:
             stitched = stitched.mul(self._nonzero_gates)
-        zeros = torch.zeros(self._gates.size(0), expert_out[-1].size(1), expert_out[-1].size(2), requires_grad=True).to(self.device)
-        # combine samples that have been processed by the same k experts
+        zeros = torch.zeros(self._gates.size(0), expert_out[-1].size(1), requires_grad=True).to(self.device)
         combined = zeros.index_add(0, self._batch_index, stitched.float())
-        # add eps to all zero values in order to avoid nans when going back to log space
         combined[combined == 0] = np.finfo(float).eps
+        # back to log space
         return combined
 
 
@@ -127,8 +126,8 @@ class MoeTokenLevelFeedForward(nn.Module):
         clean_logits = x @ self.w_gate
         if self.noisy_gating:
             raw_noise_stddev = x @ self.w_noise
-            noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train)
-            noisy_logits = clean_logits + ( torch.randn_like(clean_logits) * noise_stddev)
+            noise_stddev = ((self.softplus(raw_noise_stddev) + noise_epsilon) * train).to(self.device)
+            noisy_logits = clean_logits + ( torch.randn_like(clean_logits) * noise_stddev).to(self.device)
             logits = noisy_logits
         else:
             logits = clean_logits
@@ -139,8 +138,8 @@ class MoeTokenLevelFeedForward(nn.Module):
         top_k_indices = top_indices[:, :self.k]
         top_k_gates = self.softmax(top_k_logits)
 
-        zeros = torch.zeros_like(logits, requires_grad=True)
-        gates = zeros.scatter(1, top_k_indices, top_k_gates)
+        zeros = torch.zeros_like(logits, requires_grad=True).to(self.device)
+        gates = zeros.scatter(1, top_k_indices, top_k_gates).to(self.device)
 
         if self.noisy_gating and self.k < self.num_experts:
             load = (self._prob_in_top_k(clean_logits, noisy_logits, noise_stddev, top_logits)).sum(0)
@@ -158,7 +157,7 @@ class MoeTokenLevelFeedForward(nn.Module):
         loss = self.cv_squared(importance) + self.cv_squared(load)
         loss *= loss_coef
 
-        dispatcher = SparseDispatcher(self.num_experts, gates)
+        dispatcher = SparseDispatcher(self.num_experts, gates, is_cuda=self.is_cuda)
         expert_inputs = dispatcher.dispatch(x)
         gates = dispatcher.expert_to_gates()
         expert_outputs = [self.experts[i](expert_inputs[i]) for i in range(self.num_experts)]

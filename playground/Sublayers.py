@@ -93,19 +93,26 @@ class TokenLevelFeedForward(nn.Module):
 # TODO: explicit MoE FFN
 # TODO: handle each sequence separately as if it is a batch
 class FeedForward(nn.Module):
-    def __init__(self, d_model, d_ff=2048, dropout=0.1, ff_gating="none"):
+    def __init__(self, d_model, d_ff=2048, dropout=0.1, ff_gating="none", is_cuda=True, num_experts=4, k=2):
         super().__init__()
-        if ff_gating == "none":
+        self.device = torch.device("cuda" if is_cuda else "cpu")
+        self.ff_gating = ff_gating
+        if self.ff_gating == "none":
             self.token_level_ffn = TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
-        elif ff_gating == "moe":
-            self.token_level_ffn = MoeTokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
+        elif self.ff_gating == "moe":
+            self.token_level_ffn = MoeTokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout, is_cuda=is_cuda, num_experts=num_experts, k=k)
         else:
             raise Exception("Please provide a valid gating function for the FFN layer")
 
     def forward(self, x):
         # TODO: a bit hacky, think of a more elegant implementation
+        aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device)
         out = torch.empty_like(x, requires_grad=False)
         for i, sequence in enumerate(x):
-            sequence = self.token_level_ffn(sequence)
+            if self.ff_gating == "moe":
+                sequence, additional_loss = self.token_level_ffn(sequence)
+                aux_loss = aux_loss + additional_loss
+            else:
+                sequence = self.token_level_ffn(sequence)
             out[i] = sequence
-        return out
+        return out, aux_loss

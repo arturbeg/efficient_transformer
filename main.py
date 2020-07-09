@@ -12,6 +12,9 @@ import datetime
 from data_utils_subword import get_lm_corpus
 import logging
 
+# TODO: Find out what hyperparameters, lr, etc they used for the Transformer in GShard
+# TODO: later refactor (MoE interface --> abstract class to turn any layer into MoE)
+# TODO: provide the number of experts and k to the MoE FFN
 # TODO: implement ENUM gating (lists all possible ways to perform gating, all different components?)
 # TODO: implement random gating as a baseline
 # TODO: alternative learning schedule when training for moe, maybe need to wait for more epochs for it to learn
@@ -34,7 +37,7 @@ parser.add_argument('--debug', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--ff-gating', type=str, default='none',
+parser.add_argument('--ff-gating', type=str, default='moe',
                     help='token level gating for the feed forward layer')
 
 parser.add_argument('--decoder-mixing', type=str, default='none',
@@ -52,10 +55,10 @@ parser.add_argument('--bptt', type=int, default=128,
 parser.add_argument('--n-heads', type=int, default=4,
                     help="Number of heads in the multi headed attention layer")
 
-parser.add_argument('--num-experts', type=int, default=2,
+parser.add_argument('--num-experts', type=int, default=16,
                     help='Total number of experts')
 
-parser.add_argument('--k', type=int, default=1,
+parser.add_argument('--k', type=int, default=2,
                     help='Number of experts gated through')
 
 parser.add_argument('--d-model', type=int, default=256,
@@ -68,7 +71,6 @@ parser.add_argument('--optimizer', type=str, default='adam',
                     help='the optimizer used to train the transformer')
 
 args = parser.parse_args()
-# args = parser.parse_args(['--gating', 'moe'])
 
 DEBUG = args.debug
 NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
@@ -94,6 +96,10 @@ if args.decoder_mixing == "moe":
     LOG = "model_moe_decoder.log"
     SAVE = "model_moe_decoder.pt"
     logging.info("Performing decoder mixing")
+elif args.ff_gating == "moe":
+    LOG = "model_moe_ffn.log"
+    SAVE = "model_moe_ffn.pt"
+    logging.info("Performing FFN token level mixing")
 
 SAVE = now_str + '_' + SAVE
 SAVE = './model_files/' + SAVE
@@ -112,9 +118,9 @@ logging.info("k is : " + str(K))
 logging.info("Number of experts is : " + str(NUM_EXPERTS))
 
 if DEBUG:
-    N_LAYERS = 1
+    N_LAYERS = 2
     D_MODEL = 32
-    LOG_INTERVAL = 1
+    LOG_INTERVAL = 2
     BPTT = 32
     N_HEADS = 2
 
