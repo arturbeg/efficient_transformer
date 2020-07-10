@@ -8,7 +8,6 @@ import math
 import argparse
 from playground.Optim import ScheduledOptim
 from torch.optim import Adam, SGD
-import datetime
 from data_utils_subword import get_lm_corpus
 import logging
 
@@ -37,6 +36,9 @@ parser.add_argument('--cuda', action='store_true',
 
 parser.add_argument('--debug', action='store_true',
                     help='debugging')
+
+parser.add_argument('--log-and-save-file-name', type=str, required=True,
+                    help='Log and Save file name')
 
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
@@ -90,13 +92,10 @@ BPTT = args.bptt
 LR = args.lr  # initial learning rate
 WARMUP = 4000
 LOG_INTERVAL = 128  # report interval
-# path to save the final model
-now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-now_str = str(now)
 
-SAVE = now_str + '.pt'
+SAVE = args.log_and_save_file_name + '.pt'
 SAVE = './model_files/' + SAVE
-LOG = now_str + '.log'
+LOG = args.log_and_save_file_name + '.log'
 logging.basicConfig(filename='./log_files/' + LOG, level=logging.DEBUG)
 logging.info(SAVE)
 logging.info("The batch size is: " + str(BATCH_SIZE))
