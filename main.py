@@ -12,6 +12,9 @@ import datetime
 from data_utils_subword import get_lm_corpus
 import logging
 
+# TODO: log file name as argument
+# TODO: make a separate file for logging
+# TODO: sbatch script that runs mulple experiments with a different number of experts in one sbatch (.) run
 # TODO: Try to have MoE FFN in every other layer like in GShard
 # TODO: Find out what hyperparameters, lr, etc they used for the Transformer in GShard
 # TODO: later refactor (MoE interface --> abstract class to turn any layer into MoE)
@@ -38,7 +41,7 @@ parser.add_argument('--debug', action='store_true',
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--ff-gating', type=str, default='moe',
+parser.add_argument('--ff-gating', type=str, default='none',
                     help='token level gating for the feed forward layer')
 
 parser.add_argument('--decoder-mixing', type=str, default='none',
@@ -90,21 +93,10 @@ LOG_INTERVAL = 128  # report interval
 # path to save the final model
 now = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 now_str = str(now)
-LOG = 'model_vanilla_transformer.log' if args.gating == "none" else "model_moe_transformer.log"
-SAVE = 'model_vanilla_transformer.pt' if args.gating == "none" else "model_moe_transformer.pt"
 
-if args.decoder_mixing == "moe":
-    LOG = "model_moe_decoder.log"
-    SAVE = "model_moe_decoder.pt"
-    logging.info("Performing decoder mixing")
-elif args.ff_gating == "moe":
-    LOG = "model_moe_ffn.log"
-    SAVE = "model_moe_ffn.pt"
-    logging.info("Performing FFN token level mixing")
-
-SAVE = now_str + '_' + SAVE
+SAVE = now_str + '.pt'
 SAVE = './model_files/' + SAVE
-LOG = now_str + '_' + LOG
+LOG = now_str + '.log'
 logging.basicConfig(filename='./log_files/' + LOG, level=logging.DEBUG)
 logging.info(SAVE)
 logging.info("The batch size is: " + str(BATCH_SIZE))
@@ -117,6 +109,20 @@ logging.info("Initial learning rate is : " + str(LR))
 logging.info("Number of warmup steps is : " + str(WARMUP))
 logging.info("k is : " + str(K))
 logging.info("Number of experts is : " + str(NUM_EXPERTS))
+
+
+# TODO: does not take into account hierarchical gating
+type_of_gating = ""
+if args.ff_gating == "moe":
+    type_of_gating = "FNN gating"
+elif args.gating == "moe":
+    type_of_gating = "Multi-headed attention gating"
+elif args.decoder_mixing:
+    type_of_gating = "Decoder Layer Gating"
+else:
+    type_of_gating = "none"
+
+logging.info("Type of gating used : " + type_of_gating)
 
 if DEBUG:
     N_LAYERS = 2
