@@ -34,16 +34,13 @@ parser = argparse.ArgumentParser(description='PyTorch LM1b Transformer Language 
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 
-parser.add_argument('--debug', action='store_true',
-                    help='debugging')
-
 parser.add_argument('--log-and-save-file-name', type=str, required=True,
                     help='Log and Save file name')
 
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--ff-gating', type=str, default='none',
+parser.add_argument('--ff-gating', type=str, default='moe',
                     help='token level gating for the feed forward layer')
 
 parser.add_argument('--decoder-mixing', type=str, default='none',
@@ -76,9 +73,12 @@ parser.add_argument('--lr', type=float, default=1.0,
 parser.add_argument('--optimizer', type=str, default='adam',
                     help='the optimizer used to train the transformer')
 
-args = parser.parse_args()
+DEBUG = False
+if DEBUG:
+    args = parser.parse_args(['--log-and-save-file-name', 'debugging'])
+else:
+    args = parser.parse_args()
 
-DEBUG = args.debug
 NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
 NUM_EXPERTS = args.num_experts # total number of experts
 K = args.k # experts used

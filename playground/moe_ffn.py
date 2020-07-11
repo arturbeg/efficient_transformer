@@ -149,11 +149,11 @@ class MoeTokenLevelFeedForward(nn.Module):
 
 
 
-    def forward(self, x, train=True, loss_coef=1e-2):
+    def forward(self, x, train=True, loss_coef=0.1):
         gates, load = self.noisy_top_k_gating(x, train)
         # calculate importance loss
         importance = gates.sum(0)
-        #
+        
         loss = self.cv_squared(importance) + self.cv_squared(load)
         loss *= loss_coef
 

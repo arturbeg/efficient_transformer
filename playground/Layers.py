@@ -22,7 +22,7 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, d_model, heads, dropout=0.1, is_lm=True, mixing="none", ff_gating="none", is_cuda=True, num_experts=4, k=2):
+    def __init__(self, d_model, heads, dropout=0.1, is_lm=True, mixing="none", ff_gating="none", is_cuda=True, num_experts=4, k=2, is_odd_layer=True):
         super().__init__()
         self.mixing = mixing
         self.is_cuda = is_cuda
@@ -41,7 +41,7 @@ class DecoderLayer(nn.Module):
         else:
             raise Exception("Please provide a valid mixing method! Current options are none and moe")
 
-        self.ff = FeedForward(d_model, dropout=dropout, ff_gating=ff_gating, num_experts=num_experts, k=k, is_cuda=is_cuda) # introduce moe feedforward
+        self.ff = FeedForward(d_model, dropout=dropout, ff_gating=ff_gating, num_experts=num_experts, k=k, is_cuda=is_cuda, is_odd_layer=is_odd_layer) # introduce moe feedforward
 
         if not is_lm:
             self.norm_3 = Norm(d_model)

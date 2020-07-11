@@ -5,11 +5,26 @@ from playground.Embed import Embedder, PositionalEncoder
 from playground.Sublayers import Norm
 from torch.nn import functional as F
 from playground.moe_decoder_layer import MoeDecoderLayer
-import copy
 
 
-def get_clones(module, N):
-    return nn.ModuleList([copy.deepcopy(module) for i in range(N)])
+def get_clones(d_model, heads, num_experts, k, ff_gating, dropout, is_lm, mixing, is_cuda, N, is_moe_decoder):
+    modules = []
+    for i in range(N):
+        if is_moe_decoder:
+            modules.append(
+                MoeDecoderLayer(d_model=d_model, heads=heads, dropout=dropout,
+                                is_lm=is_lm, mixing=mixing, is_cuda=is_cuda,
+                                ff_gating=ff_gating,
+                                num_experts=num_experts, k=k))
+        else:
+            is_odd_layer = (i + 1) % 2 != 0
+            modules.append(DecoderLayer(d_model=d_model, heads=heads,
+                                        dropout=dropout, is_lm=is_lm,
+                                        mixing=mixing, is_cuda=is_cuda,
+                                        ff_gating=ff_gating, num_experts=num_experts,
+                                        k=k, is_odd_layer=is_odd_layer))
+
+    return modules
 
 class Encoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads, dropout):
@@ -41,10 +56,11 @@ class Decoder(nn.Module):
         # TODO: in here we can use MoEDecoder Layer
 
         if decoder_mixing == "none":
-            self.layers = get_clones(DecoderLayer(d_model, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda, ff_gating=ff_gating, num_experts=num_experts, k=k), N)
+            self.layers = get_clones(d_model=d_model, heads=heads, num_experts=num_experts, k=k, ff_gating=ff_gating, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda,
+                                     N=N, is_moe_decoder=False)
         elif decoder_mixing == "moe":
-            self.layers = get_clones(MoeDecoderLayer(d_model=d_model, heads=heads, num_experts=num_experts, k=k, ff_gating=ff_gating, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda),
-                                     N)
+            self.layers = get_clones(d_model=d_model, heads=heads, num_experts=num_experts, k=k, ff_gating=ff_gating, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda,
+                                     N=N, is_moe_decoder=True)
         self.norm = Norm(d_model)
 
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
