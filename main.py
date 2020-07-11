@@ -64,6 +64,9 @@ parser.add_argument('--num-experts', type=int, default=16,
 parser.add_argument('--k', type=int, default=2,
                     help='Number of experts gated through')
 
+parser.add_argument('--n-layers', type=int, default=3,
+                    help='Number of Decoder Layers')
+
 parser.add_argument('--d-model', type=int, default=256,
                     help='Embedding dimension')
 
@@ -83,7 +86,7 @@ NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
 NUM_EXPERTS = args.num_experts # total number of experts
 K = args.k # experts used
 BATCH_SIZE = args.bsz
-N_LAYERS = 3
+N_LAYERS = args.n_layers
 EPOCHS = args.num_epochs
 DROPOUT = 0.1
 N_HEADS = args.n_heads
