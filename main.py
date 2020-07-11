@@ -124,7 +124,7 @@ else:
 logging.info("Type of gating used : " + type_of_gating)
 
 if DEBUG:
-    N_LAYERS = 2
+    N_LAYERS = 3
     D_MODEL = 32
     LOG_INTERVAL = 2
     BPTT = 32

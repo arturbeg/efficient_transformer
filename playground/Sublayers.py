@@ -97,8 +97,9 @@ class FeedForward(nn.Module):
         super().__init__()
         self.device = torch.device("cuda" if is_cuda else "cpu")
         self.ff_gating = ff_gating
+        self.is_odd_layer = is_odd_layer
 
-        if self.ff_gating == "moe" and is_odd_layer:
+        if self.ff_gating == "moe" and self.is_odd_layer:
             self.token_level_ffn = MoeTokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout, is_cuda=is_cuda, num_experts=num_experts, k=k)
         else:
             self.token_level_ffn = TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
@@ -108,7 +109,7 @@ class FeedForward(nn.Module):
         aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device)
         out = torch.empty_like(x, requires_grad=False)
         for i, sequence in enumerate(x):
-            if self.ff_gating == "moe":
+            if self.ff_gating == "moe" and self.is_odd_layer:
                 sequence, additional_loss = self.token_level_ffn(sequence)
                 aux_loss = aux_loss + additional_loss
             else:
