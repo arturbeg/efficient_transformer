@@ -102,8 +102,6 @@ class MoeTokenLevelFeedForward(nn.Module):
         return (gates > 0).sum(0)
 
 
-
-
     def _prob_in_top_k(self, clean_values, noisy_values, noise_stddev, noisy_top_values):
 
 
@@ -146,7 +144,6 @@ class MoeTokenLevelFeedForward(nn.Module):
         else:
             load = self._gates_to_load(gates)
         return gates, load
-
 
 
     def forward(self, x, train=True, loss_coef=0.1):
