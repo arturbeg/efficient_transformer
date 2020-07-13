@@ -1,5 +1,0 @@
-INFO:root:./model_files/1586781229.616048_model_moe_transformer.pt
-INFO:root:Loading cached dataset...
-INFO:root:Gating function is: moe
-INFO:root:Let's use 4 GPUs!
-INFO:root:The optimizer used is: sgd
