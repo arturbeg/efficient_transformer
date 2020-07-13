@@ -40,7 +40,7 @@ parser.add_argument('--log-and-save-file-name', type=str, required=True,
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--ff-gating', type=str, default='moe',
+parser.add_argument('--ff-gating', type=str, default='none',
                     help='token level gating for the feed forward layer')
 
 parser.add_argument('--decoder-mixing', type=str, default='none',
@@ -109,18 +109,22 @@ logging.info("Number of attention heads is : " + str(N_HEADS))
 logging.info("Number of decoder layers is : " + str(N_LAYERS))
 logging.info("Initial learning rate is : " + str(LR))
 logging.info("Number of warmup steps is : " + str(WARMUP))
-logging.info("k is : " + str(K))
-logging.info("Number of experts is : " + str(NUM_EXPERTS))
 
 
 # TODO: does not take into account hierarchical gating
 type_of_gating = ""
 if args.ff_gating == "moe":
     type_of_gating = "FNN gating"
+    logging.info("Number of experts is : " + str(NUM_EXPERTS))
+    logging.info("k is : " + str(K))
 elif args.gating == "moe":
     type_of_gating = "Multi-headed attention gating"
+    logging.info("Number of experts is : " + str(NUM_EXPERTS))
+    logging.info("k is : " + str(K))
 elif args.decoder_mixing:
     type_of_gating = "Decoder Layer Gating"
+    logging.info("Number of experts is : " + str(NUM_EXPERTS))
+    logging.info("k is : " + str(K))
 else:
     type_of_gating = "none"
 
