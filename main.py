@@ -157,7 +157,7 @@ if args.cuda and torch.cuda.device_count() > 1:
 
 model.to(device)
 
-criterion = nn.NLLLoss()  # changes depending on the last layer of the transformer
+criterion = nn.NLLLoss()
 
 if args.optimizer == "adam":
     optimization_method = Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-09)

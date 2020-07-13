@@ -24,7 +24,7 @@ def get_clones(d_model, heads, num_experts, k, ff_gating, dropout, is_lm, mixing
                                         ff_gating=ff_gating, num_experts=num_experts,
                                         k=k, is_odd_layer=is_odd_layer))
 
-    return modules
+    return nn.ModuleList(modules)
 
 class Encoder(nn.Module):
     def __init__(self, vocab_size, d_model, N, heads, dropout):
