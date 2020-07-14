@@ -11,7 +11,8 @@ from torch.optim import Adam, SGD
 from data_utils_subword import get_lm_corpus
 import logging
 
-# TODO: log file name as argument
+
+# TODO: expert capacity (per sequence or per sequence*bsz)
 # TODO: make a separate file for logging
 # TODO: sbatch script that runs mulple experiments with a different number of experts in one sbatch (.) run
 # TODO: Try to have MoE FFN in every other layer like in GShard
@@ -40,7 +41,7 @@ parser.add_argument('--log-and-save-file-name', type=str, required=True,
 parser.add_argument('--gating', type=str, default='none',
                     help='gating method to use: either moe or mog or none')
 
-parser.add_argument('--ff-gating', type=str, default='none',
+parser.add_argument('--ff-gating', type=str, default='moe_gshard',
                     help='token level gating for the feed forward layer')
 
 parser.add_argument('--decoder-mixing', type=str, default='none',
@@ -76,7 +77,7 @@ parser.add_argument('--lr', type=float, default=1.0,
 parser.add_argument('--optimizer', type=str, default='adam',
                     help='the optimizer used to train the transformer')
 
-DEBUG = False
+DEBUG = True
 if DEBUG:
     args = parser.parse_args(['--log-and-save-file-name', 'debugging'])
 else:
@@ -115,6 +116,10 @@ logging.info("Number of warmup steps is : " + str(WARMUP))
 type_of_gating = ""
 if args.ff_gating == "moe":
     type_of_gating = "FNN gating"
+    logging.info("Number of experts is : " + str(NUM_EXPERTS))
+    logging.info("k is : " + str(K))
+if args.ff_gating == "moe_gshard":
+    type_of_gating = "FNN gating (MOE GSHARD)"
     logging.info("Number of experts is : " + str(NUM_EXPERTS))
     logging.info("k is : " + str(K))
 elif args.gating == "moe":
