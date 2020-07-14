@@ -1,0 +1,1450 @@
+INFO:root:./model_files/moe_ffn_0.pt
+INFO:root:The batch size is: 64
+INFO:root:Number of epochs is : 2
+INFO:root:The context length is : 128
+INFO:root:D_model is : 256
+INFO:root:Number of attention heads is : 4
+INFO:root:Number of decoder layers is : 3
+INFO:root:Initial learning rate is : 1.0
+INFO:root:Number of warmup steps is : 4000
+INFO:root:k is : 2
+INFO:root:Number of experts is : 2
+INFO:root:Type of gating used : FNN gating
+WARNING:absl:TFDS datasets with text encoding are deprecated and will be removed in a future version. Instead, you should use the plain text version and tokenize the text using `tensorflow_text` (See: https://www.tensorflow.org/tutorials/tensorflow_text/intro#tfdata_example)
+INFO:absl:Load dataset info from ./subwords32k/lm1b/subwords32k/1.0.0
+INFO:absl:Reusing dataset lm1b (./subwords32k/lm1b/subwords32k/1.0.0)
+INFO:absl:Constructing tf.data.Dataset for split train, from ./subwords32k/lm1b/subwords32k/1.0.0
+WARNING:absl:TFDS datasets with text encoding are deprecated and will be removed in a future version. Instead, you should use the plain text version and tokenize the text using `tensorflow_text` (See: https://www.tensorflow.org/tutorials/tensorflow_text/intro#tfdata_example)
+INFO:absl:Load dataset info from ./subwords32k/lm1b/subwords32k/1.0.0
+INFO:absl:Reusing dataset lm1b (./subwords32k/lm1b/subwords32k/1.0.0)
+INFO:absl:Constructing tf.data.Dataset for split test, from ./subwords32k/lm1b/subwords32k/1.0.0
+INFO:root:Gating function is: none
+INFO:root:The optimizer used is: adam
+INFO:root:Current Epoch is: 1
+INFO:root:Running without errors
+INFO:root:Learning rate has changed to: 3.186982954388445e-05
+INFO:root:| epoch   1 | batch   128 | ms/batch 876.04 | loss    10.6112 | aux_loss     0.0348 | ppl 40588.1721
+INFO:root:Learning rate has changed to: 6.349260614556825e-05
+INFO:root:| epoch   1 | batch   256 | ms/batch 806.67 | loss     9.6476 | aux_loss     0.0292 | ppl 15484.9032
+INFO:root:Learning rate has changed to: 9.511538274725204e-05
+INFO:root:| epoch   1 | batch   384 | ms/batch 806.72 | loss     7.8296 | aux_loss     0.0163 | ppl  2513.9291
+INFO:root:Learning rate has changed to: 0.00012673815934893584
+INFO:root:| epoch   1 | batch   512 | ms/batch 805.51 | loss     7.3005 | aux_loss     0.0121 | ppl  1481.1119
+INFO:root:Learning rate has changed to: 0.00015836093595061963
+INFO:root:| epoch   1 | batch   640 | ms/batch 811.47 | loss     7.0965 | aux_loss     0.0078 | ppl  1207.7571
+INFO:root:Learning rate has changed to: 0.00018998371255230342
+INFO:root:| epoch   1 | batch   768 | ms/batch 810.67 | loss     6.9108 | aux_loss     0.0040 | ppl  1003.0697
+INFO:root:Learning rate has changed to: 0.00022160648915398723
+INFO:root:| epoch   1 | batch   896 | ms/batch 799.14 | loss     6.7477 | aux_loss     0.0021 | ppl   852.0836
+INFO:root:Learning rate has changed to: 0.000253229265755671
+INFO:root:| epoch   1 | batch  1024 | ms/batch 799.27 | loss     6.5828 | aux_loss     0.0012 | ppl   722.5371
+INFO:root:Learning rate has changed to: 0.0002848520423573548
+INFO:root:| epoch   1 | batch  1152 | ms/batch 801.31 | loss     6.4371 | aux_loss     0.0008 | ppl   624.5910
+INFO:root:Learning rate has changed to: 0.0003164748189590386
+INFO:root:| epoch   1 | batch  1280 | ms/batch 802.38 | loss     6.3428 | aux_loss     0.0007 | ppl   568.3597
+INFO:root:Learning rate has changed to: 0.0003480975955607224
+INFO:root:| epoch   1 | batch  1408 | ms/batch 814.20 | loss     6.2589 | aux_loss     0.0005 | ppl   522.6246
+INFO:root:Learning rate has changed to: 0.0003797203721624062
+INFO:root:| epoch   1 | batch  1536 | ms/batch 806.11 | loss     6.1891 | aux_loss     0.0004 | ppl   487.3839
+INFO:root:Learning rate has changed to: 0.00041134314876409
+INFO:root:| epoch   1 | batch  1664 | ms/batch 806.53 | loss     6.1294 | aux_loss     0.0004 | ppl   459.1574
+INFO:root:Learning rate has changed to: 0.0004429659253657738
+INFO:root:| epoch   1 | batch  1792 | ms/batch 812.49 | loss     6.0647 | aux_loss     0.0004 | ppl   430.3759
+INFO:root:Learning rate has changed to: 0.0004745887019674576
+INFO:root:| epoch   1 | batch  1920 | ms/batch 808.36 | loss     6.0092 | aux_loss     0.0004 | ppl   407.1401
+INFO:root:Learning rate has changed to: 0.0005062114785691414
+INFO:root:| epoch   1 | batch  2048 | ms/batch 806.97 | loss     5.9735 | aux_loss     0.0003 | ppl   392.8620
+INFO:root:Learning rate has changed to: 0.0005378342551708252
+INFO:root:| epoch   1 | batch  2176 | ms/batch 805.19 | loss     5.9219 | aux_loss     0.0003 | ppl   373.1349
+INFO:root:Learning rate has changed to: 0.000569457031772509
+INFO:root:| epoch   1 | batch  2304 | ms/batch 812.41 | loss     5.8782 | aux_loss     0.0003 | ppl   357.1739
+INFO:root:Learning rate has changed to: 0.0006010798083741928
+INFO:root:| epoch   1 | batch  2432 | ms/batch 803.65 | loss     5.8310 | aux_loss     0.0003 | ppl   340.7139
+INFO:root:Learning rate has changed to: 0.0006327025849758765
+INFO:root:| epoch   1 | batch  2560 | ms/batch 809.80 | loss     5.8045 | aux_loss     0.0003 | ppl   331.7885
+INFO:root:Learning rate has changed to: 0.0006643253615775603
+INFO:root:| epoch   1 | batch  2688 | ms/batch 802.96 | loss     5.7677 | aux_loss     0.0003 | ppl   319.7922
+INFO:root:Learning rate has changed to: 0.0006959481381792441
+INFO:root:| epoch   1 | batch  2816 | ms/batch 806.47 | loss     5.7445 | aux_loss     0.0002 | ppl   312.4621
+INFO:root:Learning rate has changed to: 0.000727570914780928
+INFO:root:| epoch   1 | batch  2944 | ms/batch 803.86 | loss     5.7151 | aux_loss     0.0003 | ppl   303.4217
+INFO:root:Learning rate has changed to: 0.0007591936913826118
+INFO:root:| epoch   1 | batch  3072 | ms/batch 797.61 | loss     5.6789 | aux_loss     0.0002 | ppl   292.6395
+INFO:root:Learning rate has changed to: 0.0007908164679842956
+INFO:root:| epoch   1 | batch  3200 | ms/batch 808.42 | loss     5.6514 | aux_loss     0.0002 | ppl   284.6776
+INFO:root:Learning rate has changed to: 0.0008224392445859793
+INFO:root:| epoch   1 | batch  3328 | ms/batch 804.47 | loss     5.6294 | aux_loss     0.0002 | ppl   278.5011
+INFO:root:Learning rate has changed to: 0.0008540620211876631
+INFO:root:| epoch   1 | batch  3456 | ms/batch 807.48 | loss     5.6074 | aux_loss     0.0003 | ppl   272.4332
+INFO:root:Learning rate has changed to: 0.0008856847977893469
+INFO:root:| epoch   1 | batch  3584 | ms/batch 808.12 | loss     5.5866 | aux_loss     0.0003 | ppl   266.8294
+INFO:root:Learning rate has changed to: 0.0009173075743910307
+INFO:root:| epoch   1 | batch  3712 | ms/batch 812.69 | loss     5.5669 | aux_loss     0.0002 | ppl   261.6338
+INFO:root:Learning rate has changed to: 0.0009489303509927146
+INFO:root:| epoch   1 | batch  3840 | ms/batch 803.43 | loss     5.5340 | aux_loss     0.0003 | ppl   253.1664
+INFO:root:Learning rate has changed to: 0.0009805531275943983
+INFO:root:| epoch   1 | batch  3968 | ms/batch 808.86 | loss     5.5189 | aux_loss     0.0003 | ppl   249.3715
+INFO:root:Learning rate has changed to: 0.0009764433125338821
+INFO:root:| epoch   1 | batch  4096 | ms/batch 810.13 | loss     5.5071 | aux_loss     0.0003 | ppl   246.4312
+INFO:root:Learning rate has changed to: 0.0009615384615384616
+INFO:root:| epoch   1 | batch  4224 | ms/batch 803.89 | loss     5.4871 | aux_loss     0.0002 | ppl   241.5601
+INFO:root:Learning rate has changed to: 0.0009472959569955596
+INFO:root:| epoch   1 | batch  4352 | ms/batch 800.76 | loss     5.4612 | aux_loss     0.0003 | ppl   235.3824
+INFO:root:Learning rate has changed to: 0.0009336681528218903
+INFO:root:| epoch   1 | batch  4480 | ms/batch 807.52 | loss     5.4371 | aux_loss     0.0002 | ppl   229.7732
+INFO:root:Learning rate has changed to: 0.0009206120672864873
+INFO:root:| epoch   1 | batch  4608 | ms/batch 804.89 | loss     5.4173 | aux_loss     0.0002 | ppl   225.2731
+INFO:root:Learning rate has changed to: 0.0009080888118835636
+INFO:root:| epoch   1 | batch  4736 | ms/batch 807.09 | loss     5.3942 | aux_loss     0.0003 | ppl   220.1283
+INFO:root:Learning rate has changed to: 0.0008960631034158175
+INFO:root:| epoch   1 | batch  4864 | ms/batch 841.64 | loss     5.3681 | aux_loss     0.0003 | ppl   214.4649
+INFO:root:Learning rate has changed to: 0.0008845028453299376
+INFO:root:| epoch   1 | batch  4992 | ms/batch 802.04 | loss     5.3473 | aux_loss     0.0002 | ppl   210.0456
+INFO:root:Learning rate has changed to: 0.0008733787669798303
+INFO:root:| epoch   1 | batch  5120 | ms/batch 809.70 | loss     5.3344 | aux_loss     0.0003 | ppl   207.3383
+INFO:root:Learning rate has changed to: 0.0008626641115774413
+INFO:root:| epoch   1 | batch  5248 | ms/batch 805.94 | loss     5.3204 | aux_loss     0.0002 | ppl   204.4620
+INFO:root:Learning rate has changed to: 0.000852334365251007
+INFO:root:| epoch   1 | batch  5376 | ms/batch 807.03 | loss     5.3022 | aux_loss     0.0003 | ppl   200.7859
+INFO:root:Learning rate has changed to: 0.0008423670209604698
+INFO:root:| epoch   1 | batch  5504 | ms/batch 810.42 | loss     5.2829 | aux_loss     0.0002 | ppl   196.9367
+INFO:root:Learning rate has changed to: 0.0008327413720912831
+INFO:root:| epoch   1 | batch  5632 | ms/batch 809.20 | loss     5.2687 | aux_loss     0.0003 | ppl   194.1601
+INFO:root:Learning rate has changed to: 0.00082343833141581
+INFO:root:| epoch   1 | batch  5760 | ms/batch 801.15 | loss     5.2714 | aux_loss     0.0002 | ppl   194.6912
+INFO:root:Learning rate has changed to: 0.0008144402718182064
+INFO:root:| epoch   1 | batch  5888 | ms/batch 807.46 | loss     5.2417 | aux_loss     0.0003 | ppl   188.9824
+INFO:root:Learning rate has changed to: 0.0008057308857568942
+INFO:root:| epoch   1 | batch  6016 | ms/batch 809.36 | loss     5.2251 | aux_loss     0.0002 | ppl   185.8739
+INFO:root:Learning rate has changed to: 0.0007972950609139956
+INFO:root:| epoch   1 | batch  6144 | ms/batch 808.11 | loss     5.2209 | aux_loss     0.0003 | ppl   185.1042
+INFO:root:Learning rate has changed to: 0.0007891187698735106
+INFO:root:| epoch   1 | batch  6272 | ms/batch 808.19 | loss     5.2051 | aux_loss     0.0002 | ppl   182.1955
+INFO:root:Learning rate has changed to: 0.0007811889719953762
+INFO:root:| epoch   1 | batch  6400 | ms/batch 809.53 | loss     5.2053 | aux_loss     0.0002 | ppl   182.2432
+INFO:root:Learning rate has changed to: 0.0007734935259234094
+INFO:root:| epoch   1 | batch  6528 | ms/batch 806.16 | loss     5.1891 | aux_loss     0.0003 | ppl   179.3089
+INFO:root:Learning rate has changed to: 0.0007660211113915147
+INFO:root:| epoch   1 | batch  6656 | ms/batch 800.19 | loss     5.1757 | aux_loss     0.0002 | ppl   176.9196
+INFO:root:Learning rate has changed to: 0.0007587611591824277
+INFO:root:| epoch   1 | batch  6784 | ms/batch 801.96 | loss     5.1737 | aux_loss     0.0003 | ppl   176.5670
+INFO:root:Learning rate has changed to: 0.0007517037882531398
+INFO:root:| epoch   1 | batch  6912 | ms/batch 811.86 | loss     5.1593 | aux_loss     0.0002 | ppl   174.0501
+INFO:root:Learning rate has changed to: 0.0007448397491761886
+INFO:root:| epoch   1 | batch  7040 | ms/batch 807.35 | loss     5.1486 | aux_loss     0.0003 | ppl   172.1972
+INFO:root:Learning rate has changed to: 0.000738160373160463
+INFO:root:| epoch   1 | batch  7168 | ms/batch 798.55 | loss     5.1446 | aux_loss     0.0003 | ppl   171.4980
+INFO:root:Learning rate has changed to: 0.0007316575260124783
+INFO:root:| epoch   1 | batch  7296 | ms/batch 806.47 | loss     5.1396 | aux_loss     0.0002 | ppl   170.6552
+INFO:root:Learning rate has changed to: 0.0007253235664820743
+INFO:root:| epoch   1 | batch  7424 | ms/batch 808.23 | loss     5.1234 | aux_loss     0.0003 | ppl   167.9133
+INFO:root:Learning rate has changed to: 0.0007191513085074671
+INFO:root:| epoch   1 | batch  7552 | ms/batch 806.68 | loss     5.1182 | aux_loss     0.0003 | ppl   167.0264
+INFO:root:Learning rate has changed to: 0.0007131339869354735
+INFO:root:| epoch   1 | batch  7680 | ms/batch 807.22 | loss     5.1103 | aux_loss     0.0003 | ppl   165.7137
+INFO:root:Learning rate has changed to: 0.0007072652263450946
+INFO:root:| epoch   1 | batch  7808 | ms/batch 806.38 | loss     5.1084 | aux_loss     0.0002 | ppl   165.4111
+INFO:root:Learning rate has changed to: 0.0007015390126478009
+INFO:root:| epoch   1 | batch  7936 | ms/batch 805.85 | loss     5.1006 | aux_loss     0.0002 | ppl   164.1221
+INFO:root:Learning rate has changed to: 0.0006959496671769054
+INFO:root:| epoch   1 | batch  8064 | ms/batch 805.79 | loss     5.0972 | aux_loss     0.0002 | ppl   163.5707
+INFO:root:Learning rate has changed to: 0.0006904918230122436
+INFO:root:| epoch   1 | batch  8192 | ms/batch 807.42 | loss     5.0846 | aux_loss     0.0003 | ppl   161.5161
+INFO:root:Learning rate has changed to: 0.0006851604033157801
+INFO:root:| epoch   1 | batch  8320 | ms/batch 812.04 | loss     5.0780 | aux_loss     0.0003 | ppl   160.4577
+INFO:root:Learning rate has changed to: 0.0006799506014793461
+INFO:root:| epoch   1 | batch  8448 | ms/batch 809.54 | loss     5.0718 | aux_loss     0.0003 | ppl   159.4672
+INFO:root:Learning rate has changed to: 0.0006748578629080593
+INFO:root:| epoch   1 | batch  8576 | ms/batch 809.05 | loss     5.0693 | aux_loss     0.0003 | ppl   159.0594
+INFO:root:Learning rate has changed to: 0.0006698778682824983
+INFO:root:| epoch   1 | batch  8704 | ms/batch 804.75 | loss     5.0511 | aux_loss     0.0002 | ppl   156.1995
+INFO:root:Learning rate has changed to: 0.0006650065181598327
+INFO:root:| epoch   1 | batch  8832 | ms/batch 809.00 | loss     5.0536 | aux_loss     0.0002 | ppl   156.5790
+INFO:root:Learning rate has changed to: 0.0006602399187891344
+INFO:root:| epoch   1 | batch  8960 | ms/batch 808.01 | loss     5.0503 | aux_loss     0.0003 | ppl   156.0745
+INFO:root:Learning rate has changed to: 0.000655574369029326
+INFO:root:| epoch   1 | batch  9088 | ms/batch 806.04 | loss     5.0429 | aux_loss     0.0002 | ppl   154.9184
+INFO:root:Learning rate has changed to: 0.0006510063482698811
+INFO:root:| epoch   1 | batch  9216 | ms/batch 811.16 | loss     5.0311 | aux_loss     0.0003 | ppl   153.1005
+INFO:root:Learning rate has changed to: 0.0006465325052646858
+INFO:root:| epoch   1 | batch  9344 | ms/batch 805.29 | loss     5.0366 | aux_loss     0.0002 | ppl   153.9516
+INFO:root:Learning rate has changed to: 0.0006421496477985839
+INFO:root:| epoch   1 | batch  9472 | ms/batch 804.89 | loss     5.0295 | aux_loss     0.0003 | ppl   152.8637
+INFO:root:Learning rate has changed to: 0.0006378547331142038
+INFO:root:| epoch   1 | batch  9600 | ms/batch 808.56 | loss     5.0182 | aux_loss     0.0003 | ppl   151.1319
+INFO:root:Learning rate has changed to: 0.0006336448590338265
+INFO:root:| epoch   1 | batch  9728 | ms/batch 865.81 | loss     5.0214 | aux_loss     0.0002 | ppl   151.6223
+INFO:root:Learning rate has changed to: 0.000629517255717441
+INFO:root:| epoch   1 | batch  9856 | ms/batch 807.95 | loss     5.0096 | aux_loss     0.0002 | ppl   149.8389
+INFO:root:Learning rate has changed to: 0.000625469278003796
+INFO:root:| epoch   1 | batch  9984 | ms/batch 808.02 | loss     5.0093 | aux_loss     0.0002 | ppl   149.7948
+INFO:root:Learning rate has changed to: 0.0006214983982863358
+INFO:root:| epoch   1 | batch 10112 | ms/batch 807.65 | loss     5.0012 | aux_loss     0.0003 | ppl   148.5952
+INFO:root:Learning rate has changed to: 0.0006176021998804238
+INFO:root:| epoch   1 | batch 10240 | ms/batch 808.84 | loss     4.9952 | aux_loss     0.0003 | ppl   147.7086
+INFO:root:Learning rate has changed to: 0.0006137783708423093
+INFO:root:| epoch   1 | batch 10368 | ms/batch 801.76 | loss     4.9892 | aux_loss     0.0002 | ppl   146.8147
+INFO:root:Learning rate has changed to: 0.0006100246982039221
+INFO:root:| epoch   1 | batch 10496 | ms/batch 811.54 | loss     4.9866 | aux_loss     0.0003 | ppl   146.4371
+INFO:root:Learning rate has changed to: 0.0006063390625908325
+INFO:root:| epoch   1 | batch 10624 | ms/batch 803.92 | loss     4.9938 | aux_loss     0.0003 | ppl   147.4972
+INFO:root:Learning rate has changed to: 0.0006027194331936383
+INFO:root:| epoch   1 | batch 10752 | ms/batch 808.23 | loss     4.9807 | aux_loss     0.0003 | ppl   145.5764
+INFO:root:Learning rate has changed to: 0.000599163863065678
+INFO:root:| epoch   1 | batch 10880 | ms/batch 809.49 | loss     4.9802 | aux_loss     0.0003 | ppl   145.5071
+INFO:root:Learning rate has changed to: 0.0005956704847223289
+INFO:root:| epoch   1 | batch 11008 | ms/batch 816.20 | loss     4.9779 | aux_loss     0.0003 | ppl   145.1724
+INFO:root:Learning rate has changed to: 0.0005922375060193007
+INFO:root:| epoch   1 | batch 11136 | ms/batch 813.44 | loss     4.9667 | aux_loss     0.0002 | ppl   143.5547
+INFO:root:Learning rate has changed to: 0.000588863206289254
+INFO:root:| epoch   1 | batch 11264 | ms/batch 813.76 | loss     4.9648 | aux_loss     0.0003 | ppl   143.2807
+INFO:root:Learning rate has changed to: 0.0005855459327178278
+INFO:root:| epoch   1 | batch 11392 | ms/batch 810.16 | loss     4.9701 | aux_loss     0.0003 | ppl   144.0369
+INFO:root:Learning rate has changed to: 0.000582284096941737
+INFO:root:| epoch   1 | batch 11520 | ms/batch 802.48 | loss     4.9602 | aux_loss     0.0003 | ppl   142.6222
+INFO:root:Learning rate has changed to: 0.0005790761718530356
+INFO:root:| epoch   1 | batch 11648 | ms/batch 810.24 | loss     4.9518 | aux_loss     0.0002 | ppl   141.4287
+INFO:root:Learning rate has changed to: 0.0005759206885949388
+INFO:root:| epoch   1 | batch 11776 | ms/batch 810.30 | loss     4.9454 | aux_loss     0.0003 | ppl   140.5314
+INFO:root:Learning rate has changed to: 0.0005728162337357832
+INFO:root:| epoch   1 | batch 11904 | ms/batch 804.61 | loss     4.9494 | aux_loss     0.0003 | ppl   141.0897
+INFO:root:Learning rate has changed to: 0.0005697614466087703
+INFO:root:| epoch   1 | batch 12032 | ms/batch 800.92 | loss     4.9419 | aux_loss     0.0002 | ppl   140.0298
+INFO:root:Learning rate has changed to: 0.0005667550168061255
+INFO:root:| epoch   1 | batch 12160 | ms/batch 814.30 | loss     4.9454 | aux_loss     0.0002 | ppl   140.5276
+INFO:root:Learning rate has changed to: 0.000563795681817187
+INFO:root:| epoch   1 | batch 12288 | ms/batch 811.80 | loss     4.9443 | aux_loss     0.0003 | ppl   140.3715
+INFO:root:Learning rate has changed to: 0.0005608822248007571
+INFO:root:| epoch   1 | batch 12416 | ms/batch 806.92 | loss     4.9309 | aux_loss     0.0002 | ppl   138.5074
+INFO:root:Learning rate has changed to: 0.0005580134724827885
+INFO:root:| epoch   1 | batch 12544 | ms/batch 807.26 | loss     4.9336 | aux_loss     0.0003 | ppl   138.8743
+INFO:root:Learning rate has changed to: 0.0005551882931711544
+INFO:root:| epoch   1 | batch 12672 | ms/batch 802.15 | loss     4.9184 | aux_loss     0.0003 | ppl   136.7793
+INFO:root:Learning rate has changed to: 0.0005524055948798758
+INFO:root:| epoch   1 | batch 12800 | ms/batch 810.15 | loss     4.9276 | aux_loss     0.0003 | ppl   138.0446
+INFO:root:Learning rate has changed to: 0.000549664323555742
+INFO:root:| epoch   1 | batch 12928 | ms/batch 804.27 | loss     4.9160 | aux_loss     0.0003 | ppl   136.4521
+INFO:root:Learning rate has changed to: 0.0005469634614007854
+INFO:root:| epoch   1 | batch 13056 | ms/batch 803.84 | loss     4.9207 | aux_loss     0.0003 | ppl   137.0936
+INFO:root:Learning rate has changed to: 0.000544302025284546
+INFO:root:| epoch   1 | batch 13184 | ms/batch 808.35 | loss     4.9170 | aux_loss     0.0003 | ppl   136.5898
+INFO:root:Learning rate has changed to: 0.0005416790652405008
+INFO:root:| epoch   1 | batch 13312 | ms/batch 808.51 | loss     4.9144 | aux_loss     0.0003 | ppl   136.2310
+INFO:root:Learning rate has changed to: 0.0005390936630414364
+INFO:root:| epoch   1 | batch 13440 | ms/batch 807.90 | loss     4.9109 | aux_loss     0.0002 | ppl   135.7623
+INFO:root:Learning rate has changed to: 0.0005365449308489108
+INFO:root:| epoch   1 | batch 13568 | ms/batch 808.80 | loss     4.9001 | aux_loss     0.0003 | ppl   134.3009
+INFO:root:Learning rate has changed to: 0.0005340320099322963
+INFO:root:| epoch   1 | batch 13696 | ms/batch 810.80 | loss     4.9004 | aux_loss     0.0003 | ppl   134.3408
+INFO:root:Learning rate has changed to: 0.0005315540694532029
+INFO:root:| epoch   1 | batch 13824 | ms/batch 808.96 | loss     4.9036 | aux_loss     0.0003 | ppl   134.7714
+INFO:root:Learning rate has changed to: 0.0005291103053113766
+INFO:root:| epoch   1 | batch 13952 | ms/batch 808.85 | loss     4.8977 | aux_loss     0.0002 | ppl   133.9750
+INFO:root:Learning rate has changed to: 0.0005266999390484326
+INFO:root:| epoch   1 | batch 14080 | ms/batch 809.23 | loss     4.8940 | aux_loss     0.0003 | ppl   133.4822
+INFO:root:Learning rate has changed to: 0.0005243222168060261
+INFO:root:| epoch   1 | batch 14208 | ms/batch 804.71 | loss     4.8969 | aux_loss     0.0002 | ppl   133.8737
+INFO:root:Learning rate has changed to: 0.0005219764083352978
+INFO:root:| epoch   1 | batch 14336 | ms/batch 808.65 | loss     4.8841 | aux_loss     0.0003 | ppl   132.1774
+INFO:root:Learning rate has changed to: 0.0005196618060546367
+INFO:root:| epoch   1 | batch 14464 | ms/batch 821.81 | loss     4.8844 | aux_loss     0.0003 | ppl   132.2155
+INFO:root:Learning rate has changed to: 0.0005173777241529985
+INFO:root:| epoch   1 | batch 14592 | ms/batch 824.38 | loss     4.8854 | aux_loss     0.0003 | ppl   132.3433
+INFO:root:Learning rate has changed to: 0.0005151234977362014
+INFO:root:| epoch   1 | batch 14720 | ms/batch 806.47 | loss     4.8769 | aux_loss     0.0003 | ppl   131.2278
+INFO:root:Learning rate has changed to: 0.000512898482013784
+INFO:root:| epoch   1 | batch 14848 | ms/batch 809.62 | loss     4.8796 | aux_loss     0.0003 | ppl   131.5829
+INFO:root:Learning rate has changed to: 0.0005107020515241682
+INFO:root:| epoch   1 | batch 14976 | ms/batch 806.10 | loss     4.8848 | aux_loss     0.0003 | ppl   132.2625
+INFO:root:Learning rate has changed to: 0.0005085335993960123
+INFO:root:| epoch   1 | batch 15104 | ms/batch 812.12 | loss     4.8723 | aux_loss     0.0002 | ppl   130.6187
+INFO:root:Learning rate has changed to: 0.0005063925366437737
+INFO:root:| epoch   1 | batch 15232 | ms/batch 817.09 | loss     4.8655 | aux_loss     0.0003 | ppl   129.7329
+INFO:root:Learning rate has changed to: 0.0005042782914956237
+INFO:root:| epoch   1 | batch 15360 | ms/batch 806.06 | loss     4.8711 | aux_loss     0.0003 | ppl   130.4586
+INFO:root:Learning rate has changed to: 0.0005021903087519742
+INFO:root:| epoch   1 | batch 15488 | ms/batch 818.37 | loss     4.8620 | aux_loss     0.0002 | ppl   129.2829
+INFO:root:Learning rate has changed to: 0.0005001280491729809
+INFO:root:| epoch   1 | batch 15616 | ms/batch 807.25 | loss     4.8660 | aux_loss     0.0003 | ppl   129.7972
+INFO:root:Learning rate has changed to: 0.0004980909888934895
+INFO:root:| epoch   1 | batch 15744 | ms/batch 809.44 | loss     4.8663 | aux_loss     0.0002 | ppl   129.8382
+INFO:root:Learning rate has changed to: 0.0004960786188639821
+INFO:root:| epoch   1 | batch 15872 | ms/batch 810.53 | loss     4.8592 | aux_loss     0.0003 | ppl   128.9207
+INFO:root:Learning rate has changed to: 0.0004940904443161719
+INFO:root:| epoch   1 | batch 16000 | ms/batch 805.68 | loss     4.8547 | aux_loss     0.0002 | ppl   128.3472
+INFO:root:Learning rate has changed to: 0.0004921259842519685
+INFO:root:| epoch   1 | batch 16128 | ms/batch 808.03 | loss     4.8589 | aux_loss     0.0003 | ppl   128.8869
+INFO:root:Learning rate has changed to: 0.0004901847709546187
+INFO:root:| epoch   1 | batch 16256 | ms/batch 811.67 | loss     4.8485 | aux_loss     0.0003 | ppl   127.5542
+INFO:root:Learning rate has changed to: 0.0004882663495208925
+INFO:root:| epoch   1 | batch 16384 | ms/batch 803.96 | loss     4.8505 | aux_loss     0.0003 | ppl   127.8106
+INFO:root:Learning rate has changed to: 0.0004863702774132529
+INFO:root:| epoch   1 | batch 16512 | ms/batch 804.73 | loss     4.8464 | aux_loss     0.0002 | ppl   127.2811
+INFO:root:Learning rate has changed to: 0.00048449612403100775
+INFO:root:| epoch   1 | batch 16640 | ms/batch 806.87 | loss     4.8404 | aux_loss     0.0003 | ppl   126.5255
+INFO:root:Learning rate has changed to: 0.0004826434702995
+INFO:root:| epoch   1 | batch 16768 | ms/batch 814.11 | loss     4.8316 | aux_loss     0.0002 | ppl   125.4136
+INFO:root:Learning rate has changed to: 0.0004808119082764477
+INFO:root:| epoch   1 | batch 16896 | ms/batch 807.42 | loss     4.8408 | aux_loss     0.0003 | ppl   126.5670
+INFO:root:Learning rate has changed to: 0.0004790010407745921
+INFO:root:| epoch   1 | batch 17024 | ms/batch 810.54 | loss     4.8335 | aux_loss     0.0003 | ppl   125.6559
+INFO:root:Learning rate has changed to: 0.0004772104809998632
+INFO:root:| epoch   1 | batch 17152 | ms/batch 805.13 | loss     4.8373 | aux_loss     0.0002 | ppl   126.1255
+INFO:root:Learning rate has changed to: 0.0004754398522043128
+INFO:root:| epoch   1 | batch 17280 | ms/batch 809.46 | loss     4.8403 | aux_loss     0.0002 | ppl   126.5069
+INFO:root:Learning rate has changed to: 0.0004736887873531089
+INFO:root:| epoch   1 | batch 17408 | ms/batch 807.05 | loss     4.8338 | aux_loss     0.0003 | ppl   125.6846
+INFO:root:Learning rate has changed to: 0.0004719569288049228
+INFO:root:| epoch   1 | batch 17536 | ms/batch 811.25 | loss     4.8333 | aux_loss     0.0002 | ppl   125.6197
+INFO:root:Learning rate has changed to: 0.0004702439280050769
+INFO:root:| epoch   1 | batch 17664 | ms/batch 808.38 | loss     4.8344 | aux_loss     0.0003 | ppl   125.7582
+INFO:root:Learning rate has changed to: 0.00046854944519085544
+INFO:root:| epoch   1 | batch 17792 | ms/batch 807.97 | loss     4.8251 | aux_loss     0.0002 | ppl   124.6004
+INFO:root:Learning rate has changed to: 0.0004668731491084129
+INFO:root:| epoch   1 | batch 17920 | ms/batch 806.92 | loss     4.8258 | aux_loss     0.0003 | ppl   124.6873
+INFO:root:Learning rate has changed to: 0.0004652147167407435
+INFO:root:| epoch   1 | batch 18048 | ms/batch 805.97 | loss     4.8264 | aux_loss     0.0002 | ppl   124.7573
+INFO:root:Learning rate has changed to: 0.00046357383304620586
+INFO:root:| epoch   1 | batch 18176 | ms/batch 809.31 | loss     4.8200 | aux_loss     0.0002 | ppl   123.9628
+INFO:root:Learning rate has changed to: 0.00046195019070712135
+INFO:root:| epoch   1 | batch 18304 | ms/batch 814.70 | loss     4.8226 | aux_loss     0.0003 | ppl   124.2835
+INFO:root:Learning rate has changed to: 0.00046034348988799074
+INFO:root:| epoch   1 | batch 18432 | ms/batch 812.24 | loss     4.8115 | aux_loss     0.0002 | ppl   122.9137
+INFO:root:Learning rate has changed to: 0.0004587534380028977
+INFO:root:| epoch   1 | batch 18560 | ms/batch 814.21 | loss     4.8099 | aux_loss     0.0002 | ppl   122.7194
+INFO:root:Learning rate has changed to: 0.0004571797494916888
+INFO:root:| epoch   1 | batch 18688 | ms/batch 809.65 | loss     4.8094 | aux_loss     0.0002 | ppl   122.6626
+INFO:root:Learning rate has changed to: 0.00045562214560454224
+INFO:root:| epoch   1 | batch 18816 | ms/batch 803.09 | loss     4.8084 | aux_loss     0.0002 | ppl   122.5315
+INFO:root:Learning rate has changed to: 0.00045408035419455513
+INFO:root:| epoch   1 | batch 18944 | ms/batch 806.28 | loss     4.8120 | aux_loss     0.0003 | ppl   122.9777
+INFO:root:Learning rate has changed to: 0.00045255410951799957
+INFO:root:| epoch   1 | batch 19072 | ms/batch 810.65 | loss     4.8114 | aux_loss     0.0003 | ppl   122.8983
+INFO:root:Learning rate has changed to: 0.000451043152041915
+INFO:root:| epoch   1 | batch 19200 | ms/batch 800.95 | loss     4.8057 | aux_loss     0.0002 | ppl   122.2043
+INFO:root:Learning rate has changed to: 0.0004495472282587198
+INFO:root:| epoch   1 | batch 19328 | ms/batch 859.40 | loss     4.7993 | aux_loss     0.0002 | ppl   121.4264
+INFO:root:Learning rate has changed to: 0.0004480660905075418
+INFO:root:| epoch   1 | batch 19456 | ms/batch 819.73 | loss     4.8047 | aux_loss     0.0003 | ppl   122.0814
+INFO:root:Learning rate has changed to: 0.000446599496801982
+INFO:root:| epoch   1 | batch 19584 | ms/batch 809.93 | loss     4.8043 | aux_loss     0.0003 | ppl   122.0386
+INFO:root:Learning rate has changed to: 0.000445147210664039
+INFO:root:| epoch   1 | batch 19712 | ms/batch 810.14 | loss     4.7966 | aux_loss     0.0003 | ppl   121.0954
+INFO:root:Learning rate has changed to: 0.00044370900096393637
+INFO:root:| epoch   1 | batch 19840 | ms/batch 810.63 | loss     4.8035 | aux_loss     0.0002 | ppl   121.9358
+INFO:root:Learning rate has changed to: 0.00044228464176560516
+INFO:root:| epoch   1 | batch 19968 | ms/batch 806.61 | loss     4.8022 | aux_loss     0.0003 | ppl   121.7792
+INFO:root:Learning rate has changed to: 0.00044087391217758845
+INFO:root:| epoch   1 | batch 20096 | ms/batch 809.11 | loss     4.7855 | aux_loss     0.0003 | ppl   119.7595
+INFO:root:Learning rate has changed to: 0.00043947659620914375
+INFO:root:| epoch   1 | batch 20224 | ms/batch 812.06 | loss     4.7968 | aux_loss     0.0002 | ppl   121.1191
+INFO:root:Learning rate has changed to: 0.00043809248263133074
+INFO:root:| epoch   1 | batch 20352 | ms/batch 808.56 | loss     4.7873 | aux_loss     0.0003 | ppl   119.9820
+INFO:root:Learning rate has changed to: 0.00043672136484288127
+INFO:root:| epoch   1 | batch 20480 | ms/batch 811.42 | loss     4.7882 | aux_loss     0.0003 | ppl   120.0815
+INFO:root:Learning rate has changed to: 0.0004353630407406583
+INFO:root:| epoch   1 | batch 20608 | ms/batch 809.97 | loss     4.7945 | aux_loss     0.0003 | ppl   120.8411
+INFO:root:Learning rate has changed to: 0.00043401731259452
+INFO:root:| epoch   1 | batch 20736 | ms/batch 806.76 | loss     4.7917 | aux_loss     0.0002 | ppl   120.5039
+INFO:root:Learning rate has changed to: 0.00043268398692641186
+INFO:root:| epoch   1 | batch 20864 | ms/batch 804.43 | loss     4.7854 | aux_loss     0.0002 | ppl   119.7494
+INFO:root:Learning rate has changed to: 0.00043136287439352007
+INFO:root:| epoch   1 | batch 20992 | ms/batch 808.78 | loss     4.7866 | aux_loss     0.0002 | ppl   119.8978
+INFO:root:Learning rate has changed to: 0.0004300537896753256
+INFO:root:| epoch   1 | batch 21120 | ms/batch 809.09 | loss     4.7812 | aux_loss     0.0002 | ppl   119.2450
+INFO:root:Learning rate has changed to: 0.0004287565513644057
+INFO:root:| epoch   1 | batch 21248 | ms/batch 814.16 | loss     4.7708 | aux_loss     0.0002 | ppl   118.0094
+INFO:root:Learning rate has changed to: 0.00042747098186083726
+INFO:root:| epoch   1 | batch 21376 | ms/batch 804.08 | loss     4.7752 | aux_loss     0.0002 | ppl   118.5340
+INFO:root:Learning rate has changed to: 0.0004261969072700621
+INFO:root:| epoch   1 | batch 21504 | ms/batch 807.60 | loss     4.7773 | aux_loss     0.0002 | ppl   118.7792
+INFO:root:Learning rate has changed to: 0.000424934157304081
+INFO:root:| epoch   1 | batch 21632 | ms/batch 810.45 | loss     4.7689 | aux_loss     0.0003 | ppl   117.7867
+INFO:root:Learning rate has changed to: 0.0004236825651858491
+INFO:root:| epoch   1 | batch 21760 | ms/batch 806.99 | loss     4.7682 | aux_loss     0.0002 | ppl   117.7034
+INFO:root:Learning rate has changed to: 0.00042244196755675034
+INFO:root:| epoch   1 | batch 21888 | ms/batch 807.76 | loss     4.7687 | aux_loss     0.0002 | ppl   117.7606
+INFO:root:Learning rate has changed to: 0.00042121220438703526
+INFO:root:| epoch   1 | batch 22016 | ms/batch 803.81 | loss     4.7715 | aux_loss     0.0003 | ppl   118.0974
+INFO:root:Learning rate has changed to: 0.00041999311888910973
+INFO:root:| epoch   1 | batch 22144 | ms/batch 808.59 | loss     4.7651 | aux_loss     0.0002 | ppl   117.3420
+INFO:root:Learning rate has changed to: 0.00041878455743356877
+INFO:root:| epoch   1 | batch 22272 | ms/batch 809.55 | loss     4.7640 | aux_loss     0.0003 | ppl   117.2183
+INFO:root:Learning rate has changed to: 0.0004175863694678727
+INFO:root:| epoch   1 | batch 22400 | ms/batch 815.81 | loss     4.7683 | aux_loss     0.0002 | ppl   117.7137
+INFO:root:Learning rate has changed to: 0.0004163984074375683
+INFO:root:| epoch   1 | batch 22528 | ms/batch 804.54 | loss     4.7627 | aux_loss     0.0003 | ppl   117.0565
+INFO:root:Learning rate has changed to: 0.00041522052670996124
+INFO:root:| epoch   1 | batch 22656 | ms/batch 803.11 | loss     4.7538 | aux_loss     0.0003 | ppl   116.0257
+INFO:root:Learning rate has changed to: 0.00041405258550015025
+INFO:root:| epoch   1 | batch 22784 | ms/batch 810.73 | loss     4.7653 | aux_loss     0.0003 | ppl   117.3718
+INFO:root:Learning rate has changed to: 0.0004128944447993371
+INFO:root:| epoch   1 | batch 22912 | ms/batch 808.80 | loss     4.7628 | aux_loss     0.0002 | ppl   117.0784
+INFO:root:Learning rate has changed to: 0.00041174596830532994
+INFO:root:| epoch   1 | batch 23040 | ms/batch 801.90 | loss     4.7576 | aux_loss     0.0003 | ppl   116.4633
+INFO:root:Learning rate has changed to: 0.0004106070223551613
+INFO:root:| epoch   1 | batch 23168 | ms/batch 802.12 | loss     4.7574 | aux_loss     0.0002 | ppl   116.4459
+INFO:root:Learning rate has changed to: 0.0004094774758597452
+INFO:root:| epoch   1 | batch 23296 | ms/batch 811.13 | loss     4.7598 | aux_loss     0.0002 | ppl   116.7174
+INFO:root:Learning rate has changed to: 0.0004083572002405007
+INFO:root:| epoch   1 | batch 23424 | ms/batch 806.96 | loss     4.7589 | aux_loss     0.0002 | ppl   116.6186
+INFO:root:Learning rate has changed to: 0.00040724606936787234
+INFO:root:| epoch   1 | batch 23552 | ms/batch 803.70 | loss     4.7486 | aux_loss     0.0002 | ppl   115.4188
+INFO:root:Learning rate has changed to: 0.0004061439595016805
+INFO:root:| epoch   1 | batch 23680 | ms/batch 803.45 | loss     4.7490 | aux_loss     0.0002 | ppl   115.4707
+INFO:root:Learning rate has changed to: 0.00040505074923323866
+INFO:root:| epoch   1 | batch 23808 | ms/batch 809.76 | loss     4.7533 | aux_loss     0.0002 | ppl   115.9622
+INFO:root:Learning rate has changed to: 0.0004039663194291743
+INFO:root:| epoch   1 | batch 23936 | ms/batch 805.64 | loss     4.7527 | aux_loss     0.0002 | ppl   115.8987
+INFO:root:Learning rate has changed to: 0.00040289055317689637
+INFO:root:| epoch   1 | batch 24064 | ms/batch 807.05 | loss     4.7568 | aux_loss     0.0003 | ppl   116.3686
+INFO:root:Learning rate has changed to: 0.000401823335731651
+INFO:root:| epoch   1 | batch 24192 | ms/batch 821.53 | loss     4.7526 | aux_loss     0.0002 | ppl   115.8852
+INFO:root:Learning rate has changed to: 0.00040076455446511267
+INFO:root:| epoch   1 | batch 24320 | ms/batch 821.42 | loss     4.7531 | aux_loss     0.0002 | ppl   115.9425
+INFO:root:Learning rate has changed to: 0.0003997140988154564
+INFO:root:| epoch   1 | batch 24448 | ms/batch 803.20 | loss     4.7464 | aux_loss     0.0003 | ppl   115.1682
+INFO:root:Learning rate has changed to: 0.0003986718602388632
+INFO:root:| epoch   1 | batch 24576 | ms/batch 808.72 | loss     4.7551 | aux_loss     0.0002 | ppl   116.1767
+INFO:root:Learning rate has changed to: 0.0003976377321624085
+INFO:root:| epoch   1 | batch 24704 | ms/batch 805.22 | loss     4.7531 | aux_loss     0.0003 | ppl   115.9487
+INFO:root:Learning rate has changed to: 0.0003966116099382881
+INFO:root:| epoch   1 | batch 24832 | ms/batch 811.86 | loss     4.7436 | aux_loss     0.0002 | ppl   114.8503
+INFO:root:Learning rate has changed to: 0.0003955933907993368
+INFO:root:| epoch   1 | batch 24960 | ms/batch 815.24 | loss     4.7318 | aux_loss     0.0003 | ppl   113.5024
+INFO:root:Learning rate has changed to: 0.0003945829738157969
+INFO:root:| epoch   1 | batch 25088 | ms/batch 810.54 | loss     4.7503 | aux_loss     0.0002 | ppl   115.6212
+INFO:root:Learning rate has changed to: 0.00039358025985329484
+INFO:root:| epoch   1 | batch 25216 | ms/batch 803.31 | loss     4.7433 | aux_loss     0.0003 | ppl   114.8123
+INFO:root:Learning rate has changed to: 0.000392585151531987
+INFO:root:| epoch   1 | batch 25344 | ms/batch 805.57 | loss     4.7396 | aux_loss     0.0002 | ppl   114.3839
+INFO:root:Learning rate has changed to: 0.0003915975531868356
+INFO:root:| epoch   1 | batch 25472 | ms/batch 807.27 | loss     4.7420 | aux_loss     0.0003 | ppl   114.6662
+INFO:root:Learning rate has changed to: 0.0003906173708289789
+INFO:root:| epoch   1 | batch 25600 | ms/batch 802.60 | loss     4.7274 | aux_loss     0.0002 | ppl   112.9961
+INFO:root:Learning rate has changed to: 0.000389644512108159
+INFO:root:| epoch   1 | batch 25728 | ms/batch 810.32 | loss     4.7348 | aux_loss     0.0002 | ppl   113.8437
+INFO:root:Learning rate has changed to: 0.0003886788862761746
+INFO:root:| epoch   1 | batch 25856 | ms/batch 813.72 | loss     4.7323 | aux_loss     0.0002 | ppl   113.5556
+INFO:root:Learning rate has changed to: 0.00038772040415132464
+INFO:root:| epoch   1 | batch 25984 | ms/batch 816.01 | loss     4.7374 | aux_loss     0.0002 | ppl   114.1323
+INFO:root:Learning rate has changed to: 0.0003867689780838117
+INFO:root:| epoch   1 | batch 26112 | ms/batch 810.12 | loss     4.7309 | aux_loss     0.0002 | ppl   113.4018
+INFO:root:Learning rate has changed to: 0.0003858245219220753
+INFO:root:| epoch   1 | batch 26240 | ms/batch 812.08 | loss     4.7314 | aux_loss     0.0002 | ppl   113.4509
+INFO:root:Learning rate has changed to: 0.0003848869509800246
+INFO:root:| epoch   1 | batch 26368 | ms/batch 804.58 | loss     4.7277 | aux_loss     0.0003 | ppl   113.0370
+INFO:root:Learning rate has changed to: 0.00038395618200514237
+INFO:root:| epoch   1 | batch 26496 | ms/batch 807.46 | loss     4.7251 | aux_loss     0.0002 | ppl   112.7464
+INFO:root:Learning rate has changed to: 0.00038303213314743476
+INFO:root:| epoch   1 | batch 26624 | ms/batch 808.47 | loss     4.7322 | aux_loss     0.0002 | ppl   113.5484
+INFO:root:Learning rate has changed to: 0.00038211472392919737
+INFO:root:| epoch   1 | batch 26752 | ms/batch 808.98 | loss     4.7305 | aux_loss     0.0002 | ppl   113.3494
+INFO:root:Learning rate has changed to: 0.0003812038752155755
+INFO:root:| epoch   1 | batch 26880 | ms/batch 816.18 | loss     4.7282 | aux_loss     0.0002 | ppl   113.0937
+INFO:root:Learning rate has changed to: 0.00038029950918589187
+INFO:root:| epoch   1 | batch 27008 | ms/batch 816.35 | loss     4.7213 | aux_loss     0.0003 | ppl   112.3117
+INFO:root:Learning rate has changed to: 0.00037940154930571937
+INFO:root:| epoch   1 | batch 27136 | ms/batch 811.04 | loss     4.7283 | aux_loss     0.0003 | ppl   113.1019
+INFO:root:Learning rate has changed to: 0.0003785099202996757
+INFO:root:| epoch   1 | batch 27264 | ms/batch 806.20 | loss     4.7166 | aux_loss     0.0002 | ppl   111.7891
+INFO:root:Learning rate has changed to: 0.00037762454812491787
+INFO:root:| epoch   1 | batch 27392 | ms/batch 804.38 | loss     4.7221 | aux_loss     0.0002 | ppl   112.4057
+INFO:root:Learning rate has changed to: 0.0003767453599453158
+INFO:root:| epoch   1 | batch 27520 | ms/batch 813.07 | loss     4.7191 | aux_loss     0.0002 | ppl   112.0691
+INFO:root:Learning rate has changed to: 0.00037587228410628415
+INFO:root:| epoch   1 | batch 27648 | ms/batch 819.20 | loss     4.7216 | aux_loss     0.0002 | ppl   112.3425
+INFO:root:Learning rate has changed to: 0.0003750052501102526
+INFO:root:| epoch   1 | batch 27776 | ms/batch 809.96 | loss     4.7136 | aux_loss     0.0002 | ppl   111.4538
+INFO:root:Learning rate has changed to: 0.00037414418859275575
+INFO:root:| epoch   1 | batch 27904 | ms/batch 808.59 | loss     4.7201 | aux_loss     0.0002 | ppl   112.1800
+INFO:root:Learning rate has changed to: 0.00037328903129912465
+INFO:root:| epoch   1 | batch 28032 | ms/batch 800.91 | loss     4.7171 | aux_loss     0.0003 | ppl   111.8489
+INFO:root:Learning rate has changed to: 0.00037243971106176087
+INFO:root:| epoch   1 | batch 28160 | ms/batch 805.44 | loss     4.7131 | aux_loss     0.0002 | ppl   111.3931
+INFO:root:Learning rate has changed to: 0.0003715961617779773
+INFO:root:| epoch   1 | batch 28288 | ms/batch 802.81 | loss     4.7173 | aux_loss     0.0002 | ppl   111.8608
+INFO:root:Learning rate has changed to: 0.0003707583183883888
+INFO:root:| epoch   1 | batch 28416 | ms/batch 812.21 | loss     4.7136 | aux_loss     0.0002 | ppl   111.4478
+INFO:root:Learning rate has changed to: 0.0003699261168558353
+INFO:root:| epoch   1 | batch 28544 | ms/batch 805.83 | loss     4.7116 | aux_loss     0.0002 | ppl   111.2320
+INFO:root:Learning rate has changed to: 0.0003690994941448245
+INFO:root:| epoch   1 | batch 28672 | ms/batch 805.56 | loss     4.7207 | aux_loss     0.0002 | ppl   112.2493
+INFO:root:Learning rate has changed to: 0.0003682783882014762
+INFO:root:| epoch   1 | batch 28800 | ms/batch 807.55 | loss     4.7089 | aux_loss     0.0002 | ppl   110.9273
+INFO:root:Learning rate has changed to: 0.00036746273793395633
+INFO:root:| epoch   1 | batch 28928 | ms/batch 816.71 | loss     4.7096 | aux_loss     0.0002 | ppl   111.0084
+INFO:root:Learning rate has changed to: 0.00036665248319338474
+INFO:root:| epoch   1 | batch 29056 | ms/batch 815.04 | loss     4.7035 | aux_loss     0.0002 | ppl   110.3343
+INFO:root:Learning rate has changed to: 0.0003658475647552047
+INFO:root:| epoch   1 | batch 29184 | ms/batch 816.75 | loss     4.7052 | aux_loss     0.0002 | ppl   110.5211
+INFO:root:Learning rate has changed to: 0.0003650479243009998
+INFO:root:| epoch   1 | batch 29312 | ms/batch 809.17 | loss     4.7028 | aux_loss     0.0002 | ppl   110.2607
+INFO:root:Learning rate has changed to: 0.0003642535044007464
+INFO:root:| epoch   1 | batch 29440 | ms/batch 800.65 | loss     4.7007 | aux_loss     0.0002 | ppl   110.0233
+INFO:root:Learning rate has changed to: 0.00036346424849548924
+INFO:root:| epoch   1 | batch 29568 | ms/batch 809.14 | loss     4.7100 | aux_loss     0.0002 | ppl   111.0482
+INFO:root:Learning rate has changed to: 0.00036268010088042765
+INFO:root:| epoch   1 | batch 29696 | ms/batch 808.13 | loss     4.7033 | aux_loss     0.0002 | ppl   110.3138
+INFO:root:Learning rate has changed to: 0.000361901006688402
+INFO:root:| epoch   1 | batch 29824 | ms/batch 811.69 | loss     4.7072 | aux_loss     0.0003 | ppl   110.7367
+INFO:root:Learning rate has changed to: 0.00036112691187376847
+INFO:root:| epoch   1 | batch 29952 | ms/batch 797.18 | loss     4.6952 | aux_loss     0.0002 | ppl   109.4246
+INFO:root:Learning rate has changed to: 0.0003603577631966514
+INFO:root:| epoch   1 | batch 30080 | ms/batch 811.31 | loss     4.6997 | aux_loss     0.0002 | ppl   109.9125
+INFO:root:Learning rate has changed to: 0.00035959350820756345
+INFO:root:| epoch   1 | batch 30208 | ms/batch 806.21 | loss     4.7014 | aux_loss     0.0002 | ppl   110.1061
+INFO:root:Learning rate has changed to: 0.00035883409523238273
+INFO:root:| epoch   1 | batch 30336 | ms/batch 805.81 | loss     4.6938 | aux_loss     0.0002 | ppl   109.2669
+INFO:root:Learning rate has changed to: 0.0003580794733576774
+INFO:root:| epoch   1 | batch 30464 | ms/batch 804.61 | loss     4.6974 | aux_loss     0.0002 | ppl   109.6666
+INFO:root:Learning rate has changed to: 0.00035732959241636876
+INFO:root:| epoch   1 | batch 30592 | ms/batch 807.11 | loss     4.6920 | aux_loss     0.0002 | ppl   109.0692
+INFO:root:Learning rate has changed to: 0.00035658440297372255
+INFO:root:| epoch   1 | batch 30720 | ms/batch 810.23 | loss     4.7025 | aux_loss     0.0003 | ppl   110.2241
+INFO:root:Learning rate has changed to: 0.00035584385631366115
+INFO:root:| epoch   1 | batch 30848 | ms/batch 807.05 | loss     4.6960 | aux_loss     0.0002 | ppl   109.5095
+INFO:root:Learning rate has changed to: 0.0003551079044253861
+INFO:root:| epoch   1 | batch 30976 | ms/batch 795.97 | loss     4.6921 | aux_loss     0.0003 | ppl   109.0840
+INFO:root:Learning rate has changed to: 0.0003543764999903049
+INFO:root:| epoch   1 | batch 31104 | ms/batch 807.37 | loss     4.6897 | aux_loss     0.0002 | ppl   108.8230
+INFO:root:Learning rate has changed to: 0.00035364959636925166
+INFO:root:| epoch   1 | batch 31232 | ms/batch 807.02 | loss     4.6860 | aux_loss     0.0002 | ppl   108.4172
+INFO:root:Learning rate has changed to: 0.0003529271475899958
+INFO:root:| epoch   1 | batch 31360 | ms/batch 803.64 | loss     4.6904 | aux_loss     0.0002 | ppl   108.9005
+INFO:root:Learning rate has changed to: 0.0003522091083350297
+INFO:root:| epoch   1 | batch 31488 | ms/batch 806.38 | loss     4.6858 | aux_loss     0.0002 | ppl   108.3999
+INFO:root:Learning rate has changed to: 0.0003514954339296291
+INFO:root:| epoch   1 | batch 31616 | ms/batch 809.65 | loss     4.6885 | aux_loss     0.0003 | ppl   108.6921
+INFO:root:Learning rate has changed to: 0.00035078608033017785
+INFO:root:| epoch   1 | batch 31744 | ms/batch 810.23 | loss     4.6836 | aux_loss     0.0002 | ppl   108.1559
+INFO:root:Learning rate has changed to: 0.0003500810041127515
+INFO:root:| epoch   1 | batch 31872 | ms/batch 809.21 | loss     4.6882 | aux_loss     0.0002 | ppl   108.6621
+INFO:root:Learning rate has changed to: 0.000349380162461952
+INFO:root:| epoch   1 | batch 32000 | ms/batch 812.74 | loss     4.6886 | aux_loss     0.0003 | ppl   108.7043
+INFO:root:Learning rate has changed to: 0.00034868351315998686
+INFO:root:| epoch   1 | batch 32128 | ms/batch 807.88 | loss     4.6834 | aux_loss     0.0002 | ppl   108.1423
+INFO:root:Learning rate has changed to: 0.00034799101457598795
+INFO:root:| epoch   1 | batch 32256 | ms/batch 801.06 | loss     4.6932 | aux_loss     0.0002 | ppl   109.2046
+INFO:root:Learning rate has changed to: 0.00034730262565556166
+INFO:root:| epoch   1 | batch 32384 | ms/batch 792.81 | loss     4.6802 | aux_loss     0.0002 | ppl   107.7942
+INFO:root:Learning rate has changed to: 0.00034661830591056606
+INFO:root:| epoch   1 | batch 32512 | ms/batch 796.10 | loss     4.6870 | aux_loss     0.0003 | ppl   108.5270
+INFO:root:Learning rate has changed to: 0.0003459380154091089
+INFO:root:| epoch   1 | batch 32640 | ms/batch 791.54 | loss     4.6852 | aux_loss     0.0002 | ppl   108.3307
+INFO:root:Learning rate has changed to: 0.00034526171476576006
+INFO:root:| epoch   1 | batch 32768 | ms/batch 797.64 | loss     4.6874 | aux_loss     0.0002 | ppl   108.5741
+INFO:root:Learning rate has changed to: 0.00034458936513197464
+INFO:root:| epoch   1 | batch 32896 | ms/batch 792.92 | loss     4.6743 | aux_loss     0.0002 | ppl   107.1570
+INFO:root:Learning rate has changed to: 0.0003439209281867193
+INFO:root:| epoch   1 | batch 33024 | ms/batch 826.55 | loss     4.6848 | aux_loss     0.0002 | ppl   108.2932
+INFO:root:Learning rate has changed to: 0.00034325636612729884
+INFO:root:| epoch   1 | batch 33152 | ms/batch 799.31 | loss     4.6820 | aux_loss     0.0002 | ppl   107.9818
+INFO:root:Learning rate has changed to: 0.00034259564166037626
+INFO:root:| epoch   1 | batch 33280 | ms/batch 794.28 | loss     4.6802 | aux_loss     0.0002 | ppl   107.7955
+INFO:root:Learning rate has changed to: 0.0003419387179931828
+INFO:root:| epoch   1 | batch 33408 | ms/batch 798.76 | loss     4.6792 | aux_loss     0.0003 | ppl   107.6807
+INFO:root:Learning rate has changed to: 0.0003412855588249121
+INFO:root:| epoch   1 | batch 33536 | ms/batch 798.69 | loss     4.6797 | aux_loss     0.0002 | ppl   107.7366
+INFO:root:Learning rate has changed to: 0.0003406361283382951
+INFO:root:| epoch   1 | batch 33664 | ms/batch 789.31 | loss     4.6776 | aux_loss     0.0002 | ppl   107.5168
+INFO:root:Learning rate has changed to: 0.00033999039119135007
+INFO:root:| epoch   1 | batch 33792 | ms/batch 813.85 | loss     4.6803 | aux_loss     0.0002 | ppl   107.7979
+INFO:root:Learning rate has changed to: 0.00033934831250930457
+INFO:root:| epoch   1 | batch 33920 | ms/batch 833.30 | loss     4.6651 | aux_loss     0.0002 | ppl   106.1732
+INFO:root:Learning rate has changed to: 0.0003387098578766841
+INFO:root:| epoch   1 | batch 34048 | ms/batch 798.04 | loss     4.6763 | aux_loss     0.0003 | ppl   107.3766
+INFO:root:Learning rate has changed to: 0.00033807499332956406
+INFO:root:| epoch   1 | batch 34176 | ms/batch 789.58 | loss     4.6670 | aux_loss     0.0002 | ppl   106.3761
+INFO:root:Learning rate has changed to: 0.00033744368534798105
+INFO:root:| epoch   1 | batch 34304 | ms/batch 789.51 | loss     4.6683 | aux_loss     0.0002 | ppl   106.5118
+INFO:root:Learning rate has changed to: 0.000336815900848499
+INFO:root:| epoch   1 | batch 34432 | ms/batch 782.19 | loss     4.6703 | aux_loss     0.0002 | ppl   106.7350
+INFO:root:Learning rate has changed to: 0.0003361916071769275
+INFO:root:| epoch   1 | batch 34560 | ms/batch 790.78 | loss     4.6709 | aux_loss     0.0002 | ppl   106.7912
+INFO:root:Learning rate has changed to: 0.00033557077210118755
+INFO:root:| epoch   1 | batch 34688 | ms/batch 781.66 | loss     4.6698 | aux_loss     0.0002 | ppl   106.6760
+INFO:root:Learning rate has changed to: 0.0003349533638043217
+INFO:root:| epoch   1 | batch 34816 | ms/batch 777.35 | loss     4.6773 | aux_loss     0.0002 | ppl   107.4794
+INFO:root:Learning rate has changed to: 0.00033433935087764564
+INFO:root:| epoch   1 | batch 34944 | ms/batch 775.09 | loss     4.6686 | aux_loss     0.0002 | ppl   106.5443
+INFO:root:Learning rate has changed to: 0.0003337287023140366
+INFO:root:| epoch   1 | batch 35072 | ms/batch 789.12 | loss     4.6665 | aux_loss     0.0002 | ppl   106.3292
+INFO:root:Learning rate has changed to: 0.000333121387501357
+INFO:root:| epoch   1 | batch 35200 | ms/batch 789.56 | loss     4.6711 | aux_loss     0.0002 | ppl   106.8107
+INFO:root:Learning rate has changed to: 0.0003325173762160083
+INFO:root:| epoch   1 | batch 35328 | ms/batch 789.57 | loss     4.6699 | aux_loss     0.0002 | ppl   106.6833
+INFO:root:Learning rate has changed to: 0.000331916638616614
+INFO:root:| epoch   1 | batch 35456 | ms/batch 785.19 | loss     4.6622 | aux_loss     0.0002 | ppl   105.8647
+INFO:root:Learning rate has changed to: 0.00033131914523782665
+INFO:root:| epoch   1 | batch 35584 | ms/batch 789.74 | loss     4.6701 | aux_loss     0.0002 | ppl   106.7094
+INFO:root:Learning rate has changed to: 0.00033072486698425795
+INFO:root:| epoch   1 | batch 35712 | ms/batch 789.08 | loss     4.6641 | aux_loss     0.0002 | ppl   106.0700
+INFO:root:Learning rate has changed to: 0.0003301337751245276
+INFO:root:| epoch   1 | batch 35840 | ms/batch 789.79 | loss     4.6682 | aux_loss     0.0002 | ppl   106.5088
+INFO:root:Learning rate has changed to: 0.0003295458412854291
+INFO:root:| epoch   1 | batch 35968 | ms/batch 783.02 | loss     4.6629 | aux_loss     0.0002 | ppl   105.9385
+INFO:root:Learning rate has changed to: 0.0003289610374462092
+INFO:root:| epoch   1 | batch 36096 | ms/batch 777.69 | loss     4.6625 | aux_loss     0.0002 | ppl   105.9046
+INFO:root:Learning rate has changed to: 0.0003283793359329586
+INFO:root:| epoch   1 | batch 36224 | ms/batch 777.54 | loss     4.6608 | aux_loss     0.0002 | ppl   105.7176
+INFO:root:Learning rate has changed to: 0.00032780070941311175
+INFO:root:| epoch   1 | batch 36352 | ms/batch 781.91 | loss     4.6662 | aux_loss     0.0002 | ppl   106.2928
+INFO:root:Learning rate has changed to: 0.0003272251308900524
+INFO:root:| epoch   1 | batch 36480 | ms/batch 790.99 | loss     4.6524 | aux_loss     0.0002 | ppl   104.8368
+INFO:root:Learning rate has changed to: 0.00032665257369782306
+INFO:root:| epoch   1 | batch 36608 | ms/batch 788.46 | loss     4.6667 | aux_loss     0.0002 | ppl   106.3490
+INFO:root:Learning rate has changed to: 0.00032608301149593654
+INFO:root:| epoch   1 | batch 36736 | ms/batch 794.74 | loss     4.6596 | aux_loss     0.0002 | ppl   105.5894
+INFO:root:Learning rate has changed to: 0.0003255164182642857
+INFO:root:| epoch   1 | batch 36864 | ms/batch 793.48 | loss     4.6529 | aux_loss     0.0002 | ppl   104.8896
+INFO:root:Learning rate has changed to: 0.00032495276829815084
+INFO:root:| epoch   1 | batch 36992 | ms/batch 786.92 | loss     4.6564 | aux_loss     0.0002 | ppl   105.2543
+INFO:root:Learning rate has changed to: 0.0003243920362033016
+INFO:root:| epoch   1 | batch 37120 | ms/batch 785.40 | loss     4.6631 | aux_loss     0.0002 | ppl   105.9648
+INFO:root:Learning rate has changed to: 0.0003238341968911917
+INFO:root:| epoch   1 | batch 37248 | ms/batch 791.09 | loss     4.6577 | aux_loss     0.0002 | ppl   105.3953
+INFO:root:Learning rate has changed to: 0.00032327922557424396
+INFO:root:| epoch   1 | batch 37376 | ms/batch 792.29 | loss     4.6580 | aux_loss     0.0002 | ppl   105.4218
+INFO:root:Learning rate has changed to: 0.00032272709776122417
+INFO:root:| epoch   1 | batch 37504 | ms/batch 790.06 | loss     4.6568 | aux_loss     0.0002 | ppl   105.3011
+INFO:root:Learning rate has changed to: 0.00032217778925270143
+INFO:root:| epoch   1 | batch 37632 | ms/batch 786.76 | loss     4.6571 | aux_loss     0.0002 | ppl   105.3281
+INFO:root:Learning rate has changed to: 0.0003216312761365932
+INFO:root:| epoch   1 | batch 37760 | ms/batch 787.80 | loss     4.6461 | aux_loss     0.0002 | ppl   104.1764
+INFO:root:Learning rate has changed to: 0.00032108753478379343
+INFO:root:| epoch   1 | batch 37888 | ms/batch 790.90 | loss     4.6577 | aux_loss     0.0002 | ppl   105.3982
+INFO:root:Learning rate has changed to: 0.0003205465418438813
+INFO:root:| epoch   1 | batch 38016 | ms/batch 789.64 | loss     4.6527 | aux_loss     0.0002 | ppl   104.8727
+INFO:root:Learning rate has changed to: 0.00032000827424090954
+INFO:root:| epoch   1 | batch 38144 | ms/batch 798.03 | loss     4.6533 | aux_loss     0.0002 | ppl   104.9273
+INFO:root:Learning rate has changed to: 0.0003194727091692703
+INFO:root:| epoch   1 | batch 38272 | ms/batch 809.14 | loss     4.6541 | aux_loss     0.0002 | ppl   105.0112
+INFO:root:Learning rate has changed to: 0.00031893982408963666
+INFO:root:| epoch   1 | batch 38400 | ms/batch 797.90 | loss     4.6506 | aux_loss     0.0002 | ppl   104.6519
+INFO:root:Learning rate has changed to: 0.00031840959672497837
+INFO:root:| epoch   1 | batch 38528 | ms/batch 783.20 | loss     4.6516 | aux_loss     0.0002 | ppl   104.7513
+INFO:root:Learning rate has changed to: 0.0003178820050566506
+INFO:root:| epoch   1 | batch 38656 | ms/batch 776.82 | loss     4.6528 | aux_loss     0.0002 | ppl   104.8791
+INFO:root:Learning rate has changed to: 0.00031735702732055315
+INFO:root:| epoch   1 | batch 38784 | ms/batch 814.54 | loss     4.6465 | aux_loss     0.0002 | ppl   104.2160
+INFO:root:Learning rate has changed to: 0.00031683464200335965
+INFO:root:| epoch   1 | batch 38912 | ms/batch 806.12 | loss     4.6442 | aux_loss     0.0002 | ppl   103.9821
+INFO:root:Learning rate has changed to: 0.00031631482783881475
+INFO:root:| epoch   1 | batch 39040 | ms/batch 797.67 | loss     4.6543 | aux_loss     0.0002 | ppl   105.0336
+INFO:root:Learning rate has changed to: 0.00031579756380409763
+INFO:root:| epoch   1 | batch 39168 | ms/batch 795.63 | loss     4.6460 | aux_loss     0.0002 | ppl   104.1629
+INFO:root:Learning rate has changed to: 0.0003152828291162512
+INFO:root:| epoch   1 | batch 39296 | ms/batch 792.10 | loss     4.6465 | aux_loss     0.0002 | ppl   104.2237
+INFO:root:Learning rate has changed to: 0.0003147706032286744
+INFO:root:| epoch   1 | batch 39424 | ms/batch 795.97 | loss     4.6448 | aux_loss     0.0002 | ppl   104.0390
+INFO:root:Learning rate has changed to: 0.0003142608658276779
+INFO:root:| epoch   1 | batch 39552 | ms/batch 795.94 | loss     4.6440 | aux_loss     0.0002 | ppl   103.9588
+INFO:root:Learning rate has changed to: 0.0003137535968291001
+INFO:root:| epoch   1 | batch 39680 | ms/batch 796.92 | loss     4.6454 | aux_loss     0.0002 | ppl   104.1054
+INFO:root:Learning rate has changed to: 0.0003132487763749837
+INFO:root:| epoch   1 | batch 39808 | ms/batch 799.23 | loss     4.6544 | aux_loss     0.0002 | ppl   105.0437
+INFO:root:Learning rate has changed to: 0.0003127463848303102
+INFO:root:| epoch   1 | batch 39936 | ms/batch 794.24 | loss     4.6430 | aux_loss     0.0002 | ppl   103.8543
+INFO:root:Learning rate has changed to: 0.00031224640277979266
+INFO:root:| epoch   1 | batch 40064 | ms/batch 799.41 | loss     4.6441 | aux_loss     0.0002 | ppl   103.9655
+INFO:root:Learning rate has changed to: 0.0003117488110247239
+INFO:root:| epoch   1 | batch 40192 | ms/batch 799.67 | loss     4.6362 | aux_loss     0.0002 | ppl   103.1530
+INFO:root:Learning rate has changed to: 0.00031125359057988046
+INFO:root:| epoch   1 | batch 40320 | ms/batch 799.62 | loss     4.6343 | aux_loss     0.0002 | ppl   102.9580
+INFO:root:Learning rate has changed to: 0.0003107607226704796
+INFO:root:| epoch   1 | batch 40448 | ms/batch 799.47 | loss     4.6453 | aux_loss     0.0002 | ppl   104.0974
+INFO:root:Learning rate has changed to: 0.0003102701887291903
+INFO:root:| epoch   1 | batch 40576 | ms/batch 798.95 | loss     4.6534 | aux_loss     0.0002 | ppl   104.9437
+INFO:root:Learning rate has changed to: 0.00030978197039319497
+INFO:root:| epoch   1 | batch 40704 | ms/batch 799.46 | loss     4.6408 | aux_loss     0.0002 | ppl   103.6231
+INFO:root:Learning rate has changed to: 0.00030929604950130245
+INFO:root:| epoch   1 | batch 40832 | ms/batch 799.09 | loss     4.6376 | aux_loss     0.0002 | ppl   103.3001
+INFO:root:Learning rate has changed to: 0.0003088124080911104
+INFO:root:| epoch   1 | batch 40960 | ms/batch 793.39 | loss     4.6350 | aux_loss     0.0002 | ppl   103.0315
+INFO:root:Learning rate has changed to: 0.0003083310283962164
+INFO:root:| epoch   1 | batch 41088 | ms/batch 791.25 | loss     4.6417 | aux_loss     0.0002 | ppl   103.7179
+INFO:root:Learning rate has changed to: 0.0003078518928434768
+INFO:root:| epoch   1 | batch 41216 | ms/batch 791.93 | loss     4.6349 | aux_loss     0.0002 | ppl   103.0225
+INFO:root:Learning rate has changed to: 0.0003073749840503125
+INFO:root:| epoch   1 | batch 41344 | ms/batch 791.66 | loss     4.6356 | aux_loss     0.0002 | ppl   103.0929
+INFO:root:Learning rate has changed to: 0.0003069002848220596
+INFO:root:| epoch   1 | batch 41472 | ms/batch 791.48 | loss     4.6346 | aux_loss     0.0002 | ppl   102.9839
+INFO:root:Learning rate has changed to: 0.0003064277781493662
+INFO:root:| epoch   1 | batch 41600 | ms/batch 782.96 | loss     4.6475 | aux_loss     0.0002 | ppl   104.3235
+INFO:root:Learning rate has changed to: 0.00030595744720563205
+INFO:root:| epoch   1 | batch 41728 | ms/batch 776.61 | loss     4.6402 | aux_loss     0.0002 | ppl   103.5673
+INFO:root:Learning rate has changed to: 0.0003054892753444921
+INFO:root:| epoch   1 | batch 41856 | ms/batch 781.95 | loss     4.6335 | aux_loss     0.0002 | ppl   102.8771
+INFO:root:Learning rate has changed to: 0.00030502324609734164
+INFO:root:| epoch   1 | batch 41984 | ms/batch 806.35 | loss     4.6296 | aux_loss     0.0002 | ppl   102.4692
+INFO:root:Learning rate has changed to: 0.0003045593431709033
+INFO:root:| epoch   1 | batch 42112 | ms/batch 798.15 | loss     4.6341 | aux_loss     0.0002 | ppl   102.9303
+INFO:root:Learning rate has changed to: 0.00030409755044483443
+INFO:root:| epoch   1 | batch 42240 | ms/batch 785.92 | loss     4.6278 | aux_loss     0.0002 | ppl   102.2919
+INFO:root:Learning rate has changed to: 0.0003036378519693742
+INFO:root:| epoch   1 | batch 42368 | ms/batch 788.41 | loss     4.6303 | aux_loss     0.0002 | ppl   102.5462
+INFO:root:Learning rate has changed to: 0.00030318023196303
+INFO:root:| epoch   1 | batch 42496 | ms/batch 798.26 | loss     4.6342 | aux_loss     0.0002 | ppl   102.9421
+INFO:root:Learning rate has changed to: 0.00030272467481030175
+INFO:root:| epoch   1 | batch 42624 | ms/batch 797.82 | loss     4.6295 | aux_loss     0.0002 | ppl   102.4638
+INFO:root:Learning rate has changed to: 0.0003022711650594437
+INFO:root:| epoch   1 | batch 42752 | ms/batch 791.06 | loss     4.6309 | aux_loss     0.0002 | ppl   102.6081
+INFO:root:Learning rate has changed to: 0.0003018196874202636
+INFO:root:| epoch   1 | batch 42880 | ms/batch 776.79 | loss     4.6262 | aux_loss     0.0002 | ppl   102.1204
+INFO:root:Learning rate has changed to: 0.0003013702267619569
+INFO:root:| epoch   1 | batch 43008 | ms/batch 776.22 | loss     4.6341 | aux_loss     0.0002 | ppl   102.9330
+INFO:root:Learning rate has changed to: 0.0003009227681109774
+INFO:root:| epoch   1 | batch 43136 | ms/batch 775.53 | loss     4.6279 | aux_loss     0.0002 | ppl   102.2945
+INFO:root:Learning rate has changed to: 0.00030047729664894174
+INFO:root:| epoch   1 | batch 43264 | ms/batch 770.36 | loss     4.6334 | aux_loss     0.0002 | ppl   102.8649
+INFO:root:Learning rate has changed to: 0.0003000337977105684
+INFO:root:| epoch   1 | batch 43392 | ms/batch 775.94 | loss     4.6333 | aux_loss     0.0002 | ppl   102.8570
+INFO:root:Learning rate has changed to: 0.00029959225678164976
+INFO:root:| epoch   1 | batch 43520 | ms/batch 776.03 | loss     4.6266 | aux_loss     0.0002 | ppl   102.1699
+INFO:root:Learning rate has changed to: 0.0002991526594970573
+INFO:root:| epoch   1 | batch 43648 | ms/batch 808.50 | loss     4.6277 | aux_loss     0.0002 | ppl   102.2769
+INFO:root:Learning rate has changed to: 0.00029871499163877825
+INFO:root:| epoch   1 | batch 43776 | ms/batch 816.90 | loss     4.6355 | aux_loss     0.0002 | ppl   103.0836
+INFO:root:Learning rate has changed to: 0.0002982792391339845
+INFO:root:| epoch   1 | batch 43904 | ms/batch 788.35 | loss     4.6219 | aux_loss     0.0002 | ppl   101.6849
+INFO:root:Learning rate has changed to: 0.00029784538805313187
+INFO:root:| epoch   1 | batch 44032 | ms/batch 797.69 | loss     4.6135 | aux_loss     0.0002 | ppl   100.8318
+INFO:root:Learning rate has changed to: 0.00029741342460808985
+INFO:root:| epoch   1 | batch 44160 | ms/batch 789.00 | loss     4.6229 | aux_loss     0.0002 | ppl   101.7843
+INFO:root:Learning rate has changed to: 0.00029698333515030113
+INFO:root:| epoch   1 | batch 44288 | ms/batch 788.43 | loss     4.6194 | aux_loss     0.0003 | ppl   101.4300
+INFO:root:Learning rate has changed to: 0.0002965551061689705
+INFO:root:| epoch   1 | batch 44416 | ms/batch 786.51 | loss     4.6235 | aux_loss     0.0002 | ppl   101.8465
+INFO:root:Learning rate has changed to: 0.00029612872428928176
+INFO:root:| epoch   1 | batch 44544 | ms/batch 776.27 | loss     4.6174 | aux_loss     0.0002 | ppl   101.2265
+INFO:root:Learning rate has changed to: 0.00029570417627064363
+INFO:root:| epoch   1 | batch 44672 | ms/batch 794.36 | loss     4.6198 | aux_loss     0.0002 | ppl   101.4782
+INFO:root:Learning rate has changed to: 0.0002952814490049627
+INFO:root:| epoch   1 | batch 44800 | ms/batch 776.27 | loss     4.6253 | aux_loss     0.0002 | ppl   102.0302
+INFO:root:Learning rate has changed to: 0.0002948605295149433
+INFO:root:| epoch   1 | batch 44928 | ms/batch 772.24 | loss     4.6237 | aux_loss     0.0002 | ppl   101.8682
+INFO:root:Learning rate has changed to: 0.00029444140495241453
+INFO:root:| epoch   1 | batch 45056 | ms/batch 785.01 | loss     4.6212 | aux_loss     0.0002 | ppl   101.6145
+INFO:root:Learning rate has changed to: 0.000294024062596683
+INFO:root:| epoch   1 | batch 45184 | ms/batch 795.73 | loss     4.6220 | aux_loss     0.0002 | ppl   101.6983
+INFO:root:Learning rate has changed to: 0.0002936084898529109
+INFO:root:| epoch   1 | batch 45312 | ms/batch 791.24 | loss     4.6233 | aux_loss     0.0002 | ppl   101.8299
+INFO:root:Learning rate has changed to: 0.0002931946742505202
+INFO:root:| epoch   1 | batch 45440 | ms/batch 791.42 | loss     4.6185 | aux_loss     0.0002 | ppl   101.3434
+INFO:root:Learning rate has changed to: 0.00029278260344162024
+INFO:root:| epoch   1 | batch 45568 | ms/batch 797.93 | loss     4.6127 | aux_loss     0.0002 | ppl   100.7509
+INFO:root:Learning rate has changed to: 0.00029237226519946064
+INFO:root:| epoch   1 | batch 45696 | ms/batch 796.89 | loss     4.6165 | aux_loss     0.0002 | ppl   101.1420
+INFO:root:Learning rate has changed to: 0.0002919636474169073
+INFO:root:| epoch   1 | batch 45824 | ms/batch 796.89 | loss     4.6154 | aux_loss     0.0002 | ppl   101.0313
+INFO:root:Learning rate has changed to: 0.0002915567381049422
+INFO:root:| epoch   1 | batch 45952 | ms/batch 799.03 | loss     4.6165 | aux_loss     0.0002 | ppl   101.1348
+INFO:root:Learning rate has changed to: 0.0002911515253911856
+INFO:root:| epoch   1 | batch 46080 | ms/batch 795.39 | loss     4.6202 | aux_loss     0.0002 | ppl   101.5137
+INFO:root:Learning rate has changed to: 0.0002907479975184417
+INFO:root:| epoch   1 | batch 46208 | ms/batch 798.80 | loss     4.6159 | aux_loss     0.0002 | ppl   101.0775
+INFO:root:Learning rate has changed to: 0.00029034614284326535
+INFO:root:| epoch   1 | batch 46336 | ms/batch 798.43 | loss     4.6148 | aux_loss     0.0002 | ppl   100.9697
+INFO:root:Learning rate has changed to: 0.0002899459498345511
+INFO:root:| epoch   1 | batch 46464 | ms/batch 798.77 | loss     4.6293 | aux_loss     0.0002 | ppl   102.4415
+INFO:root:Learning rate has changed to: 0.0002895474070721436
+INFO:root:| epoch   1 | batch 46592 | ms/batch 792.47 | loss     4.6211 | aux_loss     0.0002 | ppl   101.6078
+INFO:root:Learning rate has changed to: 0.0002891505032454686
+INFO:root:| epoch   1 | batch 46720 | ms/batch 799.18 | loss     4.6179 | aux_loss     0.0002 | ppl   101.2813
+INFO:root:Learning rate has changed to: 0.00028875522715218483
+INFO:root:| epoch   1 | batch 46848 | ms/batch 798.31 | loss     4.6068 | aux_loss     0.0002 | ppl   100.1619
+INFO:root:Learning rate has changed to: 0.00028836156769685627
+INFO:root:| epoch   1 | batch 46976 | ms/batch 798.07 | loss     4.6157 | aux_loss     0.0002 | ppl   101.0538
+INFO:root:Learning rate has changed to: 0.0002879695138896435
+INFO:root:| epoch   1 | batch 47104 | ms/batch 793.42 | loss     4.6102 | aux_loss     0.0002 | ppl   100.4995
+INFO:root:Learning rate has changed to: 0.00028757905484501557
+INFO:root:| epoch   1 | batch 47232 | ms/batch 797.27 | loss     4.6217 | aux_loss     0.0002 | ppl   101.6617
+INFO:root:Learning rate has changed to: 0.0002871901797804802
+INFO:root:| epoch   1 | batch 47360 | ms/batch 786.59 | loss     4.6157 | aux_loss     0.0002 | ppl   101.0580
+INFO:root:Learning rate has changed to: 0.00028680287801533346
+INFO:root:| epoch   1 | batch 47488 | ms/batch 776.24 | loss     4.6127 | aux_loss     0.0002 | ppl   100.7589
+INFO:root:Learning rate has changed to: 0.0002864171389694274
+INFO:root:| epoch   1 | batch 47616 | ms/batch 776.58 | loss     4.6162 | aux_loss     0.0002 | ppl   101.1088
+INFO:root:Learning rate has changed to: 0.0002860329521619564
+INFO:root:| epoch   1 | batch 47744 | ms/batch 776.62 | loss     4.6114 | aux_loss     0.0002 | ppl   100.6288
+INFO:root:Learning rate has changed to: 0.0002856503072102607
+INFO:root:| epoch   1 | batch 47872 | ms/batch 785.32 | loss     4.6094 | aux_loss     0.0002 | ppl   100.4232
+INFO:root:Learning rate has changed to: 0.00028526919382864833
+INFO:root:| epoch   1 | batch 48000 | ms/batch 785.88 | loss     4.6093 | aux_loss     0.0002 | ppl   100.4146
+INFO:root:Learning rate has changed to: 0.0002848896018272335
+INFO:root:| epoch   1 | batch 48128 | ms/batch 786.18 | loss     4.6091 | aux_loss     0.0002 | ppl   100.3899
+INFO:root:Learning rate has changed to: 0.00028451152111079247
+INFO:root:| epoch   1 | batch 48256 | ms/batch 786.98 | loss     4.6124 | aux_loss     0.0002 | ppl   100.7299
+INFO:root:Learning rate has changed to: 0.0002841349416776359
+INFO:root:| epoch   1 | batch 48384 | ms/batch 782.35 | loss     4.6081 | aux_loss     0.0002 | ppl   100.2979
+INFO:root:Learning rate has changed to: 0.0002837598536184974
+INFO:root:| epoch   1 | batch 48512 | ms/batch 779.77 | loss     4.6158 | aux_loss     0.0002 | ppl   101.0694
+INFO:root:Learning rate has changed to: 0.00028338624711543857
+INFO:root:| epoch   1 | batch 48640 | ms/batch 810.96 | loss     4.6129 | aux_loss     0.0002 | ppl   100.7749
+INFO:root:Learning rate has changed to: 0.0002830141124407694
+INFO:root:| epoch   1 | batch 48768 | ms/batch 841.73 | loss     4.6093 | aux_loss     0.0002 | ppl   100.4181
+INFO:root:Learning rate has changed to: 0.00028264343995598474
+INFO:root:| epoch   1 | batch 48896 | ms/batch 797.93 | loss     4.6057 | aux_loss     0.0002 | ppl   100.0510
+INFO:root:Learning rate has changed to: 0.00028227422011071557
+INFO:root:| epoch   1 | batch 49024 | ms/batch 792.33 | loss     4.6070 | aux_loss     0.0002 | ppl   100.1847
+INFO:root:Learning rate has changed to: 0.0002819064434416955
+INFO:root:| epoch   1 | batch 49152 | ms/batch 790.32 | loss     4.6037 | aux_loss     0.0002 | ppl    99.8561
+INFO:root:Learning rate has changed to: 0.00028154010057174206
+INFO:root:| epoch   1 | batch 49280 | ms/batch 788.30 | loss     4.6044 | aux_loss     0.0002 | ppl    99.9227
+INFO:root:Learning rate has changed to: 0.0002811751822087527
+INFO:root:| epoch   1 | batch 49408 | ms/batch 784.72 | loss     4.6016 | aux_loss     0.0002 | ppl    99.6464
+INFO:root:Learning rate has changed to: 0.0002808116791447146
+INFO:root:| epoch   1 | batch 49536 | ms/batch 797.03 | loss     4.6044 | aux_loss     0.0002 | ppl    99.9213
+INFO:root:Learning rate has changed to: 0.0002804495822547288
+INFO:root:| epoch   1 | batch 49664 | ms/batch 798.10 | loss     4.6014 | aux_loss     0.0002 | ppl    99.6212
+INFO:root:Learning rate has changed to: 0.00028008888249604847
+INFO:root:| epoch   1 | batch 49792 | ms/batch 806.77 | loss     4.6045 | aux_loss     0.0002 | ppl    99.9375
+INFO:root:Learning rate has changed to: 0.00027972957090712994
+INFO:root:| epoch   1 | batch 49920 | ms/batch 793.89 | loss     4.5976 | aux_loss     0.0002 | ppl    99.2463
+INFO:root:Learning rate has changed to: 0.0002793716386066978
+INFO:root:| epoch   1 | batch 50048 | ms/batch 787.96 | loss     4.6007 | aux_loss     0.0002 | ppl    99.5506
+INFO:root:Learning rate has changed to: 0.000279015076792823
+INFO:root:| epoch   1 | batch 50176 | ms/batch 778.82 | loss     4.5983 | aux_loss     0.0002 | ppl    99.3139
+INFO:root:Learning rate has changed to: 0.0002786598767420135
+INFO:root:| epoch   1 | batch 50304 | ms/batch 779.11 | loss     4.6090 | aux_loss     0.0002 | ppl   100.3867
+INFO:root:Learning rate has changed to: 0.000278306029808318
+INFO:root:| epoch   1 | batch 50432 | ms/batch 777.07 | loss     4.6060 | aux_loss     0.0002 | ppl   100.0862
+INFO:root:Learning rate has changed to: 0.000277953527422442
+INFO:root:| epoch   1 | batch 50560 | ms/batch 783.01 | loss     4.6067 | aux_loss     0.0002 | ppl   100.1561
+INFO:root:Learning rate has changed to: 0.000277602361090876
+INFO:root:| epoch   1 | batch 50688 | ms/batch 787.73 | loss     4.5961 | aux_loss     0.0002 | ppl    99.0922
+INFO:root:Learning rate has changed to: 0.0002772525223950364
+INFO:root:| epoch   1 | batch 50816 | ms/batch 788.43 | loss     4.5989 | aux_loss     0.0002 | ppl    99.3798
+INFO:root:Learning rate has changed to: 0.00027690400299041723
+INFO:root:| epoch   1 | batch 50944 | ms/batch 790.03 | loss     4.5956 | aux_loss     0.0002 | ppl    99.0476
+INFO:root:Learning rate has changed to: 0.0002765567946057547
+INFO:root:| epoch   1 | batch 51072 | ms/batch 790.57 | loss     4.5914 | aux_loss     0.0002 | ppl    98.6318
+INFO:root:Learning rate has changed to: 0.0002762108890422025
+INFO:root:| epoch   1 | batch 51200 | ms/batch 785.78 | loss     4.6022 | aux_loss     0.0002 | ppl    99.7058
+INFO:root:Learning rate has changed to: 0.00027586627817251843
+INFO:root:| epoch   1 | batch 51328 | ms/batch 787.82 | loss     4.6007 | aux_loss     0.0002 | ppl    99.5537
+INFO:root:Learning rate has changed to: 0.0002755229539402629
+INFO:root:| epoch   1 | batch 51456 | ms/batch 785.26 | loss     4.6004 | aux_loss     0.0002 | ppl    99.5287
+INFO:root:Learning rate has changed to: 0.0002751809083590073
+INFO:root:| epoch   1 | batch 51584 | ms/batch 779.38 | loss     4.6034 | aux_loss     0.0002 | ppl    99.8221
+INFO:root:Learning rate has changed to: 0.0002748401335115541
+INFO:root:| epoch   1 | batch 51712 | ms/batch 779.49 | loss     4.5922 | aux_loss     0.0002 | ppl    98.7088
+INFO:root:Learning rate has changed to: 0.00027450062154916707
+INFO:root:| epoch   1 | batch 51840 | ms/batch 778.69 | loss     4.5930 | aux_loss     0.0002 | ppl    98.7933
+INFO:root:Learning rate has changed to: 0.0002741623646908118
+INFO:root:| epoch   1 | batch 51968 | ms/batch 771.14 | loss     4.5911 | aux_loss     0.0002 | ppl    98.6073
+INFO:root:Learning rate has changed to: 0.0002738253552224069
+INFO:root:| epoch   1 | batch 52096 | ms/batch 776.49 | loss     4.5992 | aux_loss     0.0002 | ppl    99.4065
+INFO:root:Learning rate has changed to: 0.0002734895854960852
+INFO:root:| epoch   1 | batch 52224 | ms/batch 779.19 | loss     4.5999 | aux_loss     0.0002 | ppl    99.4697
+INFO:root:Learning rate has changed to: 0.00027315504792946457
+INFO:root:| epoch   1 | batch 52352 | ms/batch 800.37 | loss     4.5958 | aux_loss     0.0002 | ppl    99.0704
+INFO:root:Learning rate has changed to: 0.0002728217350049289
+INFO:root:| epoch   1 | batch 52480 | ms/batch 797.71 | loss     4.5923 | aux_loss     0.0002 | ppl    98.7250
+INFO:root:Learning rate has changed to: 0.00027248963926891845
+INFO:root:| epoch   1 | batch 52608 | ms/batch 794.88 | loss     4.6006 | aux_loss     0.0002 | ppl    99.5395
+INFO:root:Learning rate has changed to: 0.00027215875333123007
+INFO:root:| epoch   1 | batch 52736 | ms/batch 795.02 | loss     4.5875 | aux_loss     0.0002 | ppl    98.2504
+INFO:root:Learning rate has changed to: 0.00027182906986432604
+INFO:root:| epoch   1 | batch 52864 | ms/batch 788.16 | loss     4.5826 | aux_loss     0.0002 | ppl    97.7653
+INFO:root:Learning rate has changed to: 0.00027150058160265285
+INFO:root:| epoch   1 | batch 52992 | ms/batch 775.97 | loss     4.5980 | aux_loss     0.0002 | ppl    99.2860
+INFO:root:Learning rate has changed to: 0.0002711732813419686
+INFO:root:| epoch   1 | batch 53120 | ms/batch 775.54 | loss     4.5927 | aux_loss     0.0002 | ppl    98.7585
+INFO:root:Learning rate has changed to: 0.0002708471619386793
+INFO:root:| epoch   1 | batch 53248 | ms/batch 778.77 | loss     4.5886 | aux_loss     0.0002 | ppl    98.3548
+INFO:root:Learning rate has changed to: 0.0002705222163091843
+INFO:root:| epoch   1 | batch 53376 | ms/batch 792.04 | loss     4.5902 | aux_loss     0.0002 | ppl    98.5113
+INFO:root:Learning rate has changed to: 0.00027019843742922953
+INFO:root:| epoch   1 | batch 53504 | ms/batch 800.20 | loss     4.5882 | aux_loss     0.0002 | ppl    98.3198
+INFO:root:Learning rate has changed to: 0.00026987581833327033
+INFO:root:| epoch   1 | batch 53632 | ms/batch 831.34 | loss     4.5920 | aux_loss     0.0002 | ppl    98.6962
+INFO:root:Learning rate has changed to: 0.0002695543521138417
+INFO:root:| epoch   1 | batch 53760 | ms/batch 790.38 | loss     4.5892 | aux_loss     0.0002 | ppl    98.4138
+INFO:root:Learning rate has changed to: 0.0002692340319209372
+INFO:root:| epoch   1 | batch 53888 | ms/batch 791.40 | loss     4.5905 | aux_loss     0.0002 | ppl    98.5400
+INFO:root:Learning rate has changed to: 0.000268914850961396
+INFO:root:| epoch   1 | batch 54016 | ms/batch 802.64 | loss     4.5904 | aux_loss     0.0002 | ppl    98.5304
+INFO:root:Learning rate has changed to: 0.0002685968024982977
+INFO:root:| epoch   1 | batch 54144 | ms/batch 797.58 | loss     4.5868 | aux_loss     0.0002 | ppl    98.1784
+INFO:root:Learning rate has changed to: 0.00026827987985036505
+INFO:root:| epoch   1 | batch 54272 | ms/batch 775.62 | loss     4.5980 | aux_loss     0.0002 | ppl    99.2860
+INFO:root:Learning rate has changed to: 0.00026796407639137455
+INFO:root:| epoch   1 | batch 54400 | ms/batch 779.69 | loss     4.5904 | aux_loss     0.0002 | ppl    98.5310
+INFO:root:Learning rate has changed to: 0.0002676493855495746
+INFO:root:| epoch   1 | batch 54528 | ms/batch 788.18 | loss     4.5888 | aux_loss     0.0002 | ppl    98.3805
+INFO:root:Learning rate has changed to: 0.0002673358008071109
+INFO:root:| epoch   1 | batch 54656 | ms/batch 786.58 | loss     4.5833 | aux_loss     0.0002 | ppl    97.8401
+INFO:root:Learning rate has changed to: 0.00026702331569945976
+INFO:root:| epoch   1 | batch 54784 | ms/batch 785.31 | loss     4.5880 | aux_loss     0.0002 | ppl    98.2934
+INFO:root:Learning rate has changed to: 0.000266711923814868
+INFO:root:| epoch   1 | batch 54912 | ms/batch 783.19 | loss     4.5798 | aux_loss     0.0002 | ppl    97.4949
+INFO:root:Learning rate has changed to: 0.0002664016187938008
+INFO:root:| epoch   1 | batch 55040 | ms/batch 787.79 | loss     4.5909 | aux_loss     0.0002 | ppl    98.5879
+INFO:root:Learning rate has changed to: 0.00026609239432839584
+INFO:root:| epoch   1 | batch 55168 | ms/batch 784.57 | loss     4.5844 | aux_loss     0.0002 | ppl    97.9423
+INFO:root:Learning rate has changed to: 0.000265784244161925
+INFO:root:| epoch   1 | batch 55296 | ms/batch 772.13 | loss     4.5831 | aux_loss     0.0002 | ppl    97.8192
+INFO:root:Learning rate has changed to: 0.0002654771620882624
+INFO:root:| epoch   1 | batch 55424 | ms/batch 774.71 | loss     4.5840 | aux_loss     0.0002 | ppl    97.9005
+INFO:root:Learning rate has changed to: 0.0002651711419513596
+INFO:root:| epoch   1 | batch 55552 | ms/batch 775.24 | loss     4.5890 | aux_loss     0.0002 | ppl    98.3981
+INFO:root:Learning rate has changed to: 0.00026486617764472727
+INFO:root:| epoch   1 | batch 55680 | ms/batch 775.16 | loss     4.5805 | aux_loss     0.0002 | ppl    97.5604
+INFO:root:Learning rate has changed to: 0.0002645622631109234
+INFO:root:| epoch   1 | batch 55808 | ms/batch 775.34 | loss     4.5847 | aux_loss     0.0002 | ppl    97.9739
+INFO:root:Learning rate has changed to: 0.00026425939234104776
+INFO:root:| epoch   1 | batch 55936 | ms/batch 776.38 | loss     4.5771 | aux_loss     0.0002 | ppl    97.2333
+INFO:root:Learning rate has changed to: 0.00026395755937424315
+INFO:root:| epoch   1 | batch 56064 | ms/batch 789.30 | loss     4.5785 | aux_loss     0.0002 | ppl    97.3727
+INFO:root:Learning rate has changed to: 0.0002636567582972026
+INFO:root:| epoch   1 | batch 56192 | ms/batch 790.48 | loss     4.5863 | aux_loss     0.0002 | ppl    98.1333
+INFO:root:Learning rate has changed to: 0.00026335698324368267
+INFO:root:| epoch   1 | batch 56320 | ms/batch 789.76 | loss     4.5808 | aux_loss     0.0002 | ppl    97.5959
+INFO:root:Learning rate has changed to: 0.00026305822839402314
+INFO:root:| epoch   1 | batch 56448 | ms/batch 786.22 | loss     4.5900 | aux_loss     0.0002 | ppl    98.4951
+INFO:root:Learning rate has changed to: 0.0002627604879746723
+INFO:root:| epoch   1 | batch 56576 | ms/batch 785.28 | loss     4.5827 | aux_loss     0.0002 | ppl    97.7768
+INFO:root:Learning rate has changed to: 0.00026246375625771845
+INFO:root:| epoch   1 | batch 56704 | ms/batch 785.00 | loss     4.5847 | aux_loss     0.0002 | ppl    97.9715
+INFO:root:Learning rate has changed to: 0.00026216802756042694
+INFO:root:| epoch   1 | batch 56832 | ms/batch 786.76 | loss     4.5764 | aux_loss     0.0002 | ppl    97.1608
+INFO:root:Learning rate has changed to: 0.0002618732962447833
+INFO:root:| epoch   1 | batch 56960 | ms/batch 786.47 | loss     4.5861 | aux_loss     0.0002 | ppl    98.1138
+INFO:root:Learning rate has changed to: 0.00026157955671704156
+INFO:root:| epoch   1 | batch 57088 | ms/batch 787.25 | loss     4.5793 | aux_loss     0.0002 | ppl    97.4489
+INFO:root:Learning rate has changed to: 0.00026128680342727854
+INFO:root:| epoch   1 | batch 57216 | ms/batch 793.25 | loss     4.5835 | aux_loss     0.0002 | ppl    97.8580
+INFO:root:Learning rate has changed to: 0.00026099503086895315
+INFO:root:| epoch   1 | batch 57344 | ms/batch 792.46 | loss     4.5834 | aux_loss     0.0002 | ppl    97.8475
+INFO:root:Learning rate has changed to: 0.0002607042335784717
+INFO:root:| epoch   1 | batch 57472 | ms/batch 795.29 | loss     4.5740 | aux_loss     0.0002 | ppl    96.9333
+INFO:root:Learning rate has changed to: 0.00026041440613475803
+INFO:root:| epoch   1 | batch 57600 | ms/batch 795.94 | loss     4.5841 | aux_loss     0.0002 | ppl    97.9166
+INFO:root:Learning rate has changed to: 0.000260125543158829
+INFO:root:| epoch   1 | batch 57728 | ms/batch 796.21 | loss     4.5770 | aux_loss     0.0002 | ppl    97.2254
+INFO:root:Learning rate has changed to: 0.0002598376393133752
+INFO:root:| epoch   1 | batch 57856 | ms/batch 794.22 | loss     4.5779 | aux_loss     0.0002 | ppl    97.3080
+INFO:root:Learning rate has changed to: 0.00025955068930234697
+INFO:root:| epoch   1 | batch 57984 | ms/batch 796.27 | loss     4.5769 | aux_loss     0.0002 | ppl    97.2165
+INFO:root:Learning rate has changed to: 0.0002592646878705449
+INFO:root:| epoch   1 | batch 58112 | ms/batch 795.93 | loss     4.5693 | aux_loss     0.0002 | ppl    96.4769
+INFO:root:Learning rate has changed to: 0.00025897962980321593
+INFO:root:| epoch   1 | batch 58240 | ms/batch 796.46 | loss     4.5735 | aux_loss     0.0002 | ppl    96.8818
+INFO:root:Learning rate has changed to: 0.0002586955099256536
+INFO:root:| epoch   1 | batch 58368 | ms/batch 796.24 | loss     4.5766 | aux_loss     0.0002 | ppl    97.1838
+INFO:root:Learning rate has changed to: 0.0002584123231028039
+INFO:root:| epoch   1 | batch 58496 | ms/batch 816.92 | loss     4.5737 | aux_loss     0.0002 | ppl    96.9043
+INFO:root:Learning rate has changed to: 0.0002581300642388753
+INFO:root:| epoch   1 | batch 58624 | ms/batch 859.82 | loss     4.5717 | aux_loss     0.0002 | ppl    96.7099
+INFO:root:Learning rate has changed to: 0.0002578487282769535
+INFO:root:| epoch   1 | batch 58752 | ms/batch 789.92 | loss     4.5825 | aux_loss     0.0002 | ppl    97.7586
+INFO:root:Learning rate has changed to: 0.00025756831019862103
+INFO:root:| epoch   1 | batch 58880 | ms/batch 785.15 | loss     4.5788 | aux_loss     0.0002 | ppl    97.3982
+INFO:root:Learning rate has changed to: 0.00025728880502358137
+INFO:root:| epoch   1 | batch 59008 | ms/batch 806.84 | loss     4.5669 | aux_loss     0.0002 | ppl    96.2434
+INFO:root:Learning rate has changed to: 0.0002570102078092873
+INFO:root:| epoch   1 | batch 59136 | ms/batch 776.80 | loss     4.5649 | aux_loss     0.0002 | ppl    96.0547
+INFO:root:Learning rate has changed to: 0.00025673251365057386
+INFO:root:| epoch   1 | batch 59264 | ms/batch 789.10 | loss     4.5719 | aux_loss     0.0002 | ppl    96.7318
+INFO:root:Learning rate has changed to: 0.0002564557176792956
+INFO:root:| epoch   1 | batch 59392 | ms/batch 803.22 | loss     4.5732 | aux_loss     0.0002 | ppl    96.8526
+INFO:root:Learning rate has changed to: 0.00025617981506396813
+INFO:root:| epoch   1 | batch 59520 | ms/batch 809.63 | loss     4.5750 | aux_loss     0.0002 | ppl    97.0285
+INFO:root:Learning rate has changed to: 0.0002559048010094139
+INFO:root:| epoch   1 | batch 59648 | ms/batch 809.63 | loss     4.5679 | aux_loss     0.0002 | ppl    96.3446
+INFO:root:Learning rate has changed to: 0.0002556306707564123
+INFO:root:| epoch   1 | batch 59776 | ms/batch 808.35 | loss     4.5704 | aux_loss     0.0002 | ppl    96.5867
+INFO:root:Learning rate has changed to: 0.0002553574195813536
+INFO:root:| epoch   1 | batch 59904 | ms/batch 789.53 | loss     4.5720 | aux_loss     0.0002 | ppl    96.7395
+INFO:root:Learning rate has changed to: 0.00025508504279589714
+INFO:root:| epoch   1 | batch 60032 | ms/batch 788.99 | loss     4.5711 | aux_loss     0.0002 | ppl    96.6522
+INFO:root:Learning rate has changed to: 0.00025481353574663336
+INFO:root:| epoch   1 | batch 60160 | ms/batch 787.77 | loss     4.5678 | aux_loss     0.0002 | ppl    96.3285
+INFO:root:Learning rate has changed to: 0.0002545428938147502
+INFO:root:| epoch   1 | batch 60288 | ms/batch 787.21 | loss     4.5781 | aux_loss     0.0002 | ppl    97.3265
+INFO:root:Learning rate has changed to: 0.0002542731124157027
+INFO:root:| epoch   1 | batch 60416 | ms/batch 793.47 | loss     4.5758 | aux_loss     0.0002 | ppl    97.1091
+INFO:root:Learning rate has changed to: 0.000254004186998887
+INFO:root:| epoch   1 | batch 60544 | ms/batch 789.59 | loss     4.5621 | aux_loss     0.0002 | ppl    95.7846
+INFO:root:Learning rate has changed to: 0.00025373611304731815
+INFO:root:| epoch   1 | batch 60672 | ms/batch 791.97 | loss     4.5667 | aux_loss     0.0002 | ppl    96.2295
+INFO:root:Learning rate has changed to: 0.00025346888607731105
+INFO:root:| epoch   1 | batch 60800 | ms/batch 791.80 | loss     4.5709 | aux_loss     0.0002 | ppl    96.6286
+INFO:root:Learning rate has changed to: 0.0002532025016381657
+INFO:root:| epoch   1 | batch 60928 | ms/batch 790.59 | loss     4.5655 | aux_loss     0.0002 | ppl    96.1102
+INFO:root:Learning rate has changed to: 0.000252936955311856
+INFO:root:| epoch   1 | batch 61056 | ms/batch 791.79 | loss     4.5670 | aux_loss     0.0002 | ppl    96.2519
+INFO:root:Learning rate has changed to: 0.0002526722427127216
+INFO:root:| epoch   1 | batch 61184 | ms/batch 791.84 | loss     4.5668 | aux_loss     0.0002 | ppl    96.2360
+INFO:root:Learning rate has changed to: 0.0002524083594871642
+INFO:root:| epoch   1 | batch 61312 | ms/batch 791.78 | loss     4.5652 | aux_loss     0.0002 | ppl    96.0776
+INFO:root:Learning rate has changed to: 0.0002521453013133463
+INFO:root:| epoch   1 | batch 61440 | ms/batch 776.97 | loss     4.5688 | aux_loss     0.0002 | ppl    96.4252
+INFO:root:Learning rate has changed to: 0.0002518830639008943
+INFO:root:| epoch   1 | batch 61568 | ms/batch 777.08 | loss     4.5692 | aux_loss     0.0002 | ppl    96.4698
+INFO:root:Learning rate has changed to: 0.00025162164299060433
+INFO:root:| epoch   1 | batch 61696 | ms/batch 777.38 | loss     4.5727 | aux_loss     0.0002 | ppl    96.8075
+INFO:root:Learning rate has changed to: 0.000251361034354152
+INFO:root:| epoch   1 | batch 61824 | ms/batch 778.04 | loss     4.5685 | aux_loss     0.0002 | ppl    96.4022
+INFO:root:Learning rate has changed to: 0.00025110123379380473
+INFO:root:| epoch   1 | batch 61952 | ms/batch 772.81 | loss     4.5712 | aux_loss     0.0002 | ppl    96.6609
+INFO:root:Learning rate has changed to: 0.0002508422371421382
+INFO:root:| epoch   1 | batch 62080 | ms/batch 777.79 | loss     4.5653 | aux_loss     0.0002 | ppl    96.0882
+INFO:root:Learning rate has changed to: 0.0002505840402617554
+INFO:root:| epoch   1 | batch 62208 | ms/batch 776.02 | loss     4.5701 | aux_loss     0.0002 | ppl    96.5540
+INFO:root:Learning rate has changed to: 0.00025032663904500896
+INFO:root:| epoch   1 | batch 62336 | ms/batch 776.20 | loss     4.5738 | aux_loss     0.0002 | ppl    96.9106
+INFO:root:Learning rate has changed to: 0.00025007002941372674
+INFO:root:| epoch   1 | batch 62464 | ms/batch 775.69 | loss     4.5622 | aux_loss     0.0002 | ppl    95.7957
+INFO:root:Learning rate has changed to: 0.00024981420731894045
+INFO:root:| epoch   1 | batch 62592 | ms/batch 777.15 | loss     4.5587 | aux_loss     0.0002 | ppl    95.4583
+INFO:root:Learning rate has changed to: 0.00024955916874061735
+INFO:root:| epoch   1 | batch 62720 | ms/batch 775.89 | loss     4.5688 | aux_loss     0.0002 | ppl    96.4246
+INFO:root:Learning rate has changed to: 0.00024930490968739496
+INFO:root:| epoch   1 | batch 62848 | ms/batch 774.58 | loss     4.5670 | aux_loss     0.0002 | ppl    96.2558
+INFO:root:Learning rate has changed to: 0.00024905142619631855
+INFO:root:| epoch   1 | batch 62976 | ms/batch 778.91 | loss     4.5660 | aux_loss     0.0002 | ppl    96.1543
+INFO:root:Learning rate has changed to: 0.00024879871433258185
+INFO:root:| epoch   1 | batch 63104 | ms/batch 797.91 | loss     4.5710 | aux_loss     0.0002 | ppl    96.6421
+INFO:root:Learning rate has changed to: 0.0002485467701892705
+INFO:root:| epoch   1 | batch 63232 | ms/batch 795.43 | loss     4.5627 | aux_loss     0.0002 | ppl    95.8448
+INFO:root:Learning rate has changed to: 0.00024829558988710823
+INFO:root:| epoch   1 | batch 63360 | ms/batch 797.31 | loss     4.5674 | aux_loss     0.0002 | ppl    96.2902
+INFO:root:Learning rate has changed to: 0.00024804516957420615
+INFO:root:| epoch   1 | batch 63488 | ms/batch 806.66 | loss     4.5650 | aux_loss     0.0002 | ppl    96.0582
+INFO:root:Learning rate has changed to: 0.0002477955054258147
+INFO:root:| epoch   1 | batch 63616 | ms/batch 810.88 | loss     4.5680 | aux_loss     0.0002 | ppl    96.3490
+INFO:root:Learning rate has changed to: 0.000247546593644078
+INFO:root:| epoch   1 | batch 63744 | ms/batch 790.59 | loss     4.5680 | aux_loss     0.0002 | ppl    96.3508
+INFO:root:Learning rate has changed to: 0.00024729843045779144
+INFO:root:| epoch   1 | batch 63872 | ms/batch 790.06 | loss     4.5644 | aux_loss     0.0002 | ppl    96.0044
+INFO:root:Learning rate has changed to: 0.00024705101212216176
+INFO:root:| epoch   1 | batch 64000 | ms/batch 813.11 | loss     4.5694 | aux_loss     0.0002 | ppl    96.4906
+INFO:root:Learning rate has changed to: 0.00024680433491856954
+INFO:root:| epoch   1 | batch 64128 | ms/batch 778.29 | loss     4.5631 | aux_loss     0.0002 | ppl    95.8812
+INFO:root:Learning rate has changed to: 0.0002465583951543345
+INFO:root:| epoch   1 | batch 64256 | ms/batch 779.29 | loss     4.5559 | aux_loss     0.0002 | ppl    95.1919
+INFO:root:Learning rate has changed to: 0.00024631318916248343
+INFO:root:| epoch   1 | batch 64384 | ms/batch 780.00 | loss     4.5584 | aux_loss     0.0002 | ppl    95.4293
+INFO:root:Learning rate has changed to: 0.0002460687133015203
+INFO:root:| epoch   1 | batch 64512 | ms/batch 785.90 | loss     4.5635 | aux_loss     0.0002 | ppl    95.9164
+INFO:root:Learning rate has changed to: 0.00024582496395519947
+INFO:root:| epoch   1 | batch 64640 | ms/batch 791.17 | loss     4.5561 | aux_loss     0.0002 | ppl    95.2096
+INFO:root:Learning rate has changed to: 0.00024558193753230085
+INFO:root:| epoch   1 | batch 64768 | ms/batch 790.97 | loss     4.5639 | aux_loss     0.0002 | ppl    95.9597
+INFO:root:Learning rate has changed to: 0.00024533963046640756
+INFO:root:| epoch   1 | batch 64896 | ms/batch 784.39 | loss     4.5583 | aux_loss     0.0002 | ppl    95.4254
+INFO:root:Learning rate has changed to: 0.00024509803921568627
+INFO:root:| epoch   1 | batch 65024 | ms/batch 774.19 | loss     4.5598 | aux_loss     0.0002 | ppl    95.5680
+INFO:root:Learning rate has changed to: 0.0002448571602626698
+INFO:root:| epoch   1 | batch 65152 | ms/batch 775.69 | loss     4.5581 | aux_loss     0.0002 | ppl    95.3992
+INFO:root:Learning rate has changed to: 0.0002446169901140418
+INFO:root:| epoch   1 | batch 65280 | ms/batch 776.84 | loss     4.5635 | aux_loss     0.0002 | ppl    95.9221
+INFO:root:Learning rate has changed to: 0.0002443775253004243
+INFO:root:| epoch   1 | batch 65408 | ms/batch 785.47 | loss     4.5606 | aux_loss     0.0002 | ppl    95.6439
+INFO:root:Learning rate has changed to: 0.00024413876237616678
+INFO:root:| epoch   1 | batch 65536 | ms/batch 786.45 | loss     4.5520 | aux_loss     0.0002 | ppl    94.8209
+INFO:root:Learning rate has changed to: 0.00024390069791913835
+INFO:root:| epoch   1 | batch 65664 | ms/batch 796.05 | loss     4.5561 | aux_loss     0.0002 | ppl    95.2141
+INFO:root:Learning rate has changed to: 0.0002436633285305215
+INFO:root:| epoch   1 | batch 65792 | ms/batch 799.34 | loss     4.5666 | aux_loss     0.0002 | ppl    96.2211
+INFO:root:Learning rate has changed to: 0.0002434266508346084
+INFO:root:| epoch   1 | batch 65920 | ms/batch 799.60 | loss     4.5531 | aux_loss     0.0002 | ppl    94.9246
+INFO:root:Learning rate has changed to: 0.00024319066147859923
+INFO:root:| epoch   1 | batch 66048 | ms/batch 791.52 | loss     4.5563 | aux_loss     0.0002 | ppl    95.2290
+INFO:root:Learning rate has changed to: 0.00024295535713240264
+INFO:root:| epoch   1 | batch 66176 | ms/batch 776.62 | loss     4.5606 | aux_loss     0.0002 | ppl    95.6436
+INFO:root:Learning rate has changed to: 0.00024272073448843847
+INFO:root:| epoch   1 | batch 66304 | ms/batch 777.20 | loss     4.5584 | aux_loss     0.0002 | ppl    95.4321
+INFO:root:Learning rate has changed to: 0.00024248679026144248
+INFO:root:| epoch   1 | batch 66432 | ms/batch 781.54 | loss     4.5651 | aux_loss     0.0002 | ppl    96.0678
+INFO:root:Learning rate has changed to: 0.00024225352118827307
+INFO:root:| epoch   1 | batch 66560 | ms/batch 786.77 | loss     4.5515 | aux_loss     0.0002 | ppl    94.7730
+INFO:root:Learning rate has changed to: 0.00024202092402772013
+INFO:root:| epoch   1 | batch 66688 | ms/batch 786.27 | loss     4.5568 | aux_loss     0.0002 | ppl    95.2769
+INFO:root:Learning rate has changed to: 0.00024178899556031593
+INFO:root:| epoch   1 | batch 66816 | ms/batch 787.28 | loss     4.5555 | aux_loss     0.0002 | ppl    95.1561
+INFO:root:Learning rate has changed to: 0.00024155773258814796
+INFO:root:| epoch   1 | batch 66944 | ms/batch 786.47 | loss     4.5583 | aux_loss     0.0002 | ppl    95.4166
+INFO:root:Learning rate has changed to: 0.0002413271319346736
+INFO:root:| epoch   1 | batch 67072 | ms/batch 785.34 | loss     4.5657 | aux_loss     0.0002 | ppl    96.1325
+INFO:root:Learning rate has changed to: 0.00024109719044453713
+INFO:root:| epoch   1 | batch 67200 | ms/batch 787.83 | loss     4.5544 | aux_loss     0.0002 | ppl    95.0484
+INFO:root:Learning rate has changed to: 0.00024086790498338806
+INFO:root:| epoch   1 | batch 67328 | ms/batch 788.97 | loss     4.5552 | aux_loss     0.0002 | ppl    95.1253
+INFO:root:Learning rate has changed to: 0.00024063927243770197
+INFO:root:| epoch   1 | batch 67456 | ms/batch 788.38 | loss     4.5548 | aux_loss     0.0002 | ppl    95.0880
+INFO:root:Learning rate has changed to: 0.00024041128971460276
+INFO:root:| epoch   1 | batch 67584 | ms/batch 781.45 | loss     4.5567 | aux_loss     0.0002 | ppl    95.2648
+INFO:root:Learning rate has changed to: 0.000240183953741687
+INFO:root:| epoch   1 | batch 67712 | ms/batch 775.54 | loss     4.5528 | aux_loss     0.0002 | ppl    94.8970
+INFO:root:Learning rate has changed to: 0.00023995726146685005
+INFO:root:| epoch   1 | batch 67840 | ms/batch 775.29 | loss     4.5581 | aux_loss     0.0002 | ppl    95.3994
+INFO:root:Learning rate has changed to: 0.00023973120985811382
+INFO:root:| epoch   1 | batch 67968 | ms/batch 776.27 | loss     4.5518 | aux_loss     0.0002 | ppl    94.7984
+INFO:root:Learning rate has changed to: 0.00023950579590345663
+INFO:root:| epoch   1 | batch 68096 | ms/batch 774.66 | loss     4.5540 | aux_loss     0.0002 | ppl    95.0090
+INFO:root:Learning rate has changed to: 0.0002392810166106445
+INFO:root:| epoch   1 | batch 68224 | ms/batch 772.64 | loss     4.5517 | aux_loss     0.0002 | ppl    94.7933
+INFO:root:Learning rate has changed to: 0.00023905686900706438
+INFO:root:| epoch   1 | batch 68352 | ms/batch 779.93 | loss     4.5432 | aux_loss     0.0002 | ppl    93.9884
+INFO:root:Learning rate has changed to: 0.00023883335013955912
+INFO:root:| epoch   1 | batch 68480 | ms/batch 802.75 | loss     4.5562 | aux_loss     0.0002 | ppl    95.2178
+INFO:root:Learning rate has changed to: 0.00023861045707426385
+INFO:root:| epoch   1 | batch 68608 | ms/batch 815.97 | loss     4.5538 | aux_loss     0.0002 | ppl    94.9890
+INFO:root:Learning rate has changed to: 0.0002383881868964445
+INFO:root:| epoch   1 | batch 68736 | ms/batch 788.58 | loss     4.5553 | aux_loss     0.0002 | ppl    95.1360
+INFO:root:Learning rate has changed to: 0.00023816653671033746
+INFO:root:| epoch   1 | batch 68864 | ms/batch 788.03 | loss     4.5539 | aux_loss     0.0002 | ppl    95.0000
+INFO:root:Learning rate has changed to: 0.00023794550363899136
+INFO:root:| epoch   1 | batch 68992 | ms/batch 796.46 | loss     4.5554 | aux_loss     0.0002 | ppl    95.1490
+INFO:root:Learning rate has changed to: 0.00023772508482411
+INFO:root:| epoch   1 | batch 69120 | ms/batch 786.52 | loss     4.5561 | aux_loss     0.0002 | ppl    95.2159
+INFO:root:Learning rate has changed to: 0.00023750527742589725
+INFO:root:| epoch   1 | batch 69248 | ms/batch 788.49 | loss     4.5467 | aux_loss     0.0002 | ppl    94.3164
+INFO:root:Learning rate has changed to: 0.00023728607862290345
+INFO:root:| epoch   1 | batch 69376 | ms/batch 787.47 | loss     4.5513 | aux_loss     0.0002 | ppl    94.7549
+INFO:root:Learning rate has changed to: 0.0002370674856118731
+INFO:root:| epoch   1 | batch 69504 | ms/batch 787.69 | loss     4.5448 | aux_loss     0.0002 | ppl    94.1442
+INFO:root:Learning rate has changed to: 0.00023684949560759443
+INFO:root:| epoch   1 | batch 69632 | ms/batch 788.30 | loss     4.5475 | aux_loss     0.0002 | ppl    94.3993
+INFO:root:Learning rate has changed to: 0.00023663210584275036
+INFO:root:| epoch   1 | batch 69760 | ms/batch 787.54 | loss     4.5473 | aux_loss     0.0002 | ppl    94.3753
+INFO:root:Learning rate has changed to: 0.0002364153135677708
+INFO:root:| epoch   1 | batch 69888 | ms/batch 788.29 | loss     4.5459 | aux_loss     0.0002 | ppl    94.2483
+INFO:root:Learning rate has changed to: 0.0002361991160506868
+INFO:root:| epoch   1 | batch 70016 | ms/batch 788.91 | loss     4.5453 | aux_loss     0.0002 | ppl    94.1924
+INFO:root:Learning rate has changed to: 0.0002359835105769858
+INFO:root:| epoch   1 | batch 70144 | ms/batch 789.18 | loss     4.5567 | aux_loss     0.0002 | ppl    95.2677
+INFO:root:Learning rate has changed to: 0.00023576849444946848
+INFO:root:| epoch   1 | batch 70272 | ms/batch 797.80 | loss     4.5546 | aux_loss     0.0002 | ppl    95.0704
+INFO:root:Learning rate has changed to: 0.00023555406498810717
+INFO:root:| epoch   1 | batch 70400 | ms/batch 799.20 | loss     4.5500 | aux_loss     0.0002 | ppl    94.6351
+INFO:root:Learning rate has changed to: 0.0002353402195299054
+INFO:root:| epoch   1 | batch 70528 | ms/batch 796.83 | loss     4.5478 | aux_loss     0.0002 | ppl    94.4261
+INFO:root:Learning rate has changed to: 0.0002351269554287591
+INFO:root:| epoch   1 | batch 70656 | ms/batch 796.86 | loss     4.5490 | aux_loss     0.0002 | ppl    94.5348
+INFO:root:Learning rate has changed to: 0.00023491427005531906
+INFO:root:| epoch   1 | batch 70784 | ms/batch 788.50 | loss     4.5452 | aux_loss     0.0002 | ppl    94.1750
+INFO:root:Learning rate has changed to: 0.00023470216079685466
+INFO:root:| epoch   1 | batch 70912 | ms/batch 787.00 | loss     4.5451 | aux_loss     0.0002 | ppl    94.1675
+INFO:root:Learning rate has changed to: 0.00023449062505711928
+INFO:root:| epoch   1 | batch 71040 | ms/batch 787.31 | loss     4.5542 | aux_loss     0.0002 | ppl    95.0351
+INFO:root:Learning rate has changed to: 0.00023427966025621664
+INFO:root:| epoch   1 | batch 71168 | ms/batch 784.79 | loss     4.5401 | aux_loss     0.0002 | ppl    93.6979
+INFO:root:Learning rate has changed to: 0.00023406926383046875
+INFO:root:| epoch   1 | batch 71296 | ms/batch 790.94 | loss     4.5458 | aux_loss     0.0002 | ppl    94.2354
+INFO:root:Learning rate has changed to: 0.00023385943323228503
+INFO:root:| epoch   1 | batch 71424 | ms/batch 790.36 | loss     4.5431 | aux_loss     0.0002 | ppl    93.9856
+INFO:root:Learning rate has changed to: 0.00023365016593003275
+INFO:root:| epoch   1 | batch 71552 | ms/batch 794.64 | loss     4.5423 | aux_loss     0.0002 | ppl    93.9037
+INFO:root:Learning rate has changed to: 0.00023344145940790866
+INFO:root:| epoch   1 | batch 71680 | ms/batch 807.10 | loss     4.5438 | aux_loss     0.0002 | ppl    94.0466
+INFO:root:Learning rate has changed to: 0.0002332333111658122
+INFO:root:| epoch   1 | batch 71808 | ms/batch 808.21 | loss     4.5425 | aux_loss     0.0002 | ppl    93.9260
+INFO:root:Learning rate has changed to: 0.00023302571871921938
+INFO:root:| epoch   1 | batch 71936 | ms/batch 805.23 | loss     4.5468 | aux_loss     0.0002 | ppl    94.3286
+INFO:root:Learning rate has changed to: 0.00023281867959905854
+INFO:root:| epoch   1 | batch 72064 | ms/batch 799.30 | loss     4.5345 | aux_loss     0.0002 | ppl    93.1773
+INFO:root:Learning rate has changed to: 0.00023261219135158677
+INFO:root:| epoch   1 | batch 72192 | ms/batch 794.55 | loss     4.5544 | aux_loss     0.0002 | ppl    95.0472
+INFO:root:Learning rate has changed to: 0.00023240625153826794
+INFO:root:| epoch   1 | batch 72320 | ms/batch 796.77 | loss     4.5513 | aux_loss     0.0002 | ppl    94.7531
+INFO:root:Learning rate has changed to: 0.00023220085773565158
+INFO:root:| epoch   1 | batch 72448 | ms/batch 797.81 | loss     4.5450 | aux_loss     0.0002 | ppl    94.1619
+INFO:root:Learning rate has changed to: 0.00023199600753525326
+INFO:root:| epoch   1 | batch 72576 | ms/batch 791.71 | loss     4.5391 | aux_loss     0.0002 | ppl    93.6026
+INFO:root:Learning rate has changed to: 0.00023179169854343587
+INFO:root:| epoch   1 | batch 72704 | ms/batch 796.01 | loss     4.5380 | aux_loss     0.0002 | ppl    93.5039
+INFO:root:Learning rate has changed to: 0.00023158792838129223
+INFO:root:| epoch   1 | batch 72832 | ms/batch 796.72 | loss     4.5380 | aux_loss     0.0002 | ppl    93.5074
+INFO:root:Learning rate has changed to: 0.00023138469468452866
+INFO:root:| epoch   1 | batch 72960 | ms/batch 797.10 | loss     4.5328 | aux_loss     0.0002 | ppl    93.0207
+INFO:root:Learning rate has changed to: 0.0002311819951033498
+INFO:root:| epoch   1 | batch 73088 | ms/batch 797.52 | loss     4.5427 | aux_loss     0.0002 | ppl    93.9441
+INFO:root:Learning rate has changed to: 0.00023097982730234452
+INFO:root:| epoch   1 | batch 73216 | ms/batch 796.52 | loss     4.5494 | aux_loss     0.0002 | ppl    94.5710
+INFO:root:Learning rate has changed to: 0.00023077818896037288
+INFO:root:| epoch   1 | batch 73344 | ms/batch 805.58 | loss     4.5407 | aux_loss     0.0002 | ppl    93.7567
+INFO:root:Learning rate has changed to: 0.00023057707777045426
+INFO:root:| epoch   1 | batch 73472 | ms/batch 815.98 | loss     4.5408 | aux_loss     0.0002 | ppl    93.7668
+INFO:root:Learning rate has changed to: 0.00023037649143965643
+INFO:root:| epoch   1 | batch 73600 | ms/batch 790.09 | loss     4.5383 | aux_loss     0.0002 | ppl    93.5302
+INFO:root:Learning rate has changed to: 0.00023017642768898572
+INFO:root:| epoch   1 | batch 73728 | ms/batch 786.35 | loss     4.5374 | aux_loss     0.0002 | ppl    93.4490
+INFO:root:Learning rate has changed to: 0.00022997688425327844
+INFO:root:| epoch   1 | batch 73856 | ms/batch 804.99 | loss     4.5369 | aux_loss     0.0002 | ppl    93.3970
+INFO:root:Learning rate has changed to: 0.00022977785888109292
+INFO:root:| epoch   1 | batch 73984 | ms/batch 809.07 | loss     4.5345 | aux_loss     0.0002 | ppl    93.1733
+INFO:root:Learning rate has changed to: 0.00022957934933460307
+INFO:root:| epoch   1 | batch 74112 | ms/batch 791.32 | loss     4.5383 | aux_loss     0.0002 | ppl    93.5357
+INFO:root:Learning rate has changed to: 0.00022938135338949247
+INFO:root:| epoch   1 | batch 74240 | ms/batch 779.46 | loss     4.5414 | aux_loss     0.0002 | ppl    93.8226
+INFO:root:Learning rate has changed to: 0.00022918386883484981
+INFO:root:| epoch   1 | batch 74368 | ms/batch 778.13 | loss     4.5400 | aux_loss     0.0002 | ppl    93.6931
+INFO:root:Learning rate has changed to: 0.00022898689347306523
+INFO:root:| epoch   1 | batch 74496 | ms/batch 778.55 | loss     4.5351 | aux_loss     0.0002 | ppl    93.2355
+INFO:root:Learning rate has changed to: 0.00022879042511972754
+INFO:root:| epoch   1 | batch 74624 | ms/batch 787.42 | loss     4.5403 | aux_loss     0.0002 | ppl    93.7200
+INFO:root:Learning rate has changed to: 0.00022859446160352248
+INFO:root:| epoch   1 | batch 74752 | ms/batch 791.47 | loss     4.5414 | aux_loss     0.0002 | ppl    93.8218
+INFO:root:Learning rate has changed to: 0.00022839900076613193
+INFO:root:| epoch   1 | batch 74880 | ms/batch 791.58 | loss     4.5357 | aux_loss     0.0002 | ppl    93.2865
+INFO:root:Learning rate has changed to: 0.0002282040404621341
+INFO:root:| epoch   1 | batch 75008 | ms/batch 791.63 | loss     4.5414 | aux_loss     0.0002 | ppl    93.8208
+INFO:root:Learning rate has changed to: 0.00022800957855890466
+INFO:root:| epoch   1 | batch 75136 | ms/batch 793.89 | loss     4.5345 | aux_loss     0.0002 | ppl    93.1753
+INFO:root:Learning rate has changed to: 0.00022781561293651862
+INFO:root:| epoch   1 | batch 75264 | ms/batch 810.39 | loss     4.5373 | aux_loss     0.0002 | ppl    93.4375
+INFO:root:Learning rate has changed to: 0.0002276221414876534
+INFO:root:| epoch   1 | batch 75392 | ms/batch 810.80 | loss     4.5453 | aux_loss     0.0002 | ppl    94.1876
+INFO:root:Learning rate has changed to: 0.00022742916211749266
+INFO:root:| epoch   1 | batch 75520 | ms/batch 810.37 | loss     4.5444 | aux_loss     0.0002 | ppl    94.1063
+INFO:root:Learning rate has changed to: 0.00022723667274363095
+INFO:root:| epoch   1 | batch 75648 | ms/batch 803.02 | loss     4.5354 | aux_loss     0.0002 | ppl    93.2628
+INFO:root:Learning rate has changed to: 0.00022704467129597942
+INFO:root:| epoch   1 | batch 75776 | ms/batch 799.13 | loss     4.5397 | aux_loss     0.0002 | ppl    93.6639
+INFO:root:Learning rate has changed to: 0.00022685315571667223
+INFO:root:| epoch   1 | batch 75904 | ms/batch 811.47 | loss     4.5357 | aux_loss     0.0002 | ppl    93.2850
+INFO:root:Learning rate has changed to: 0.00022666212395997405
+INFO:root:| epoch   1 | batch 76032 | ms/batch 811.50 | loss     4.5333 | aux_loss     0.0002 | ppl    93.0684
+INFO:root:Learning rate has changed to: 0.0002264715739921881
+INFO:root:| epoch   1 | batch 76160 | ms/batch 791.22 | loss     4.5372 | aux_loss     0.0002 | ppl    93.4326
+INFO:root:Learning rate has changed to: 0.00022628150379156537
+INFO:root:| epoch   1 | batch 76288 | ms/batch 790.47 | loss     4.5389 | aux_loss     0.0002 | ppl    93.5918
+INFO:root:Learning rate has changed to: 0.00022609191134821446
+INFO:root:| epoch   1 | batch 76416 | ms/batch 786.39 | loss     4.5398 | aux_loss     0.0002 | ppl    93.6711
+INFO:root:Learning rate has changed to: 0.00022590279466401232
+INFO:root:| epoch   1 | batch 76544 | ms/batch 779.39 | loss     4.5371 | aux_loss     0.0002 | ppl    93.4180
+INFO:root:Learning rate has changed to: 0.00022571415175251576
+INFO:root:| epoch   1 | batch 76672 | ms/batch 777.75 | loss     4.5357 | aux_loss     0.0002 | ppl    93.2866
+INFO:root:Learning rate has changed to: 0.00022552598063887394
+INFO:root:| epoch   1 | batch 76800 | ms/batch 775.54 | loss     4.5370 | aux_loss     0.0002 | ppl    93.4136
+INFO:root:Learning rate has changed to: 0.00022533827935974137
+INFO:root:| epoch   1 | batch 76928 | ms/batch 783.42 | loss     4.5256 | aux_loss     0.0002 | ppl    92.3480
+INFO:root:Learning rate has changed to: 0.00022515104596319206
+INFO:root:| epoch   1 | batch 77056 | ms/batch 777.39 | loss     4.5361 | aux_loss     0.0002 | ppl    93.3223
+INFO:root:Learning rate has changed to: 0.00022496427850863407
+INFO:root:| epoch   1 | batch 77184 | ms/batch 776.79 | loss     4.5348 | aux_loss     0.0002 | ppl    93.2037
+INFO:root:Learning rate has changed to: 0.0002247779750667252
+INFO:root:| epoch   1 | batch 77312 | ms/batch 780.16 | loss     4.5389 | aux_loss     0.0002 | ppl    93.5917
+INFO:root:Learning rate has changed to: 0.00022459213371928913
+INFO:root:| epoch   1 | batch 77440 | ms/batch 776.16 | loss     4.5363 | aux_loss     0.0002 | ppl    93.3447
+INFO:root:Learning rate has changed to: 0.00022440675255923264
+INFO:root:| epoch   1 | batch 77568 | ms/batch 780.48 | loss     4.5355 | aux_loss     0.0002 | ppl    93.2661
+INFO:root:Learning rate has changed to: 0.00022422182969046326
+INFO:root:| epoch   1 | batch 77696 | ms/batch 787.04 | loss     4.5354 | aux_loss     0.0002 | ppl    93.2636
+INFO:root:Learning rate has changed to: 0.00022403736322780792
+INFO:root:| epoch   1 | batch 77824 | ms/batch 791.75 | loss     4.5220 | aux_loss     0.0002 | ppl    92.0196
+INFO:root:Learning rate has changed to: 0.00022385335129693218
+INFO:root:| epoch   1 | batch 77952 | ms/batch 790.97 | loss     4.5341 | aux_loss     0.0002 | ppl    93.1370
+INFO:root:Learning rate has changed to: 0.00022366979203426024
+INFO:root:| epoch   1 | batch 78080 | ms/batch 792.23 | loss     4.5377 | aux_loss     0.0002 | ppl    93.4724
+INFO:root:Learning rate has changed to: 0.0002234866835868957
+INFO:root:| epoch   1 | batch 78208 | ms/batch 809.32 | loss     4.5261 | aux_loss     0.0002 | ppl    92.3931
+INFO:root:Learning rate has changed to: 0.00022330402411254298
+INFO:root:| epoch   1 | batch 78336 | ms/batch 785.65 | loss     4.5338 | aux_loss     0.0002 | ppl    93.1085
+INFO:root:Learning rate has changed to: 0.00022312181177942952
+INFO:root:| epoch   1 | batch 78464 | ms/batch 817.42 | loss     4.5236 | aux_loss     0.0002 | ppl    92.1649
+INFO:root:Learning rate has changed to: 0.00022294004476622852
+INFO:root:| epoch   1 | batch 78592 | ms/batch 798.71 | loss     4.5346 | aux_loss     0.0002 | ppl    93.1844
+INFO:root:Learning rate has changed to: 0.00022275872126198258
+INFO:root:| epoch   1 | batch 78720 | ms/batch 797.77 | loss     4.5358 | aux_loss     0.0002 | ppl    93.3013
+INFO:root:Learning rate has changed to: 0.0002225778394660279
+INFO:root:| epoch   1 | batch 78848 | ms/batch 796.94 | loss     4.5294 | aux_loss     0.0002 | ppl    92.6993
+INFO:root:Learning rate has changed to: 0.00022239739758791912
+INFO:root:| epoch   1 | batch 78976 | ms/batch 803.10 | loss     4.5295 | aux_loss     0.0002 | ppl    92.7098
+INFO:root:Learning rate has changed to: 0.00022221739384735496
+INFO:root:| epoch   1 | batch 79104 | ms/batch 796.16 | loss     4.5354 | aux_loss     0.0002 | ppl    93.2611
+INFO:root:Learning rate has changed to: 0.0002220378264741044
+INFO:root:| epoch   1 | batch 79232 | ms/batch 794.87 | loss     4.5338 | aux_loss     0.0002 | ppl    93.1111
+INFO:root:Learning rate has changed to: 0.0002218586937079335
+INFO:root:| epoch   1 | batch 79360 | ms/batch 799.41 | loss     4.5267 | aux_loss     0.0002 | ppl    92.4546
+INFO:root:Learning rate has changed to: 0.00022167999379853312
+INFO:root:| epoch   1 | batch 79488 | ms/batch 797.30 | loss     4.5243 | aux_loss     0.0002 | ppl    92.2331
+INFO:root:Learning rate has changed to: 0.00022150172500544688
+INFO:root:| epoch   1 | batch 79616 | ms/batch 797.36 | loss     4.5319 | aux_loss     0.0002 | ppl    92.9351
+INFO:root:Learning rate has changed to: 0.00022132388559800007
+INFO:root:| epoch   1 | batch 79744 | ms/batch 796.70 | loss     4.5362 | aux_loss     0.0002 | ppl    93.3324
+INFO:root:Learning rate has changed to: 0.00022114647385522912
+INFO:root:| epoch   1 | batch 79872 | ms/batch 796.92 | loss     4.5282 | aux_loss     0.0002 | ppl    92.5948
+INFO:root:Learning rate has changed to: 0.00022096948806581148
+INFO:root:| epoch   1 | batch 80000 | ms/batch 797.33 | loss     4.5263 | aux_loss     0.0002 | ppl    92.4191
+INFO:root:Learning rate has changed to: 0.0002207929265279965
+INFO:root:| epoch   1 | batch 80128 | ms/batch 800.79 | loss     4.5281 | aux_loss     0.0002 | ppl    92.5859
+INFO:root:Learning rate has changed to: 0.0002206167875495366
+INFO:root:| epoch   1 | batch 80256 | ms/batch 806.84 | loss     4.5282 | aux_loss     0.0002 | ppl    92.5885
+INFO:root:Learning rate has changed to: 0.00022044106944761916
+INFO:root:| epoch   1 | batch 80384 | ms/batch 810.33 | loss     4.5283 | aux_loss     0.0002 | ppl    92.6037
+INFO:root:Learning rate has changed to: 0.00022026577054879893
+INFO:root:| epoch   1 | batch 80512 | ms/batch 807.22 | loss     4.5240 | aux_loss     0.0002 | ppl    92.2050
+INFO:root:Learning rate has changed to: 0.00022009088918893124
+INFO:root:| epoch   1 | batch 80640 | ms/batch 809.52 | loss     4.5377 | aux_loss     0.0002 | ppl    93.4782
+INFO:root:Learning rate has changed to: 0.0002199164237131055
+INFO:root:| epoch   1 | batch 80768 | ms/batch 796.72 | loss     4.5294 | aux_loss     0.0002 | ppl    92.7064
+INFO:root:Learning rate has changed to: 0.00021974237247557953
+INFO:root:| epoch   1 | batch 80896 | ms/batch 788.82 | loss     4.5305 | aux_loss     0.0002 | ppl    92.8047
+INFO:root:Learning rate has changed to: 0.00021956873383971435
+INFO:root:| epoch   1 | batch 81024 | ms/batch 794.24 | loss     4.5297 | aux_loss     0.0002 | ppl    92.7344
+INFO:root:Learning rate has changed to: 0.0002193955061779094
+INFO:root:| epoch   1 | batch 81152 | ms/batch 792.18 | loss     4.5317 | aux_loss     0.0002 | ppl    92.9173
+INFO:root:Learning rate has changed to: 0.00021922268787153868
+INFO:root:| epoch   1 | batch 81280 | ms/batch 791.48 | loss     4.5234 | aux_loss     0.0002 | ppl    92.1507
+INFO:root:Learning rate has changed to: 0.0002190502773108871
+INFO:root:| epoch   1 | batch 81408 | ms/batch 789.98 | loss     4.5285 | aux_loss     0.0002 | ppl    92.6185
+INFO:root:Learning rate has changed to: 0.00021887827289508748
+INFO:root:| epoch   1 | batch 81536 | ms/batch 787.13 | loss     4.5234 | aux_loss     0.0002 | ppl    92.1454
+INFO:root:Learning rate has changed to: 0.0002187066730320582
+INFO:root:| epoch   1 | batch 81664 | ms/batch 789.57 | loss     4.5290 | aux_loss     0.0002 | ppl    92.6670
+INFO:root:Learning rate has changed to: 0.00021853547613844124
+INFO:root:| epoch   1 | batch 81792 | ms/batch 788.87 | loss     4.5250 | aux_loss     0.0002 | ppl    92.2947
+INFO:root:Learning rate has changed to: 0.00021836468063954093
+INFO:root:| epoch   1 | batch 81920 | ms/batch 790.83 | loss     4.5315 | aux_loss     0.0002 | ppl    92.9016
+INFO:root:Learning rate has changed to: 0.00021819428496926298
+INFO:root:| epoch   1 | batch 82048 | ms/batch 792.14 | loss     4.5175 | aux_loss     0.0002 | ppl    91.6021
+INFO:root:Learning rate has changed to: 0.00021802428757005418
+INFO:root:| epoch   1 | batch 82176 | ms/batch 791.04 | loss     4.5188 | aux_loss     0.0002 | ppl    91.7271
+INFO:root:Learning rate has changed to: 0.00021785468689284273
+INFO:root:| epoch   1 | batch 82304 | ms/batch 790.77 | loss     4.5175 | aux_loss     0.0002 | ppl    91.6041
+INFO:root:Learning rate has changed to: 0.00021768548139697883
+INFO:root:| epoch   1 | batch 82432 | ms/batch 785.78 | loss     4.5191 | aux_loss     0.0002 | ppl    91.7540
+INFO:root:Learning rate has changed to: 0.00021751666955017595
+INFO:root:| epoch   1 | batch 82560 | ms/batch 788.63 | loss     4.5225 | aux_loss     0.0002 | ppl    92.0689
+INFO:root:Learning rate has changed to: 0.0002173482498284525
+INFO:root:| epoch   1 | batch 82688 | ms/batch 790.01 | loss     4.5114 | aux_loss     0.0002 | ppl    91.0534
+INFO:root:Learning rate has changed to: 0.0002171802207160741
+INFO:root:| epoch   1 | batch 82816 | ms/batch 789.63 | loss     4.5170 | aux_loss     0.0002 | ppl    91.5636
+INFO:root:Learning rate has changed to: 0.00021701258070549637
+INFO:root:| epoch   1 | batch 82944 | ms/batch 787.00 | loss     4.5288 | aux_loss     0.0002 | ppl    92.6460
+INFO:root:Learning rate has changed to: 0.0002168453282973079
+INFO:root:| epoch   1 | batch 83072 | ms/batch 788.52 | loss     4.5179 | aux_loss     0.0002 | ppl    91.6396
+INFO:root:Learning rate has changed to: 0.00021667846200017408
+INFO:root:| epoch   1 | batch 83200 | ms/batch 813.73 | loss     4.5299 | aux_loss     0.0002 | ppl    92.7497
+INFO:root:Learning rate has changed to: 0.00021651198033078122
+INFO:root:| epoch   1 | batch 83328 | ms/batch 810.88 | loss     4.5242 | aux_loss     0.0002 | ppl    92.2218
+INFO:root:Learning rate has changed to: 0.00021634588181378118
+INFO:root:| epoch   1 | batch 83456 | ms/batch 783.95 | loss     4.5214 | aux_loss     0.0002 | ppl    91.9630
+INFO:root:Learning rate has changed to: 0.00021618016498173642
+INFO:root:| epoch   1 | batch 83584 | ms/batch 779.46 | loss     4.5228 | aux_loss     0.0002 | ppl    92.0898
+INFO:root:Learning rate has changed to: 0.00021601482837506561
+INFO:root:| epoch   1 | batch 83712 | ms/batch 779.58 | loss     4.5151 | aux_loss     0.0002 | ppl    91.3883
+INFO:root:Learning rate has changed to: 0.00021584987054198954
+INFO:root:| epoch   1 | batch 83840 | ms/batch 797.42 | loss     4.5164 | aux_loss     0.0002 | ppl    91.5090
+INFO:root:Learning rate has changed to: 0.00021568529003847768
+INFO:root:| epoch   1 | batch 83968 | ms/batch 806.71 | loss     4.5226 | aux_loss     0.0002 | ppl    92.0749
+INFO:root:Learning rate has changed to: 0.00021552108542819507
+INFO:root:| epoch   1 | batch 84096 | ms/batch 795.48 | loss     4.5157 | aux_loss     0.0002 | ppl    91.4450
+INFO:root:Learning rate has changed to: 0.00021535725528244956
+INFO:root:| epoch   1 | batch 84224 | ms/batch 796.27 | loss     4.5146 | aux_loss     0.0002 | ppl    91.3451
+INFO:root:Learning rate has changed to: 0.00021519379818013974
+INFO:root:| epoch   1 | batch 84352 | ms/batch 797.97 | loss     4.5201 | aux_loss     0.0002 | ppl    91.8454
+INFO:root:Learning rate has changed to: 0.00021503071270770316
+INFO:root:| epoch   1 | batch 84480 | ms/batch 795.80 | loss     4.5241 | aux_loss     0.0002 | ppl    92.2098
+INFO:root:Learning rate has changed to: 0.00021486799745906482
+INFO:root:| epoch   1 | batch 84608 | ms/batch 798.36 | loss     4.5217 | aux_loss     0.0002 | ppl    91.9913
+INFO:root:Learning rate has changed to: 0.0002147056510355865
+INFO:root:| epoch   1 | batch 84736 | ms/batch 809.50 | loss     4.5151 | aux_loss     0.0002 | ppl    91.3885
+INFO:root:Learning rate has changed to: 0.0002145436720460161
+INFO:root:| epoch   1 | batch 84864 | ms/batch 809.38 | loss     4.5180 | aux_loss     0.0002 | ppl    91.6526
+INFO:root:Learning rate has changed to: 0.00021438205910643754
+INFO:root:| epoch   1 | batch 84992 | ms/batch 792.99 | loss     4.5176 | aux_loss     0.0002 | ppl    91.6172
+INFO:root:Learning rate has changed to: 0.00021422081084022127
+INFO:root:| epoch   1 | batch 85120 | ms/batch 789.52 | loss     4.5239 | aux_loss     0.0002 | ppl    92.1954
+INFO:root:Learning rate has changed to: 0.0002140599258779748
+INFO:root:| epoch   1 | batch 85248 | ms/batch 787.36 | loss     4.5171 | aux_loss     0.0002 | ppl    91.5731
+INFO:root:Learning rate has changed to: 0.0002138994028574941
+INFO:root:| epoch   1 | batch 85376 | ms/batch 779.31 | loss     4.5171 | aux_loss     0.0002 | ppl    91.5710
+INFO:root:Learning rate has changed to: 0.00021373924042371493
+INFO:root:| epoch   1 | batch 85504 | ms/batch 778.94 | loss     4.5180 | aux_loss     0.0002 | ppl    91.6476
+INFO:root:Learning rate has changed to: 0.00021357943722866493
+INFO:root:| epoch   1 | batch 85632 | ms/batch 774.61 | loss     4.5191 | aux_loss     0.0002 | ppl    91.7513
+INFO:root:Learning rate has changed to: 0.00021341999193141595
+INFO:root:| epoch   1 | batch 85760 | ms/batch 777.56 | loss     4.5163 | aux_loss     0.0002 | ppl    91.4926
+INFO:root:Learning rate has changed to: 0.00021326090319803673
+INFO:root:| epoch   1 | batch 85888 | ms/batch 778.71 | loss     4.5186 | aux_loss     0.0002 | ppl    91.7032
+INFO:root:Learning rate has changed to: 0.00021310216970154612
+INFO:root:| epoch   1 | batch 86016 | ms/batch 780.13 | loss     4.5233 | aux_loss     0.0002 | ppl    92.1380
+INFO:root:Learning rate has changed to: 0.00021294379012186656
+INFO:root:| epoch   1 | batch 86144 | ms/batch 783.88 | loss     4.5124 | aux_loss     0.0002 | ppl    91.1403
+INFO:root:Learning rate has changed to: 0.0002127857631457779
+INFO:root:| epoch   1 | batch 86272 | ms/batch 793.28 | loss     4.5193 | aux_loss     0.0002 | ppl    91.7696
+INFO:root:Learning rate has changed to: 0.0002126280874668718
+INFO:root:| epoch   1 | batch 86400 | ms/batch 790.53 | loss     4.5124 | aux_loss     0.0002 | ppl    91.1415
+INFO:root:Learning rate has changed to: 0.0002124707617855062
+INFO:root:| epoch   1 | batch 86528 | ms/batch 789.17 | loss     4.5222 | aux_loss     0.0002 | ppl    92.0422
+INFO:root:Learning rate has changed to: 0.00021231378480876054
+INFO:root:| epoch   1 | batch 86656 | ms/batch 791.32 | loss     4.5127 | aux_loss     0.0002 | ppl    91.1659
+INFO:root:Learning rate has changed to: 0.0002121571552503909
+INFO:root:| epoch   1 | batch 86784 | ms/batch 790.78 | loss     4.5148 | aux_loss     0.0002 | ppl    91.3624
+INFO:root:Learning rate has changed to: 0.00021200087183078595
+INFO:root:| epoch   1 | batch 86912 | ms/batch 791.94 | loss     4.5222 | aux_loss     0.0002 | ppl    92.0346
+INFO:root:Learning rate has changed to: 0.0002118449332769229
+INFO:root:| epoch   1 | batch 87040 | ms/batch 790.55 | loss     4.5148 | aux_loss     0.0002 | ppl    91.3612
+INFO:root:Learning rate has changed to: 0.00021168933832232397
+INFO:root:| epoch   1 | batch 87168 | ms/batch 790.32 | loss     4.5157 | aux_loss     0.0002 | ppl    91.4408
+INFO:root:Learning rate has changed to: 0.00021153408570701328
+INFO:root:| epoch   1 | batch 87296 | ms/batch 790.97 | loss     4.5138 | aux_loss     0.0002 | ppl    91.2699
+INFO:root:Learning rate has changed to: 0.00021137917417747383
+INFO:root:| epoch   1 | batch 87424 | ms/batch 785.97 | loss     4.5184 | aux_loss     0.0002 | ppl    91.6914
+INFO:root:Learning rate has changed to: 0.00021122460248660516
+INFO:root:| epoch   1 | batch 87552 | ms/batch 788.07 | loss     4.5118 | aux_loss     0.0002 | ppl    91.0831
+INFO:root:Learning rate has changed to: 0.00021107036939368109
+INFO:root:| epoch   1 | batch 87680 | ms/batch 791.20 | loss     4.5096 | aux_loss     0.0002 | ppl    90.8870
+INFO:root:Learning rate has changed to: 0.00021091647366430796
+INFO:root:| epoch   1 | batch 87808 | ms/batch 790.66 | loss     4.5110 | aux_loss     0.0002 | ppl    91.0160
+INFO:root:Learning rate has changed to: 0.000210762914070383
+INFO:root:| epoch   1 | batch 87936 | ms/batch 789.13 | loss     4.5114 | aux_loss     0.0002 | ppl    91.0507
+INFO:root:Learning rate has changed to: 0.00021060968939005332
+INFO:root:| epoch   1 | batch 88064 | ms/batch 814.67 | loss     4.5238 | aux_loss     0.0002 | ppl    92.1867
+INFO:root:Learning rate has changed to: 0.000210456798407675
+INFO:root:| epoch   1 | batch 88192 | ms/batch 796.55 | loss     4.5172 | aux_loss     0.0002 | ppl    91.5800
+INFO:root:Learning rate has changed to: 0.0002103042399137726
+INFO:root:| epoch   1 | batch 88320 | ms/batch 789.22 | loss     4.5148 | aux_loss     0.0002 | ppl    91.3560
+INFO:root:Learning rate has changed to: 0.000210152012704999
+INFO:root:| epoch   1 | batch 88448 | ms/batch 789.47 | loss     4.5160 | aux_loss     0.0002 | ppl    91.4721
+INFO:root:Learning rate has changed to: 0.00021000011558409542
+INFO:root:| epoch   1 | batch 88576 | ms/batch 789.01 | loss     4.5175 | aux_loss     0.0002 | ppl    91.6063
+INFO:root:Learning rate has changed to: 0.00020984854735985208
+INFO:root:| epoch   1 | batch 88704 | ms/batch 789.71 | loss     4.5246 | aux_loss     0.0002 | ppl    92.2622
+INFO:root:Learning rate has changed to: 0.0002096973068470687
+INFO:root:| epoch   1 | batch 88832 | ms/batch 791.06 | loss     4.5158 | aux_loss     0.0002 | ppl    91.4539
+INFO:root:Learning rate has changed to: 0.0002095463928665159
+INFO:root:| epoch   1 | batch 88960 | ms/batch 805.31 | loss     4.5171 | aux_loss     0.0002 | ppl    91.5719
+INFO:root:Learning rate has changed to: 0.00020939580424489618
+INFO:root:| epoch   1 | batch 89088 | ms/batch 808.13 | loss     4.5036 | aux_loss     0.0002 | ppl    90.3425
+INFO:root:Learning rate has changed to: 0.00020924553981480602
+INFO:root:| epoch   1 | batch 89216 | ms/batch 801.27 | loss     4.5152 | aux_loss     0.0002 | ppl    91.3997
+INFO:root:Learning rate has changed to: 0.00020909559841469756
+INFO:root:| epoch   1 | batch 89344 | ms/batch 788.41 | loss     4.5201 | aux_loss     0.0002 | ppl    91.8431
+INFO:root:Learning rate has changed to: 0.00020894597888884107
+INFO:root:| epoch   1 | batch 89472 | ms/batch 788.32 | loss     4.5146 | aux_loss     0.0002 | ppl    91.3451
+INFO:root:Learning rate has changed to: 0.0002087966800872874
+INFO:root:| epoch   1 | batch 89600 | ms/batch 789.43 | loss     4.5150 | aux_loss     0.0002 | ppl    91.3810
+INFO:root:Learning rate has changed to: 0.00020864770086583104
+INFO:root:| epoch   1 | batch 89728 | ms/batch 790.86 | loss     4.5080 | aux_loss     0.0002 | ppl    90.7445
+INFO:root:Learning rate has changed to: 0.00020849904008597307
+INFO:root:| epoch   1 | batch 89856 | ms/batch 790.44 | loss     4.5111 | aux_loss     0.0002 | ppl    91.0197
+INFO:root:Learning rate has changed to: 0.00020835069661488478
+INFO:root:| epoch   1 | batch 89984 | ms/batch 789.32 | loss     4.5145 | aux_loss     0.0002 | ppl    91.3326
+INFO:root:Learning rate has changed to: 0.00020820266932537138
+INFO:root:| epoch   1 | batch 90112 | ms/batch 781.05 | loss     4.5139 | aux_loss     0.0002 | ppl    91.2811
+INFO:root:Learning rate has changed to: 0.00020805495709583593
+INFO:root:| epoch   1 | batch 90240 | ms/batch 789.75 | loss     4.5062 | aux_loss     0.0002 | ppl    90.5813
+INFO:root:Learning rate has changed to: 0.00020790755881024383
+INFO:root:| epoch   1 | batch 90368 | ms/batch 785.43 | loss     4.5104 | aux_loss     0.0002 | ppl    90.9624
+INFO:root:Learning rate has changed to: 0.00020776047335808721
+INFO:root:| epoch   1 | batch 90496 | ms/batch 789.12 | loss     4.5098 | aux_loss     0.0002 | ppl    90.9023
+INFO:root:Learning rate has changed to: 0.00020761369963434993
+INFO:root:| epoch   1 | batch 90624 | ms/batch 785.72 | loss     4.5142 | aux_loss     0.0002 | ppl    91.3090
+INFO:root:Learning rate has changed to: 0.00020746723653947263
+INFO:root:| epoch   1 | batch 90752 | ms/batch 781.38 | loss     4.5152 | aux_loss     0.0002 | ppl    91.3972
+INFO:root:Learning rate has changed to: 0.00020732108297931822
+INFO:root:| epoch   1 | batch 90880 | ms/batch 799.23 | loss     4.5192 | aux_loss     0.0002 | ppl    91.7616
+INFO:root:Learning rate has changed to: 0.0002071752378651374
+INFO:root:| epoch   1 | batch 91008 | ms/batch 798.13 | loss     4.5044 | aux_loss     0.0002 | ppl    90.4186
+INFO:root:Learning rate has changed to: 0.00020702970011353479
+INFO:root:| epoch   1 | batch 91136 | ms/batch 795.36 | loss     4.5115 | aux_loss     0.0002 | ppl    91.0594
+INFO:root:Learning rate has changed to: 0.00020688446864643498
+INFO:root:| epoch   1 | batch 91264 | ms/batch 785.27 | loss     4.5027 | aux_loss     0.0002 | ppl    90.2636
