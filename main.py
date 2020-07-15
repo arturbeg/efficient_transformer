@@ -12,6 +12,7 @@ from data_utils_subword import get_lm_corpus
 import logging
 
 
+# TODO: tensorboard
 # TODO: expert capacity (per sequence or per sequence*bsz)
 # TODO: make a separate file for logging
 # TODO: sbatch script that runs mulple experiments with a different number of experts in one sbatch (.) run
