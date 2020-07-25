@@ -81,10 +81,9 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
             [TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout) for _ in range(self.num_experts)])
         self.w_gate = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
 
-        self.softplus = nn.Softplus()
-        self.softmax = nn.Softmax(1)
-        self.normal = Normal(torch.tensor([0.0]).to(device=self.device), torch.tensor([1.0]).to(device=self.device))
-
+        # self.softplus = nn.Softplus()
+        # self.softmax = nn.Softmax(1)
+        # self.normal = Normal(torch.tensor([0.0]).to(device=self.device), torch.tensor([1.0]).to(device=self.device))
         assert (self.k <= self.num_experts)
 
 
@@ -97,10 +96,10 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
         # TODO: pytorch normalise along a dimension (but not softmax)
         # Expert Capacity allocated to this group
         S = x.size(0)
-        group_combine_weights_1 = torch.zeros(size=(S, self.num_experts), requires_grad=True)
-        group_combine_weights_with_capacity = torch.zeros(size=(S, self.num_experts), requires_grad=True)
+        group_combine_weights_1 = torch.zeros(size=(S, self.num_experts), requires_grad=True).to(device=self.device)
+        group_combine_weights_with_capacity = torch.zeros(size=(S, self.num_experts), requires_grad=True).to(device=self.device)
         expert_capacity = int(S / self.num_experts)
-        gating_decision_per_expert = torch.zeros(size=(self.num_experts,), requires_grad=True)
+        gating_decision_per_expert = torch.zeros(size=(self.num_experts,), requires_grad=True).to(device=self.device)
         gates_per_token_per_expert = F.softmax(x @ self.w_gate)
         mean_gates_per_expert = torch.mean(gates_per_token_per_expert, dim=0)
         # They are no longer logits
@@ -122,7 +121,7 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
                                                                   top_gates[:, 0].unsqueeze(dim=1))
 
         # second expert
-        group_combine_weights_2 = torch.zeros(size=(S, self.num_experts), requires_grad=True)
+        group_combine_weights_2 = torch.zeros(size=(S, self.num_experts), requires_grad=True).to(device=self.device)
 
         random_uniform = torch.div(torch.rand_like(group_combine_weights_2), 2)
 
@@ -140,11 +139,31 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
         group_combine_weights_with_capacity = group_combine_weights_with_capacity.scatter(0, top_new_indicies,
                                                                                           top_values)
 
+        # temporary hack --> for all the rows that have zeroes do random routing with random k weights
+        unutilised_token_indicies = ((group_combine_weights_with_capacity > 0).sum(1)==0).tolist()
+        unutilised_token_indicies = [i for i in range(len(unutilised_token_indicies)) if unutilised_token_indicies[i]]
+        unutilised_token_indicies = torch.tensor(unutilised_token_indicies).to(device=self.device)
+
+
+        # TODO: make sure this operation is only performed if at least one of the tokens is not utilised
+        # TODO: simplify and turn into separete methods
+        random_values = torch.rand(size=(unutilised_token_indicies.size(0), self.k), requires_grad=True).to(device=self.device)
+        random_values_sum = torch.sum(random_values, dim=1)
+        random_values[:, 0] = random_values[:, 0] / random_values_sum
+        random_values[:, 1] = random_values[:, 1] / random_values_sum
+
+        random_indicies = torch.randint_like(input=random_values, low=0, high=self.num_experts, dtype=torch.int64).to(device=self.device)
+
+        placeholder_tensor = torch.zeros_like(group_combine_weights_with_capacity[unutilised_token_indicies, :], requires_grad=True).to(device=self.device)
+
+        placeholder_tensor = placeholder_tensor.scatter(1, random_indicies, random_values)
+
+        group_combine_weights_with_capacity[unutilised_token_indicies, :] = placeholder_tensor
+
         return group_combine_weights_with_capacity, loss_aux
 
-    def forward(self, x, train=True, loss_coef=0.1):
+    def forward(self, x, train=True, loss_coef = 0.1):
         gates, loss = self.generate_gates_and_loss(x, train)
-        # calculate importance loss
 
         loss *= loss_coef
 
