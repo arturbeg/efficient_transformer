@@ -12,20 +12,17 @@ from data_utils_subword import get_lm_corpus
 import logging
 
 
+# TODO: make sure requires_grad is not overused when initialising zero tensors
 # TODO: track expert utilisation via tensorboard or log files
-# TODO: logging.info(args)
-# TODO: do not apply experts to tokens which have all gates as zero
 # TODO: check what loss_aux coefficient to use
 # TODO: tensorboard
 # TODO: expert capacity (per sequence or per sequence*bsz)
 # TODO: make a separate file for logging
 # TODO: Find out what hyperparameters, lr, etc they used for the Transformer in GShard
 # TODO: later refactor (MoE interface --> abstract class to turn any layer into MoE)
-# TODO: provide the number of experts and k to the MoE FFN
 # TODO: implement ENUM gating (lists all possible ways to perform gating, all different components?)
 # TODO: implement random gating as a baseline
 # TODO: alternative learning schedule when training for moe, maybe need to wait for more epochs for it to learn
-# TODO: incorporate GShard tweaks
 # TODO: need many more experts (might need access to GCloud) --> GShard paper uses 512 experts with top 2 gating..
 
 torch.manual_seed(0)
@@ -113,6 +110,7 @@ logging.info("Number of attention heads is : " + str(N_HEADS))
 logging.info("Number of decoder layers is : " + str(N_LAYERS))
 logging.info("Initial learning rate is : " + str(LR))
 logging.info("Number of warmup steps is : " + str(WARMUP))
+logging.info(args)
 
 
 # TODO: does not take into account hierarchical gating
@@ -227,47 +225,48 @@ def train(epoch_counter):
     start_time = time.time()
     ntokens = NTOKENS
     for batch, (data, target, seq_len) in enumerate(tr_iter):
-        if DEBUG:
-            print(data)
-        targets = target.contiguous().view(-1).to(device)
-        trg_mask = create_mask(data).to(device)
-        data = data.to(device)  # TODO: data_utils_subword (to device)
-        optimizer.zero_grad()
-        output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
-        if DEBUG:
-            logging.info("Output dimensions: " + str(output.size()))
-            logging.info("Targets dimensions: " + str(targets.size()))
-        output = output.view(-1, ntokens)
-        loss = criterion(output, targets)
-        final_loss = loss + aux_loss
-        final_loss.backward()
-
-        performLogging = (batch % LOG_INTERVAL == 0 and batch > 0)
-
-        optimizer.step_and_update_lr(performLogging=performLogging)
-
-        total_loss += loss.item()
-        total_aux_loss += aux_loss.item()
-
-        if batch == 0:
-            logging.info("Running without errors")
-
-        if performLogging:
-            cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
-            curr_aux_loss = total_aux_loss / LOG_INTERVAL
-
-            elapsed = time.time() - start_time
-            logging.info('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
-                  'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
-                epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
-            total_loss = 0.
-            total_aux_loss = 0.
-            start_time = time.time()
+        with torch.autograd.set_detect_anomaly(True):
             if DEBUG:
-                print('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
-                  'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
-                epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
-                break
+                print(data)
+            targets = target.contiguous().view(-1).to(device)
+            trg_mask = create_mask(data).to(device)
+            data = data.to(device)  # TODO: data_utils_subword (to device)
+            optimizer.zero_grad()
+            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
+            if DEBUG:
+                logging.info("Output dimensions: " + str(output.size()))
+                logging.info("Targets dimensions: " + str(targets.size()))
+            output = output.view(-1, ntokens)
+            loss = criterion(output, targets)
+            final_loss = loss + aux_loss
+            final_loss.backward()
+
+            performLogging = (batch % LOG_INTERVAL == 0 and batch > 0)
+
+            optimizer.step_and_update_lr(performLogging=performLogging)
+
+            total_loss += loss.item()
+            total_aux_loss += aux_loss.item()
+
+            if batch == 0:
+                logging.info("Running without errors")
+
+            if performLogging:
+                cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
+                curr_aux_loss = total_aux_loss / LOG_INTERVAL
+
+                elapsed = time.time() - start_time
+                logging.info('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
+                      'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
+                    epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+                total_loss = 0.
+                total_aux_loss = 0.
+                start_time = time.time()
+                if DEBUG:
+                    print('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
+                      'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
+                    epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+                    break
 
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()

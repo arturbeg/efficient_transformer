@@ -92,6 +92,7 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
         return (gates > 0).sum(0)
 
     # Current implementation only works with k=2 like in the GShard paper
+    # TODO: simplify this function (split into multiple simpler methods)
     def generate_gates_and_loss(self, x, train):
         # TODO: pytorch normalise along a dimension (but not softmax)
         # Expert Capacity allocated to this group
@@ -105,16 +106,17 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
         # They are no longer logits
         top_gates, top_indices = gates_per_token_per_expert.topk(k=min(self.k, self.num_experts), dim=1)
         gates_sum = torch.sum(top_gates, dim=1)
-        top_gates[:, 0] = top_gates[:, 0] / gates_sum
-        top_gates[:, 1] = top_gates[:, 1] / gates_sum
+        top_gates = torch.div(top_gates, gates_sum.unsqueeze(1))
 
+
+        expert_decisions_count = torch.empty_like(gating_decision_per_expert, requires_grad=False).to(device=self.device)
         # increment expert decisions count
         # TODO: think of how to optimise
         for i in range(self.num_experts):
             # produce the if mask in here
-            gating_decision_per_expert[i] = torch.eq(top_indices[:, 0], i).sum().item()
+            expert_decisions_count[i] = torch.eq(top_indices[:, 0], i).sum().item()
 
-        loss_aux = torch.mean(torch.div(gating_decision_per_expert, S) * mean_gates_per_expert)
+        loss_aux = torch.mean(torch.div(expert_decisions_count, S) * mean_gates_per_expert)
 
         # update group_combine_weights
         group_combine_weights_1 = group_combine_weights_1.scatter(1, top_indices[:, 0].unsqueeze(dim=1),
@@ -140,17 +142,14 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
                                                                                           top_values)
 
         # temporary hack --> for all the rows that have zeroes do random routing with random k weights
-        unutilised_token_indicies = ((group_combine_weights_with_capacity > 0).sum(1)==0).tolist()
-        unutilised_token_indicies = [i for i in range(len(unutilised_token_indicies)) if unutilised_token_indicies[i]]
-        unutilised_token_indicies = torch.tensor(unutilised_token_indicies).to(device=self.device)
+        unutilised_token_indicies = (((group_combine_weights_with_capacity > 0).sum(1) == 0).nonzero()).squeeze()
 
 
         # TODO: make sure this operation is only performed if at least one of the tokens is not utilised
         # TODO: simplify and turn into separete methods
         random_values = torch.rand(size=(unutilised_token_indicies.size(0), self.k), requires_grad=True).to(device=self.device)
         random_values_sum = torch.sum(random_values, dim=1)
-        random_values[:, 0] = random_values[:, 0] / random_values_sum
-        random_values[:, 1] = random_values[:, 1] / random_values_sum
+        random_values = torch.div(random_values, random_values_sum.unsqueeze(1))
 
         random_indicies = torch.randint_like(input=random_values, low=0, high=self.num_experts, dtype=torch.int64).to(device=self.device)
 
