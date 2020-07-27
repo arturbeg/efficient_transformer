@@ -10,6 +10,8 @@ from playground.Optim import ScheduledOptim
 from torch.optim import Adam, SGD
 from data_utils_subword import get_lm_corpus
 import logging
+import random
+import string
 
 
 # TODO: make sure requires_grad is not overused when initialising zero tensors
@@ -97,9 +99,15 @@ LR = args.lr  # initial learning rate
 WARMUP = 4000
 LOG_INTERVAL = 128  # report interval
 
-SAVE = args.log_and_save_file_name + '.pt'
+def get_random_string(length):
+    # Random string with the combination of lower and upper case
+    letters = string.ascii_letters
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    return result_str
+
+SAVE = args.log_and_save_file_name + get_random_string(4) + '.pt'
 SAVE = './model_files/' + SAVE
-LOG = args.log_and_save_file_name + '.log'
+LOG = args.log_and_save_file_name + get_random_string(4) + '.log'
 logging.basicConfig(filename='./log_files/' + LOG, level=logging.DEBUG)
 logging.info(SAVE)
 logging.info("The batch size is: " + str(BATCH_SIZE))
