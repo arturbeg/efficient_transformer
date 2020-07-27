@@ -131,20 +131,21 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
 
         unutilised_token_indicies = (((group_combine_weights_with_capacity > 0).sum(1) == 0).nonzero()).squeeze()
 
-        random_values = torch.rand(size=(unutilised_token_indicies.size(0), self.k), requires_grad=True).to(
-            device=self.device)
-        random_values_sum = torch.sum(random_values, dim=1)
-        random_values = torch.div(random_values, random_values_sum.unsqueeze(1))
+        if unutilised_token_indicies.size(0) > 0:
+            random_values = torch.rand(size=(unutilised_token_indicies.size(0), self.k), requires_grad=True).to(
+                device=self.device)
+            random_values_sum = torch.sum(random_values, dim=1)
+            random_values = torch.div(random_values, random_values_sum.unsqueeze(1))
 
-        random_indicies = torch.randint_like(input=random_values, low=0, high=self.num_experts, dtype=torch.int64).to(
-            device=self.device)
+            random_indicies = torch.randint_like(input=random_values, low=0, high=self.num_experts, dtype=torch.int64).to(
+                device=self.device)
 
-        placeholder_tensor = torch.zeros_like(group_combine_weights_with_capacity[unutilised_token_indicies, :],
-                                              requires_grad=True).to(device=self.device)
+            placeholder_tensor = torch.zeros_like(group_combine_weights_with_capacity[unutilised_token_indicies, :],
+                                                  requires_grad=True).to(device=self.device)
 
-        placeholder_tensor = placeholder_tensor.scatter(1, random_indicies, random_values)
+            placeholder_tensor = placeholder_tensor.scatter(1, random_indicies, random_values)
 
-        group_combine_weights_with_capacity[unutilised_token_indicies, :] = placeholder_tensor
+            group_combine_weights_with_capacity[unutilised_token_indicies, :] = placeholder_tensor
 
         return group_combine_weights_with_capacity
 
