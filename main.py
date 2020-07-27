@@ -233,48 +233,44 @@ def train(epoch_counter):
     start_time = time.time()
     ntokens = NTOKENS
     for batch, (data, target, seq_len) in enumerate(tr_iter):
-        with torch.autograd.set_detect_anomaly(True):
+        performLogging = (batch % LOG_INTERVAL == 0 and batch > 0)
+        targets = target.contiguous().view(-1).to(device)
+        trg_mask = create_mask(data).to(device)
+        data = data.to(device)  # TODO: data_utils_subword (to device)
+        optimizer.zero_grad()
+        output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True, performLogging=performLogging)
+        if DEBUG:
+            logging.info("Output dimensions: " + str(output.size()))
+            logging.info("Targets dimensions: " + str(targets.size()))
+        output = output.view(-1, ntokens)
+        loss = criterion(output, targets)
+        final_loss = loss + aux_loss
+        final_loss.backward()
+
+        optimizer.step_and_update_lr(performLogging=performLogging)
+
+        total_loss += loss.item()
+        total_aux_loss += aux_loss.item()
+
+        if batch == 0:
+            logging.info("Running without errors")
+
+        if performLogging:
+            cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
+            curr_aux_loss = total_aux_loss / LOG_INTERVAL
+
+            elapsed = time.time() - start_time
+            logging.info('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
+                  'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
+                epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+            total_loss = 0.
+            total_aux_loss = 0.
+            start_time = time.time()
             if DEBUG:
-                print(data)
-            targets = target.contiguous().view(-1).to(device)
-            trg_mask = create_mask(data).to(device)
-            data = data.to(device)  # TODO: data_utils_subword (to device)
-            optimizer.zero_grad()
-            output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True)
-            if DEBUG:
-                logging.info("Output dimensions: " + str(output.size()))
-                logging.info("Targets dimensions: " + str(targets.size()))
-            output = output.view(-1, ntokens)
-            loss = criterion(output, targets)
-            final_loss = loss + aux_loss
-            final_loss.backward()
-
-            performLogging = (batch % LOG_INTERVAL == 0 and batch > 0)
-
-            optimizer.step_and_update_lr(performLogging=performLogging)
-
-            total_loss += loss.item()
-            total_aux_loss += aux_loss.item()
-
-            if batch == 0:
-                logging.info("Running without errors")
-
-            if performLogging:
-                cur_loss = total_loss / LOG_INTERVAL  # curr loss is independent of the aux loss
-                curr_aux_loss = total_aux_loss / LOG_INTERVAL
-
-                elapsed = time.time() - start_time
-                logging.info('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
-                      'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
-                    epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
-                total_loss = 0.
-                total_aux_loss = 0.
-                start_time = time.time()
-                if DEBUG:
-                    print('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
-                      'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
-                    epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
-                    break
+                print('| epoch {:3d} | batch {:5d} | ms/batch {:5.2f} | '
+                  'loss {:10.4f} | aux_loss {:10.4f} | ppl {:10.4f}'.format(
+                epoch_counter, batch, elapsed * 1000 / LOG_INTERVAL, cur_loss, curr_aux_loss, math.exp(cur_loss)))
+                break
 
 for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()

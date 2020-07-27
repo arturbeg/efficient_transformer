@@ -48,13 +48,13 @@ class DecoderLayer(nn.Module):
             self.attn_2 = MultiHeadAttention(heads, d_model, dropout=dropout)
             self.dropout_3 = nn.Dropout(dropout)
 
-    def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True, train=True):
+    def forward(self, x, e_outputs, src_mask, trg_mask, is_lm=True, train=True, performLogging=False):
         aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device) # TODO: maybe get rid of this
         if is_lm and self.mixing == "none":
             x2 = self.norm_1(x)
             x = x + self.dropout_1(self.attn_1(x2, x2, x2, trg_mask))
             x2 = self.norm_2(x)
-            x2, additional_loss = self.ff(x2)
+            x2, additional_loss = self.ff(x2, performLogging=performLogging)
             aux_loss = aux_loss + additional_loss
             x = x + self.dropout_2(x2) # x + refers to a residual connectinon
         elif is_lm and self.mixing == "moe":
@@ -63,7 +63,7 @@ class DecoderLayer(nn.Module):
             aux_loss = aux_loss + additional_loss
             x = x + self.dropout_1(attn_out)
             x2 = self.norm_2(x)
-            x2, additional_loss = self.ff(x2)
+            x2, additional_loss = self.ff(x2, performLogging=performLogging)
             aux_loss = aux_loss + additional_loss
             x = x + self.dropout_2(x2)
         else:

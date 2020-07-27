@@ -108,13 +108,13 @@ class FeedForward(nn.Module):
         else:
             self.token_level_ffn = TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout)
 
-    def forward(self, x):
+    def forward(self, x, performLogging=False):
         # TODO: a bit hacky, think of a more elegant implementation
         aux_loss = torch.tensor(0.0, dtype=torch.float, requires_grad=True).to(self.device)
         out = torch.empty_like(x, requires_grad=False)
         for i, sequence in enumerate(x):
             if (self.ff_gating in ["moe", "moe_gshard"]) and self.is_odd_layer:
-                sequence, additional_loss = self.token_level_ffn(sequence)
+                sequence, additional_loss = self.token_level_ffn(sequence, performLogging=performLogging)
                 aux_loss = aux_loss + additional_loss
             else:
                 sequence = self.token_level_ffn(sequence)

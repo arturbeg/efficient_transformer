@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
-from torch.distributions.normal import Normal
 from torch.nn import functional as F
 # from playground import TokenLevelFeedForward # TODO: find out what causes the import error
-
 import numpy as np
+import logging
 
 
 class SparseDispatcher(object):
@@ -81,9 +80,6 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
             [TokenLevelFeedForward(d_model=d_model, d_ff=d_ff, dropout=dropout) for _ in range(self.num_experts)])
         self.w_gate = nn.Parameter(torch.zeros(d_model, num_experts), requires_grad=True)
 
-        # self.softplus = nn.Softplus()
-        # self.softmax = nn.Softmax(1)
-        # self.normal = Normal(torch.tensor([0.0]).to(device=self.device), torch.tensor([1.0]).to(device=self.device))
         assert (self.k <= self.num_experts)
 
 
@@ -91,39 +87,34 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
 
         return (gates > 0).sum(0)
 
-    # Current implementation only works with k=2 like in the GShard paper
-    # TODO: simplify this function (split into multiple simpler methods)
-    def generate_gates_and_loss(self, x, train):
-        # TODO: pytorch normalise along a dimension (but not softmax)
-        # Expert Capacity allocated to this group
-        S = x.size(0)
-        group_combine_weights_1 = torch.zeros(size=(S, self.num_experts), requires_grad=True).to(device=self.device)
-        group_combine_weights_with_capacity = torch.zeros(size=(S, self.num_experts), requires_grad=True).to(device=self.device)
-        expert_capacity = int(S / self.num_experts)
+    def expert_1_and_loss(self, x):
+        group_combine_weights_1 = torch.zeros(size=(x.size(0), self.num_experts), requires_grad=True).to(device=self.device)
         gating_decision_per_expert = torch.zeros(size=(self.num_experts,), requires_grad=True).to(device=self.device)
-        gates_per_token_per_expert = F.softmax(x @ self.w_gate)
+        gates_per_token_per_expert = F.softmax(x @ self.w_gate, dim=1)
         mean_gates_per_expert = torch.mean(gates_per_token_per_expert, dim=0)
-        # They are no longer logits
+
         top_gates, top_indices = gates_per_token_per_expert.topk(k=min(self.k, self.num_experts), dim=1)
         gates_sum = torch.sum(top_gates, dim=1)
         top_gates = torch.div(top_gates, gates_sum.unsqueeze(1))
 
-
         expert_decisions_count = torch.empty_like(gating_decision_per_expert, requires_grad=False).to(device=self.device)
-        # increment expert decisions count
-        # TODO: think of how to optimise
+
         for i in range(self.num_experts):
             # produce the if mask in here
             expert_decisions_count[i] = torch.eq(top_indices[:, 0], i).sum().item()
 
-        loss_aux = torch.mean(torch.div(expert_decisions_count, S) * mean_gates_per_expert)
+        loss_aux = torch.mean(torch.div(expert_decisions_count, x.size(0)) * mean_gates_per_expert)
 
-        # update group_combine_weights
+
         group_combine_weights_1 = group_combine_weights_1.scatter(1, top_indices[:, 0].unsqueeze(dim=1),
                                                                   top_gates[:, 0].unsqueeze(dim=1))
 
+        return group_combine_weights_1, loss_aux, top_gates, top_indices
+
+
+    def expert_2(self, x, top_gates, top_indices):
         # second expert
-        group_combine_weights_2 = torch.zeros(size=(S, self.num_experts), requires_grad=True).to(device=self.device)
+        group_combine_weights_2 = torch.zeros(size=(x.size(0), self.num_experts), requires_grad=True).to(device=self.device)
 
         random_uniform = torch.div(torch.rand_like(group_combine_weights_2), 2)
 
@@ -133,36 +124,55 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
         group_combine_weights_2 = torch.where(group_combine_weights_2 > random_uniform, group_combine_weights_2,
                                               torch.zeros_like(group_combine_weights_2))
 
-        group_combine_weights = group_combine_weights_1 + group_combine_weights_2
+        return group_combine_weights_2
 
-        top_values, top_new_indicies = group_combine_weights.topk(k=expert_capacity, dim=0)
 
-        # only has one expert
-        group_combine_weights_with_capacity = group_combine_weights_with_capacity.scatter(0, top_new_indicies,
-                                                                                          top_values)
+    def random_routing_for_unutilised_tokens(self, group_combine_weights_with_capacity):
 
-        # temporary hack --> for all the rows that have zeroes do random routing with random k weights
         unutilised_token_indicies = (((group_combine_weights_with_capacity > 0).sum(1) == 0).nonzero()).squeeze()
 
-
-        # TODO: make sure this operation is only performed if at least one of the tokens is not utilised
-        # TODO: simplify and turn into separete methods
-        random_values = torch.rand(size=(unutilised_token_indicies.size(0), self.k), requires_grad=True).to(device=self.device)
+        random_values = torch.rand(size=(unutilised_token_indicies.size(0), self.k), requires_grad=True).to(
+            device=self.device)
         random_values_sum = torch.sum(random_values, dim=1)
         random_values = torch.div(random_values, random_values_sum.unsqueeze(1))
 
-        random_indicies = torch.randint_like(input=random_values, low=0, high=self.num_experts, dtype=torch.int64).to(device=self.device)
+        random_indicies = torch.randint_like(input=random_values, low=0, high=self.num_experts, dtype=torch.int64).to(
+            device=self.device)
 
-        placeholder_tensor = torch.zeros_like(group_combine_weights_with_capacity[unutilised_token_indicies, :], requires_grad=True).to(device=self.device)
+        placeholder_tensor = torch.zeros_like(group_combine_weights_with_capacity[unutilised_token_indicies, :],
+                                              requires_grad=True).to(device=self.device)
 
         placeholder_tensor = placeholder_tensor.scatter(1, random_indicies, random_values)
 
         group_combine_weights_with_capacity[unutilised_token_indicies, :] = placeholder_tensor
 
+        return group_combine_weights_with_capacity
+
+
+
+    def generate_gates_and_loss(self, x):
+
+        group_combine_weights_with_capacity = torch.zeros(size=(x.size(0), self.num_experts), requires_grad=True).to(
+            device=self.device)
+        expert_capacity = int(x.size(0) / self.num_experts)
+
+        group_combine_weights_1, loss_aux, top_gates, top_indices = self.expert_1_and_loss(x=x)
+
+        group_combine_weights_2 = self.expert_2(x=x, top_gates=top_gates, top_indices=top_indices)
+
+        group_combine_weights = group_combine_weights_1 + group_combine_weights_2
+
+        top_values, top_new_indicies = group_combine_weights.topk(k=expert_capacity, dim=0)
+
+        group_combine_weights_with_capacity = group_combine_weights_with_capacity.scatter(0, top_new_indicies,
+                                                                                          top_values)
+
+        group_combine_weights_with_capacity = self.random_routing_for_unutilised_tokens(group_combine_weights_with_capacity=group_combine_weights_with_capacity)
+
         return group_combine_weights_with_capacity, loss_aux
 
-    def forward(self, x, train=True, loss_coef = 0.1):
-        gates, loss = self.generate_gates_and_loss(x, train)
+    def forward(self, x, train=True, loss_coef = 0.1, performLogging=False):
+        gates, loss = self.generate_gates_and_loss(x)
 
         loss *= loss_coef
 
