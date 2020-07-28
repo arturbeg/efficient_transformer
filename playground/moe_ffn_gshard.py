@@ -3,7 +3,6 @@ import torch.nn as nn
 from torch.nn import functional as F
 # from playground import TokenLevelFeedForward # TODO: find out what causes the import error
 import numpy as np
-import logging
 
 
 class SparseDispatcher(object):
@@ -129,7 +128,7 @@ class MoeTokenLevelFeedForwardGshard(nn.Module):
 
     def random_routing_for_unutilised_tokens(self, group_combine_weights_with_capacity):
 
-        unutilised_token_indicies = (((group_combine_weights_with_capacity > 0).sum(1) == 0).nonzero()).squeeze()
+        unutilised_token_indicies = (((group_combine_weights_with_capacity > 0).sum(1) == 0).nonzero()).squeeze(dim=1)
 
         if unutilised_token_indicies.size(0) > 0:
             random_values = torch.rand(size=(unutilised_token_indicies.size(0), self.k), requires_grad=True).to(
