@@ -24,7 +24,7 @@
 # Standard output and error log
 #SBATCH --output=moe_ffn_cuda_simple_%j.out
 
-#SBATCH --array=0-2
+#SBATCH --array=0-3
 
 # run the application
 
