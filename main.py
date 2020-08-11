@@ -37,11 +37,11 @@ parser = argparse.ArgumentParser(description='PyTorch LM1b Transformer Language 
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 
-parser.add_argument('--sparse_attn', type=bool, default=False,
+parser.add_argument('--sparse_attn', action='store_true',
                     help='Use a Sparse Attention mechanism instead of the classic one')
 
-parser.add_argument('--debug', type=bool, default=False,
-                    help='Debugging mode on')
+# parser.add_argument('--debug', type=bool, default=False,
+#                     help='Debugging mode on') # TODO: use str2bool
 
 parser.add_argument('--log-and-save-file-name', type=str,
                     help='Log and Save file name')
@@ -86,8 +86,8 @@ parser.add_argument('--optimizer', type=str, default='adam',
                     help='the optimizer used to train the transformer')
 
 args = parser.parse_args()
-DEBUG = args.debug
-if args.debug:
+DEBUG = False
+if DEBUG:
     args.log_and_save_file_name = 'debugging'
 
 NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
