@@ -26,4 +26,4 @@
 
 # run the application
 
-srun python main.py --cuda --n-layers 1 --log-and-save-file-name vanilla_transformer --optimizer adam --num-epochs 10 --bsz 64 --bptt 32 --d-model 64 --lr 1.0 --n-heads 2 --decoder-mixing none --ff-gating none --gating none
+srun python main.py --cuda --n-layers 1 --log-and-save-file-name vanilla_transformer --optimizer adam --num-epochs 10 --bsz 64 --bptt 32 --d-model 64 --lr 1.0 --n-heads 2 --decoder-mixing none --ff-gating none --gating none --sparse_attn False

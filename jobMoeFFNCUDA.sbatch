@@ -30,4 +30,4 @@
 
 ARGS=(4 16 64)
 
-srun python main.py --cuda --n-layers 3 --log-and-save-file-name moe_ffn_$SLURM_ARRAY_TASK_ID --optimizer adam --num-epochs 10 --bsz 64 --bptt 128 --d-model 256 --lr 1.0 --n-heads 4 --decoder-mixing none --ff-gating moe_gshard --gating none --num-experts ${ARGS[$SLURM_ARRAY_TASK_ID]} --k 2
+srun python main.py --cuda --n-layers 3 --log-and-save-file-name moe_ffn_$SLURM_ARRAY_TASK_ID --optimizer adam --num-epochs 10 --bsz 64 --bptt 128 --d-model 256 --lr 1.0 --n-heads 4 --decoder-mixing none --ff-gating moe_gshard --gating none --num-experts ${ARGS[$SLURM_ARRAY_TASK_ID]} --k 2 --sparse_attn False
