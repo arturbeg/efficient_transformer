@@ -40,7 +40,10 @@ parser.add_argument('--cuda', action='store_true',
 parser.add_argument('--sparse_attn', type=bool, default=False,
                     help='Use a Sparse Attention mechanism instead of the classic one')
 
-parser.add_argument('--log-and-save-file-name', type=str, required=True,
+parser.add_argument('--debug', type=bool, default=False,
+                    help='Debugging mode on')
+
+parser.add_argument('--log-and-save-file-name', type=str,
                     help='Log and Save file name')
 
 parser.add_argument('--gating', type=str, default='none',
@@ -82,11 +85,10 @@ parser.add_argument('--lr', type=float, default=1.0,
 parser.add_argument('--optimizer', type=str, default='adam',
                     help='the optimizer used to train the transformer')
 
-DEBUG = False
-if DEBUG:
-    args = parser.parse_args(['--log-and-save-file-name', 'debugging'])
-else:
-    args = parser.parse_args()
+args = parser.parse_args()
+DEBUG = args.debug
+if args.debug:
+    args.log_and_save_file_name = 'debugging'
 
 NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
 NUM_EXPERTS = args.num_experts # total number of experts
