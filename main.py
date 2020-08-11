@@ -14,11 +14,11 @@ import random
 import string
 
 
+# TODO: check what loss_aux coefficient to use (ARGS it in the sbatch script)
+# TODO: expert capacity (per sequence or per sequence*bsz)
 # TODO: make sure requires_grad is not overused when initialising zero tensors
 # TODO: track expert utilisation via tensorboard or log files
-# TODO: check what loss_aux coefficient to use
 # TODO: tensorboard
-# TODO: expert capacity (per sequence or per sequence*bsz)
 # TODO: make a separate file for logging
 # TODO: Find out what hyperparameters, lr, etc they used for the Transformer in GShard
 # TODO: later refactor (MoE interface --> abstract class to turn any layer into MoE)
