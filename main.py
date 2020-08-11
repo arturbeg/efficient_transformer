@@ -82,7 +82,7 @@ parser.add_argument('--lr', type=float, default=1.0,
 parser.add_argument('--optimizer', type=str, default='adam',
                     help='the optimizer used to train the transformer')
 
-DEBUG = True
+DEBUG = False
 if DEBUG:
     args = parser.parse_args(['--log-and-save-file-name', 'debugging'])
 else:
