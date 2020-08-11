@@ -37,7 +37,7 @@ class DecoderLayer(nn.Module):
 
         if mixing == "none":
             if self.args.sparse_attn:
-                self.attn_1 = SparseMultiHeadAttention(num_lookup_subsequences=1, num_experts=4, heads=heads, d_model=d_model, dropout=0.1)
+                self.attn_1 = SparseMultiHeadAttention(num_lookup_subsequences=1, num_experts=4, heads=heads, d_model=d_model, dropout=0.1, args=args)
             else:
                 self.attn_1 = MultiHeadAttention(heads, d_model, dropout=dropout)
         elif mixing == "moe":

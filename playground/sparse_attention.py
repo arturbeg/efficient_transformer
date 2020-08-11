@@ -97,11 +97,14 @@ class MultiHeadAttention(nn.Module):
 
 
 class SparseMultiHeadAttention(nn.Module):
-    def __init__(self, num_lookup_subsequences, num_experts, heads, d_model, dropout=0.1):
+    def __init__(self, num_lookup_subsequences, num_experts, heads, d_model, dropout=0.1, args=None):
+        assert args is not None
         super().__init__()
         # num_expert is the same a the number of subsequences
         self.d_model = d_model
-        self.device = 'cpu'
+
+        self.device = torch.device("cuda:0" if args.cuda else "cpu")
+
         self.num_lookup_subsequences = num_lookup_subsequences
         self.num_experts = num_experts
         self.dense_attn = MultiHeadAttention(heads=heads, d_model=d_model, dropout=dropout)
@@ -110,6 +113,7 @@ class SparseMultiHeadAttention(nn.Module):
         x = torch.sum(input=x, dim=2)
 
         mask = create_mask(trg=x)
+        mask = mask.to(device=self.device)
 
         top_level_attention_scores = top_level_attention(src=x, mask=mask)
 
@@ -119,10 +123,6 @@ class SparseMultiHeadAttention(nn.Module):
 
 
     def generate_lookup_subsequences(self, main_subsequences, lookup_indices):
-
-        # TODO: temp
-        # main_subsequences = main_subsequences[0]
-        # lookup_indices = lookup_indices[0]
 
         index = lookup_indices.expand_as(main_subsequences)
 
@@ -134,7 +134,6 @@ class SparseMultiHeadAttention(nn.Module):
     def forward(self, x):
 
         bsz = x.size(0)
-        bptt = x.size(1) # sequence length
 
         main_subsequences = x.view(bsz, self.num_experts, -1, self.d_model)
 
