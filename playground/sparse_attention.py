@@ -23,7 +23,8 @@ def create_mask(trg):
     # no padding masks in here
     return np_mask  # equivalent to the trg_mask
 
-def top_level_attention(src, mask=None, dropout=None):
+# TODO: turn all the functions into one class
+def top_level_attention(src, device, mask=None, dropout=None):
     d_model = src.size(2)
     scores = torch.matmul(src, src.transpose(-2, -1)) / math.sqrt(d_model)
 
@@ -36,7 +37,7 @@ def top_level_attention(src, mask=None, dropout=None):
     if dropout is not None:
         scores = dropout(scores)
 
-    diag_mask = torch.eye(mask.size(1)).unsqueeze(dim=0)
+    diag_mask = torch.eye(mask.size(1)).unsqueeze(dim=0).to(device=device)
     scores = scores.masked_fill(diag_mask == 1, 0.0)
 
     return scores
@@ -97,13 +98,12 @@ class MultiHeadAttention(nn.Module):
 
 
 class SparseMultiHeadAttention(nn.Module):
-    def __init__(self, num_lookup_subsequences, num_experts, heads, d_model, dropout=0.1, args=None):
-        assert args is not None
+    def __init__(self, num_lookup_subsequences, num_experts, heads, d_model, dropout=0.1, is_cuda=True):
         super().__init__()
         # num_expert is the same a the number of subsequences
         self.d_model = d_model
 
-        self.device = torch.device("cuda:0" if args.cuda else "cpu")
+        self.device = torch.device("cuda:0" if is_cuda else "cpu")
 
         self.num_lookup_subsequences = num_lookup_subsequences
         self.num_experts = num_experts
@@ -112,10 +112,9 @@ class SparseMultiHeadAttention(nn.Module):
     def generate_lookup_indices(self, x):
         x = torch.sum(input=x, dim=2)
 
-        mask = create_mask(trg=x)
-        mask = mask.to(device=self.device)
+        mask = create_mask(trg=x).to(self.device)
 
-        top_level_attention_scores = top_level_attention(src=x, mask=mask)
+        top_level_attention_scores = top_level_attention(src=x, device=self.device, mask=mask)
 
         top_attn_scores, lookup_indices = top_level_attention_scores.topk(self.num_lookup_subsequences, dim=2)
 

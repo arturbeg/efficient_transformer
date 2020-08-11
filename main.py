@@ -140,7 +140,7 @@ elif args.gating == "moe":
     type_of_gating = "Multi-headed attention gating"
     logging.info("Number of experts is : " + str(NUM_EXPERTS))
     logging.info("k is : " + str(K))
-elif args.decoder_mixing:
+elif args.decoder_mixing == "moe":
     type_of_gating = "Decoder Layer Gating"
     logging.info("Number of experts is : " + str(NUM_EXPERTS))
     logging.info("k is : " + str(K))
