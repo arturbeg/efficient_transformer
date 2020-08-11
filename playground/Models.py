@@ -7,7 +7,7 @@ from torch.nn import functional as F
 from playground.moe_decoder_layer import MoeDecoderLayer
 
 
-def get_clones(d_model, heads, num_experts, k, ff_gating, dropout, is_lm, mixing, is_cuda, N, is_moe_decoder):
+def get_clones(d_model, heads, num_experts, k, ff_gating, dropout, is_lm, mixing, is_cuda, N, is_moe_decoder, args=None):
     modules = []
     for i in range(N):
         if is_moe_decoder:
@@ -22,7 +22,7 @@ def get_clones(d_model, heads, num_experts, k, ff_gating, dropout, is_lm, mixing
                                         dropout=dropout, is_lm=is_lm,
                                         mixing=mixing, is_cuda=is_cuda,
                                         ff_gating=ff_gating, num_experts=num_experts,
-                                        k=k, is_odd_layer=is_odd_layer))
+                                        k=k, is_odd_layer=is_odd_layer, args=args))
 
     return nn.ModuleList(modules)
 
@@ -44,7 +44,7 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", ff_gating="none", is_cuda=True, decoder_mixing="none", num_experts=4, k=2):
+    def __init__(self, vocab_size, d_model, N, heads, dropout, is_lm=True, mixing="none", ff_gating="none", is_cuda=True, decoder_mixing="none", num_experts=4, k=2, args=None):
         super().__init__()
         self.N = N
         self.is_cuda = is_cuda
@@ -57,10 +57,10 @@ class Decoder(nn.Module):
 
         if decoder_mixing == "none":
             self.layers = get_clones(d_model=d_model, heads=heads, num_experts=num_experts, k=k, ff_gating=ff_gating, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda,
-                                     N=N, is_moe_decoder=False)
+                                     N=N, is_moe_decoder=False, args=args)
         elif decoder_mixing == "moe":
             self.layers = get_clones(d_model=d_model, heads=heads, num_experts=num_experts, k=k, ff_gating=ff_gating, dropout=dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda,
-                                     N=N, is_moe_decoder=True)
+                                     N=N, is_moe_decoder=True, args=args)
         self.norm = Norm(d_model)
 
     def forward(self, trg, e_outputs, src_mask, trg_mask, is_lm=True, train=True, performLogging=False):
@@ -82,13 +82,13 @@ class Decoder(nn.Module):
 
 class Transformer(nn.Module):
     def __init__(self, src_vocab, trg_vocab, d_model, N, heads, dropout, is_lm=True, mixing="none", ff_gating="none", is_cuda=True,
-                 is_debug=True, decoder_mixing="none", num_experts=4, k=2):
+                 is_debug=True, decoder_mixing="none", num_experts=4, k=2, args=None):
         super().__init__()
         if not is_lm:
             self.encoder = Encoder(src_vocab, d_model, N, heads, dropout)
 
         self.is_debug = is_debug
-        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda, decoder_mixing=decoder_mixing, ff_gating=ff_gating, num_experts=num_experts, k=k)
+        self.decoder = Decoder(trg_vocab, d_model, N, heads, dropout, is_lm=is_lm, mixing=mixing, is_cuda=is_cuda, decoder_mixing=decoder_mixing, ff_gating=ff_gating, num_experts=num_experts, k=k, args=args)
         self.out = nn.Linear(d_model, trg_vocab)
 
     def forward(self, src, trg, src_mask, trg_mask, is_lm=True, train=True, performLogging=False):

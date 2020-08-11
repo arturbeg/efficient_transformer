@@ -37,6 +37,9 @@ parser = argparse.ArgumentParser(description='PyTorch LM1b Transformer Language 
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 
+parser.add_argument('--sparse_attn', type=bool, default=False,
+                    help='Use a Sparse Attention mechanism instead of the classic one')
+
 parser.add_argument('--log-and-save-file-name', type=str, required=True,
                     help='Log and Save file name')
 
@@ -79,7 +82,7 @@ parser.add_argument('--lr', type=float, default=1.0,
 parser.add_argument('--optimizer', type=str, default='adam',
                     help='the optimizer used to train the transformer')
 
-DEBUG = False
+DEBUG = True
 if DEBUG:
     args = parser.parse_args(['--log-and-save-file-name', 'debugging'])
 else:
@@ -167,7 +170,7 @@ logging.info("Gating function is: " + str(args.gating))
 
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
                     is_lm=True, mixing=args.gating, is_cuda=args.cuda, decoder_mixing=args.decoder_mixing, num_experts=NUM_EXPERTS, k=K,
-                    ff_gating=args.ff_gating)
+                    ff_gating=args.ff_gating, args=args)
 
 if args.cuda and torch.cuda.device_count() > 1:
     logging.info("Let's use " + str(torch.cuda.device_count()) + " GPUs!")

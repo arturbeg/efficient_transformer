@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import numpy as np
 from torch.autograd import Variable
 
+# TODO: unit tests?
 
 torch.manual_seed(0)
 
@@ -139,11 +140,9 @@ class SparseMultiHeadAttention(nn.Module):
 
         lookup_indices = self.generate_lookup_indices(x=main_subsequences)
 
-        # output should be the lookup_subsequences (the gather operation needs to be done for each expert ?)
-        # TODO: stopped here (https://discuss.pytorch.org/t/gather-command-for-a-4-d-tensor/92331)
         lookup_subsequences = self.generate_lookup_subsequences(main_subsequences=main_subsequences, lookup_indices=lookup_indices)
 
-        lookup_subsequences[:, 0, :, :] = 0.0 # TODO: implement in a neater way
+        lookup_subsequences[:, 0, :, :] = 0.0  # TODO: implement in a neater way (padding for the first token in each subsequence)
 
         keys_values = torch.cat([lookup_subsequences, main_subsequences], dim=2)
 
