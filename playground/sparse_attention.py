@@ -7,8 +7,6 @@ from torch.autograd import Variable
 
 # TODO: unit tests?
 
-torch.manual_seed(0)
-
 def nopeak_mask(size):
     np_mask = np.triu(np.ones((1, size, size)),
                       k=1).astype('uint8')
@@ -47,7 +45,7 @@ def attention(q, k, v, d_k, mask=None, dropout=None):
 
     if mask is not None:
         mask = mask.unsqueeze(1)
-        scores = scores.masked_fill(mask == 0, -1e9)
+        scores[:, :, :, :, :scores.size(3)] = scores[:, :, :, :, :scores.size(3)].masked_fill(mask == 0, -1e9)
 
     scores = F.softmax(scores, dim=-1)
 
@@ -142,20 +140,22 @@ class SparseMultiHeadAttention(nn.Module):
 
         lookup_subsequences[:, 0, :, :] = 0.0  # TODO: implement in a neater way (padding for the first token in each subsequence)
 
-        keys_values = torch.cat([lookup_subsequences, main_subsequences], dim=2)
+        keys_values = torch.cat([main_subsequences, lookup_subsequences], dim=2)
 
         # pass everything through attention layers
-        output = self.dense_attn(q=main_subsequences, k=keys_values, v=keys_values, mask=None)
+
+        mask = create_mask(main_subsequences[:, 0, :, :]).to(device=self.device) # an example sequence that a dense "expert" recieves
+        output = self.dense_attn(q=main_subsequences, k=keys_values, v=keys_values, mask=mask)
 
         output = output.view(bsz, -1, self.d_model)
 
         return output
 
+# torch.manual_seed(0)
 # d_model = 4
 # bptt = 8
 # bsz = 2
-
 # src = torch.rand(size=(2, bptt, d_model))
 # # mask = create_mask(trg=src)
-# sparse_attn = SparseMultiHeadAttention(num_lookup_subsequences=1, heads=4, num_experts=4, d_model=d_model, dropout=0.0)
+# sparse_attn = SparseMultiHeadAttention(num_lookup_subsequences=1, heads=4, num_experts=4, d_model=d_model, dropout=0.0, is_cuda=False)
 # output = sparse_attn(x=src)
