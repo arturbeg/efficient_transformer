@@ -28,6 +28,6 @@
 
 #SBATCH --array=0-3
 
-ARGS=(32 64 128)
+ARGS=(128 256 512)
 
-srun python main.py --cuda --n-layers 1 --log-and-save-file-name sparse_attn --optimizer adam --num-epochs 10 --bsz 64 --bptt ${ARGS[$SLURM_ARRAY_TASK_ID]} --d-model 64 --lr 1.0 --n-heads 4 --decoder-mixing none --ff-gating none --gating none --sparse_attn
+srun python main.py --cuda --n-layers 3 --log-and-save-file-name sparse_attn --optimizer adam --num-epochs 10 --bsz 64 --bptt ${ARGS[$SLURM_ARRAY_TASK_ID]} --d-model 512 --lr 1.0 --n-heads 4 --decoder-mixing none --ff-gating none --gating none --sparse_attn
