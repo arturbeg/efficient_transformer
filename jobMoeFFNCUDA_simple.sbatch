@@ -24,10 +24,10 @@
 # Standard output and error log
 #SBATCH --output=moe_ffn_cuda_simple_%j.out
 
-#SBATCH --array=0-3
+#SBATCH --array=0-6
 
 # run the application
 
-ARGS=(4 16 32)
+ARGS=(16 32 64 128 256 512)
 
-srun python main.py --cuda --n-layers 1 --log-and-save-file-name moe_ffn_$SLURM_ARRAY_TASK_ID --optimizer adam --num-epochs 10 --bsz 64 --bptt 32 --d-model 64 --lr 1.0 --n-heads 2 --decoder-mixing none --ff-gating moe_gshard --gating none --num-experts ${ARGS[$SLURM_ARRAY_TASK_ID]} --k 2
+srun python main.py --cuda --n-layers 2 --log-and-save-file-name moe_ffn_$SLURM_ARRAY_TASK_ID --optimizer adam --num-epochs 10 --bsz 64 --bptt 64 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating moe_gshard --gating none --num-experts ${ARGS[$SLURM_ARRAY_TASK_ID]} --k 2
