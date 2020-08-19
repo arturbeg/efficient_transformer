@@ -14,6 +14,7 @@ import random
 import string
 
 
+# TODO: weight initialisations for moe layers
 # TODO: check what loss_aux coefficient to use (ARGS it in the sbatch script)
 # TODO: expert capacity (per sequence or per sequence*bsz)
 # TODO: make sure requires_grad is not overused when initialising zero tensors
@@ -91,8 +92,8 @@ if DEBUG:
     args.log_and_save_file_name = 'debugging'
 
 NTOKENS = 32711 + 2  # lm1b/subwords32k (+ start and stop token)
-NUM_EXPERTS = args.num_experts # total number of experts
-K = args.k # experts used
+NUM_EXPERTS = args.num_experts
+K = args.k
 BATCH_SIZE = args.bsz
 N_LAYERS = args.n_layers
 EPOCHS = args.num_epochs
@@ -272,9 +273,12 @@ for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train(epoch_counter=epoch)
 
-# Run on test data.
-test_loss = evaluate(data_iter=te_iter)
-logging.info('-' * 89)
-logging.info('| End of training | test loss {:6.4f} | test ppl {:10.4f}'.format(
-    test_loss, math.exp(test_loss)))
-logging.info('-' * 89)
+    if (epoch % 2) == 0:
+        try:
+            test_loss = evaluate(data_iter=te_iter)
+            logging.info('-' * 89)
+            logging.info('| End of training | test loss {:6.4f} | test ppl {:10.4f}'.format(
+                test_loss, math.exp(test_loss)))
+            logging.info('-' * 89)
+        except:
+            logging.info("Something went wrong with testing")
