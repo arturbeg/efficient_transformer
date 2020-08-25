@@ -24,10 +24,4 @@
 # Standard output and error log
 #SBATCH --output=vanilla_transformer_cuda_%j.out
 
-# run the application
-
-#SBATCH --array=0-2
-
-ARGS=(128 256)
-
-srun python main.py --cuda --n-layers 3 --log-and-save-file-name vanilla_transformer --optimizer adam --num-epochs 10 --bsz 64 --bptt ${ARGS[$SLURM_ARRAY_TASK_ID]} --d-model 512 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none
+srun python main.py --cuda --n-layers 2 --log-and-save-file-name vanilla_transformer --optimizer adam --num-epochs 10 --bsz 64 --bptt 64 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none
