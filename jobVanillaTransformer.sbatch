@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 
 # set name of job
-#SBATCH --job-name=moe_ffn_cuda_simple
+#SBATCH --job-name=vanilla_transformer_cuda
 
 # set number of GPUs
 #SBATCH --gres=gpu:1
@@ -22,12 +22,12 @@
 #SBATCH --mail-user=artur.begyan@kellogg.ox.ac.uk
 
 # Standard output and error log
-#SBATCH --output=moe_ffn_cuda_simple_%j.out
+#SBATCH --output=vanilla_transformer_cuda_%j.out
 
-#SBATCH --array=0-6
+#SBATCH --array=0-2
 
 # run the application
 
-ARGS=(16 32 64 128 256 512)
+ARGS=(2 3)
 
-srun python main.py --cuda --n-layers 2 --log-and-save-file-name moe_ffn_$SLURM_ARRAY_TASK_ID --optimizer adam --num-epochs 10 --bsz 64 --bptt 64 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating moe_gshard --gating none --num-experts ${ARGS[$SLURM_ARRAY_TASK_ID]} --k 2
+srun python main.py --cuda --n-layers ${ARGS[$SLURM_ARRAY_TASK_ID]} --log-and-save-file-name vanilla_transformer --optimizer adam --num-epochs 10 --bsz 64 --bptt 64 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none
