@@ -26,7 +26,6 @@ import string
 # TODO: implement ENUM gating (lists all possible ways to perform gating, all different components?)
 # TODO: implement random gating as a baseline
 # TODO: alternative learning schedule when training for moe, maybe need to wait for more epochs for it to learn
-# TODO: need many more experts (might need access to GCloud) --> GShard paper uses 512 experts with top 2 gating..
 
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
@@ -213,10 +212,15 @@ def evaluate(data_iter):
         for batch, (data, target, seq_len) in enumerate(data_iter):
             targets = target.contiguous().view(-1).to(device)
             trg_mask = create_mask(data).to(device)
+            data = data.to(device)
+
             output, aux_loss = model(src=None, trg=data, src_mask=None, trg_mask=trg_mask, is_lm=True, train=False)
             output = output.view(-1, ntokens)
             total_loss += criterion(output, targets).item()
             number_of_batches += 1
+
+            if batch == 0:
+                logging.info("Testing without errors")
 
     return total_loss / number_of_batches
 
@@ -273,12 +277,8 @@ for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train(epoch_counter=epoch)
 
-    if (epoch % 2) == 0:
-        try:
-            test_loss = evaluate(data_iter=te_iter)
-            logging.info('-' * 89)
-            logging.info('| End of training | test loss {:6.4f} | test ppl {:10.4f}'.format(
-                test_loss, math.exp(test_loss)))
-            logging.info('-' * 89)
-        except:
-            logging.info("Something went wrong with testing")
+    test_loss = evaluate(data_iter=te_iter)
+    logging.info('-' * 89)
+    logging.info('| End of training | test loss {:6.4f} | test ppl {:10.4f}'.format(
+        test_loss, math.exp(test_loss)))
+    logging.info('-' * 89)
