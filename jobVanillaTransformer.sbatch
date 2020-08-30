@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 
 # set name of job
-#SBATCH --job-name=vanilla_transformer_cuda
+#SBATCH --job-name=vanilla_transformer
 
 # set number of GPUs
 #SBATCH --gres=gpu:1
@@ -22,7 +22,7 @@
 #SBATCH --mail-user=artur.begyan@kellogg.ox.ac.uk
 
 # Standard output and error log
-#SBATCH --output=vanilla_transformer_cuda_%j.out
+#SBATCH --output=vanilla_transformer_%j.out
 
 #SBATCH --array=0-2
 
