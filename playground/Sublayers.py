@@ -58,6 +58,8 @@ class MultiHeadAttention(nn.Module):
 
         bs = q.size(0)
 
+        if bs == 0:
+            return torch.empty_like(q, requires_grad=True).to(device=q.device)
         # perform linear operation and split into N heads
         k = self.k_linear(k).view(bs, -1, self.h, self.d_k)
         q = self.q_linear(q).view(bs, -1, self.h, self.d_k)

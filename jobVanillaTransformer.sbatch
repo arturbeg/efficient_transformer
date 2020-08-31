@@ -30,4 +30,4 @@
 
 ARGS=(2 3)
 
-srun python main.py --cuda --n-layers ${ARGS[$SLURM_ARRAY_TASK_ID]} --log-and-save-file-name vanilla_transformer --optimizer adam --num-epochs 10 --bsz 64 --bptt 64 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none
+srun python main.py --cuda --n-layers ${ARGS[$SLURM_ARRAY_TASK_ID]} --log-and-save-file-name vanilla_transformer --optimizer adam --num-epochs 10 --bsz 128 --bptt 128 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none

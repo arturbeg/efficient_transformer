@@ -6,7 +6,6 @@ import numpy as np
 from torch.nn import functional as F
 # from torch.nn.init import xavier_uniform_
 
-
 class SparseDispatcher(object):
 
     def __init__(self, num_experts, gates, is_cuda=True):
@@ -168,7 +167,7 @@ class MoeMultiHeadAttention(nn.Module):
         loss *= loss_coef
 
         dispatcher = SparseDispatcher(self.num_experts, gates, is_cuda=self.is_cuda)
-        expert_inputs = dispatcher.dispatch(q) # just dispatch q and then replicate it when passing to experts
+        expert_inputs = dispatcher.dispatch(q)  # just dispatch q and then replicate it when passing to experts
         gates = dispatcher.expert_to_gates()
         expert_outputs = [self.experts[i](expert_inputs[i], expert_inputs[i], expert_inputs[i], mask) for i in range(self.num_experts)]
         y = dispatcher.combine(expert_outputs)

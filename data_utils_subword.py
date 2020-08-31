@@ -71,7 +71,7 @@ class Corpus(object):
         ds_train = tfds.load("lm1b/subwords32k", split="train", data_dir="./subwords32k")
         self.ds_train = ds_train.shuffle(number_of_epochs, reshuffle_each_iteration=True)
         ds_test = tfds.load("lm1b/subwords32k", split="test", data_dir="./subwords32k")
-        self.ds_test = ds_test
+        self.ds_test = ds_test.shuffle(number_of_epochs, reshuffle_each_iteration=False)
 
     def get_iterator(self, split, bsz, bptt, device='cpu'):
         if split == 'train':
