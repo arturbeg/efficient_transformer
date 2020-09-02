@@ -156,14 +156,23 @@ device = torch.device("cuda:0" if args.cuda else "cpu")
 corpus = get_lm_corpus(number_of_epochs=EPOCHS)
 ntokens = NTOKENS
 
-te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
-                              device=device)
-
 logging.info("Gating function is: " + str(args.gating))
 
 model = Transformer(src_vocab=ntokens, trg_vocab=ntokens, d_model=D_MODEL, N=N_LAYERS, heads=N_HEADS, dropout=DROPOUT,
                     is_lm=True, mixing=args.gating, is_cuda=args.cuda, decoder_mixing=args.decoder_mixing, num_experts=NUM_EXPERTS, k=K,
                     ff_gating=args.ff_gating, args=args)
+
+# def count_parameters(model):
+#     total_params = 0
+#     for name, parameter in model.named_parameters():
+#         if not parameter.requires_grad: continue
+#         param = parameter.numel()
+#         total_params += param
+#     print(f"Total Trainable Params: {total_params}")
+#     return total_params
+#
+#
+# count_parameters(model)
 
 if args.cuda and torch.cuda.device_count() > 1:
     logging.info("Let's use " + str(torch.cuda.device_count()) + " GPUs!")
@@ -276,6 +285,8 @@ for epoch in range(1, EPOCHS + 1):
     epoch_start_time = time.time()
     train(epoch_counter=epoch)
 
+    te_iter = corpus.get_iterator('test', BATCH_SIZE, BPTT,
+                                  device=device)
     test_loss = evaluate(data_iter=te_iter)
     logging.info('-' * 89)
     logging.info('| End of training | test loss {:6.4f} | test ppl {:10.4f}'.format(

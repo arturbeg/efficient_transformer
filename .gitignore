@@ -9,3 +9,4 @@ playground/__pycache__/
 /log_files/
 /exploratory_tests/testing_things.py
 /exploratory_tests/
+/plot_perplexity_vs_comp_budget.py
