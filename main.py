@@ -78,6 +78,9 @@ parser.add_argument('--n-layers', type=int, default=3,
 parser.add_argument('--d-model', type=int, default=256,
                     help='Embedding dimension')
 
+parser.add_argument('--num-sub', type=int, default=32,
+                    help='Number of subsequences for sparse attention')
+
 parser.add_argument('--lr', type=float, default=1.0,
                     help='Initial learning rate')
 

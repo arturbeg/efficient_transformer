@@ -37,7 +37,7 @@ class DecoderLayer(nn.Module):
 
         if mixing == "none":
             if self.args.sparse_attn:
-                self.attn_1 = SparseMultiHeadAttention(num_lookup_subsequences=1, num_experts=32, heads=heads, d_model=d_model, dropout=0.1, is_cuda=is_cuda)
+                self.attn_1 = SparseMultiHeadAttention(num_lookup_subsequences=1, num_experts=args.num_sub, heads=heads, d_model=d_model, dropout=0.1, is_cuda=is_cuda)
             else:
                 self.attn_1 = MultiHeadAttention(heads, d_model, dropout=dropout)
         elif mixing == "moe":
@@ -46,7 +46,7 @@ class DecoderLayer(nn.Module):
         else:
             raise Exception("Please provide a valid mixing method! Current options are none and moe")
 
-        self.ff = FeedForward(d_model, dropout=dropout, ff_gating=ff_gating, num_experts=num_experts, k=k, is_cuda=is_cuda, is_odd_layer=is_odd_layer) # introduce moe feedforward
+        self.ff = FeedForward(d_model, dropout=dropout, ff_gating=ff_gating, num_experts=num_experts, k=k, is_cuda=is_cuda, is_odd_layer=is_odd_layer)  # introduce moe feed-forward
 
         if not is_lm:
             self.norm_3 = Norm(d_model)
