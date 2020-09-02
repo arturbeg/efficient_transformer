@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 
 # set name of job
-#SBATCH --job-name=sparse_attn
+#SBATCH --job-name=sparse_attn_1024
 
 # set number of GPUs
 #SBATCH --gres=gpu:1
@@ -22,12 +22,6 @@
 #SBATCH --mail-user=artur.begyan@kellogg.ox.ac.uk
 
 # Standard output and error log
-#SBATCH --output=sparse_attn_%j.out
+#SBATCH --output=sparse_attn_1024_%j.out
 
-# run the application
-
-#SBATCH --array=0-3
-
-ARGS=(128 256 512)
-
-srun python main.py --cuda --n-layers 3 --log-and-save-file-name sparse_attn --optimizer adam --num-epochs 10 --bsz 64 --bptt ${ARGS[$SLURM_ARRAY_TASK_ID]} --d-model 512 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none --sparse_attn
+srun python main.py --cuda --n-layers 3 --log-and-save-file-name sparse_attn_1024 --optimizer adam --num-epochs 10 --bsz 64 --bptt 1024 --d-model 512 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none --sparse_attn

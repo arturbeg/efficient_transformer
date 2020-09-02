@@ -22,7 +22,7 @@ def get_clones(d_model, heads, num_experts, k, ff_gating, dropout, is_lm, mixing
                                         dropout=dropout, is_lm=is_lm,
                                         mixing=mixing, is_cuda=is_cuda,
                                         ff_gating=ff_gating, num_experts=num_experts,
-                                        k=k, is_odd_layer=is_odd_layer, args=args))
+                                        k=k, is_odd_layer=True, args=args)) # is_odd_layer=True apply moe ffn to all layers
 
     return nn.ModuleList(modules)
 
