@@ -24,4 +24,4 @@
 # Standard output and error log
 #SBATCH --output=vanilla_sparse_baseline_1024_%j.out
 
-srun python main.py --cuda --n-layers 3 --log-and-save-file-name vanilla_sparse_baseline_1024 --optimizer adam --num-epochs 10 --bsz 64 --bptt 1024 --d-model 512 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none
+srun python main.py --cuda --n-layers 3 --log-and-save-file-name vanilla_sparse_baseline_1024 --optimizer adam --num-epochs 10 --bsz 128 --bptt 1024 --d-model 512 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none

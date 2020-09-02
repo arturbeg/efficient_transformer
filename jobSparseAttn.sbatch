@@ -24,4 +24,10 @@
 # Standard output and error log
 #SBATCH --output=sparse_attn_1024_%j.out
 
-srun python main.py --cuda --n-layers 3 --log-and-save-file-name sparse_attn_1024 --optimizer adam --num-epochs 10 --bsz 64 --bptt 1024 --d-model 512 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none --sparse_attn
+#SBATCH --array=0-4
+
+# run the application
+
+ARGS=(4 8 16 32)
+
+srun python main.py --cuda --n-layers 3 --log-and-save-file-name sparse_attn_1024_$SLURM_ARRAY_TASK_ID --optimizer adam --num-epochs 10 --bsz 128 --bptt 1024 --d-model 512 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none --sparse_attn --num-sub ${ARGS[$SLURM_ARRAY_TASK_ID]}
