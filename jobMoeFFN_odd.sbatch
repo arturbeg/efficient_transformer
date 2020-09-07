@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 
 # set name of job
-#SBATCH --job-name=vanilla_transformer_4_layers
+#SBATCH --job-name=moe_ffn_odd
 
 # set number of GPUs
 #SBATCH --gres=gpu:1
@@ -22,6 +22,6 @@
 #SBATCH --mail-user=artur.begyan@kellogg.ox.ac.uk
 
 # Standard output and error log
-#SBATCH --output=vanilla_transformer_4_layers_%j.out
+#SBATCH --output=moe_ffn_odd_%j.out
 
-srun python main.py --cuda --n-layers 4 --log-and-save-file-name vanilla_transformer_4_layers --optimizer adam --num-epochs 10 --bsz 128 --bptt 128 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating none --gating none
+srun python main.py --cuda --n-layers 2 --log-and-save-file-name moe_ffn_odd_$SLURM_ARRAY_TASK_ID --optimizer adam --num-epochs 10 --bsz 128 --bptt 128 --d-model 256 --lr 1.0 --n-heads 8 --decoder-mixing none --ff-gating moe_gshard --gating none --num-experts 32 --k 2 --odd_layer

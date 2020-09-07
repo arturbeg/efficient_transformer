@@ -41,6 +41,7 @@ parser.add_argument('--sparse_attn', action='store_true',
 
 parser.add_argument('--odd_layer', action='store_true',
                     help='Apply MoE to odd decoder layers only')
+
 # parser.add_argument('--debug', type=bool, default=False,
 #                     help='Debugging mode on') # TODO: use str2bool
 

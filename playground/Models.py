@@ -18,11 +18,15 @@ def get_clones(d_model, heads, num_experts, k, ff_gating, dropout, is_lm, mixing
                                 num_experts=num_experts, k=k))
         else:
             is_odd_layer = (i + 1) % 2 != 0
+
+            if not args.odd_layer:
+                is_odd_layer = True  # A bit too hacky, refactor
+
             modules.append(DecoderLayer(d_model=d_model, heads=heads,
                                         dropout=dropout, is_lm=is_lm,
                                         mixing=mixing, is_cuda=is_cuda,
                                         ff_gating=ff_gating, num_experts=num_experts,
-                                        k=k, is_odd_layer=True, args=args)) # is_odd_layer=True apply moe ffn to all layers
+                                        k=k, is_odd_layer=is_odd_layer, args=args))
 
     return nn.ModuleList(modules)
 
