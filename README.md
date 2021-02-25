@@ -4,3 +4,8 @@ Scaling Transformer architectures has been critical for pushing the frontiers of
 
 ## Hierarchical Self Attention
 
+![shot 1](hsa.png?raw=true)
+
+## Hierarchical Self Attention Results
+
+![shot 1](hsa_results.png?raw=true)
